@@ -1,0 +1,14 @@
+## Title: MapRadar
+## APIVersion: 101039 101040
+## Version: 1.0.0
+## Author: Dude
+## SavedVariables: MapRadar_SavedVariables
+## Description: Need to come up with something
+## IsLibrary: False
+
+MapRadar.xml
+
+MapRadar.lua
+RadarPin.lua
+
+Bindings.xml

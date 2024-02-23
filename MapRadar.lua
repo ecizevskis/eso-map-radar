@@ -1,13 +1,20 @@
-local MapRadar = {}
+local MapRadar = {
+    isOverlayMode = false,
+    showPointer = true,
+
+    currentMapWidth = 0,
+    currentMapHeight = 0,
+
+    maxDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
+
+    positionLabel = {}
+}
+
+local UIWidth, UIHeight = GuiRoot:GetDimensions()
 local playerPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
 local pinsPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
-local showPointer = false
-
 local activePins = {}
-local currentMapWidth = 0
-local currentMapHeight = 0
-local positionLabel = {}
 
 local function getVal(obj)
     if obj == nil then
@@ -27,8 +34,9 @@ end
 local function addPointerToPin(pinTexture)
     local pointerTexture, pointerKey = pointerPool:AcquireObject()
     pointerTexture:SetTexture("MapRadar/pointer.dds")
-    pointerTexture:SetAnchor(BOTTOM, MapRadarContainer, CENTER)
-    pointerTexture:SetDimensions(4, 64)
+    pointerTexture:SetAnchor(BOTTOM, MapRadar.playerPinTexture, CENTER)
+    pointerTexture:SetAlpha(0.05)
+    pointerTexture:SetDimensions(8, 64)
 
     pinTexture.pointer = pointerTexture
 end
@@ -36,9 +44,9 @@ end
 function MapRadar_button()
     local atanRes = math.atan(12, 24)
 
-    -- d(zo_strformat("Atan result: <<1>>", atanRes))
+    -- debug("Atan result: <<1>>", atanRes)
 
-    currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
+    local currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
     local x, y, h = GetMapPlayerPosition("player")
 
     -- :GetCurrentCurvedZoom()
@@ -46,9 +54,9 @@ function MapRadar_button()
 
     -- local scale = ZO_WorldMap_GetPanAndZoom():GetCurrentZoom()
 
-    d(zo_strformat("Map dimension: <<1>> <<2>>, Player coords: <<3>> <<4>> <<5>>", currentMapWidth, currentMapHeight, x, y, h))
-    d(zo_strformat("Map curvedZoom: <<1>>, NormalizedZoom: <<2>>", ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom(),
-                   ZO_WorldMap_GetPanAndZoom():GetCurrentNormalizedZoom()))
+    debug("Map dimension: <<1>> <<2>>, Player coords: <<3>> <<4>> <<5>>", currentMapWidth, currentMapHeight, x, y, h)
+    debug("Map curvedZoom: <<1>>, NormalizedZoom: <<2>>", ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom(),
+          ZO_WorldMap_GetPanAndZoom():GetCurrentNormalizedZoom())
 end
 
 -- Create control pool
@@ -143,7 +151,7 @@ local function registerMapPins()
     -- TODO: create filter methods that return filtered pins 
 
     for pinKey, pin in pairs(pins) do
-        -- d(zo_strformat("Looped pin: <<1>>,  Val: <<2>>", pinKey, getVal(pin)))
+        -- debug("Looped pin: <<1>>,  Val: <<2>>", pinKey, getVal(pin))
 
         if IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
             local pinTexture, pinTextureKey = pinsPool:AcquireObject()
@@ -153,12 +161,12 @@ local function registerMapPins()
             pinTexture.pin = pin
             pinTexture:SetTexture(GetIcon(pin))
 
-            if showPointer then
+            if MapRadar.showPointer then
                 addPointerToPin(pinTexture)
             end
 
             activePins[pinTextureKey] = pinTexture
-            -- d(zo_strformat("Added pin: <<1>>,  Normalized: <<2>> <<3>>", pinTextureKey, pin.normalizedX, pin.normalizedY))
+            -- debug("Added pin: <<1>>,  Normalized: <<2>> <<3>>", pinTextureKey, pin.normalizedX, pin.normalizedY)
         end
     end
 end
@@ -170,7 +178,7 @@ local function pinReset()
 
     -- If map zone name does not match player zone/subzone that means map is just navigated and should not regenerate pins.
     if zoneName ~= playerZone and zoneName ~= playerSubZone then
-        -- d(zo_strformat("pZone: <<2>>,  pSubZone: <<3>>,  Zone: <<4>>", mapName, playerZone, playerSubZone, zoneName))
+        -- debug("pZone: <<2>>,  pSubZone: <<3>>,  Zone: <<4>>", mapName, playerZone, playerSubZone, zoneName)
 
         -- For now let it stay without filter. Surfing map gegenerates pins but closing them back generates them as was
         -- with this regen it guarantees to regen pins in some map changes where GetPlayerActiveSubzoneName() does not return correct value still
@@ -198,17 +206,12 @@ local function setPinDimensions(pinTexture, size)
 end
 
 local function updatePinTexture(pinTexture, playerX, playerY, heading, curvedZoom)
-    local dx = (pinTexture.x - playerX) * currentMapWidth
-    local dy = (pinTexture.y - playerY) * currentMapHeight
+    local dx = (pinTexture.x - playerX) * MapRadar.currentMapWidth
+    local dy = (pinTexture.y - playerY) * MapRadar.currentMapHeight
     local size = 25 -- size is smaller for radar mode and will be bigger for overlay mode
-    local maxDistance = 110 -- limit distance to keep icons on radar outer edge (distance will be increased in overlay mode)
-
-    -- test values for relative distance
-    -- local dxx = playerX - pinTexture.x
-    -- local dyy = playerY - pinTexture.y
 
     local angle = math.atan2(-dx, -dy) - heading
-    local distance = math.min(maxDistance, calcHypotenuse(dx, dy))
+    local distance = math.min(MapRadar.maxDistance, calcHypotenuse(dx, dy))
 
     -- recalc coordinates to apply rotation
     dx = distance * -math.sin(angle)
@@ -218,17 +221,33 @@ local function updatePinTexture(pinTexture, playerX, playerY, heading, curvedZoo
         pinTexture.pointer:SetTextureRotation(angle, 0.5, 1)
     end
 
-    -- TODO: need to calculate distance (at least relative as percents)
-
-    -- TODO: need to calculate angle
-
-    -- TODO: based on new angle and relative distance need to calculate new dx and dy
-
-    -- TODO: need to return translparency/opacity of texture based on 
+    -- TODO: need to set translparency/opacity of texture based on distance
 
     pinTexture:ClearAnchors()
-    pinTexture:SetAnchor(CENTER, MapRadarContainer, CENTER, dx, dy)
+    pinTexture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
     setPinDimensions(pinTexture, size)
+end
+
+-- ==================================================================================================
+-- Mode change
+local function setOverlayMode(flag)
+    MapRadar.playerPinTexture:ClearAnchors()
+
+    if flag then
+        MapRadar.playerPinTexture:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)
+        MapRadar.maxDistance = UIHeight * 0.5
+    else
+        MapRadar.playerPinTexture:SetAnchor(CENTER, MapRadarContainer, CENTER)
+        MapRadar.maxDistance = 110
+    end
+
+    MapRadar.isOverlayMode = flag
+end
+
+local function updateOverlay()
+    if MapRadar.isOverlayMode then
+        setOverlayMode(true)
+    end
 end
 
 -- ==================================================================================================
@@ -247,7 +266,7 @@ local function zoneChangeCheck()
     prevZone = playerZone
     prevSubZone = playerSubZone
 
-    d(zo_strformat("ZoneChange: zone: <<1>>, subzone: <<2>>", playerZone, playerSubZone))
+    debug("ZoneChange: zone: <<1>>, subzone: <<2>>", playerZone, playerSubZone)
 
     -- Trigger pin reset
     pinReset()
@@ -258,12 +277,12 @@ local function mapUpdate()
     MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- read map width and height to local params not to invoke method in loop
-    currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
+    MapRadar.currentMapWidth, MapRadar.currentMapHeight = ZO_WorldMap_GetMapDimensions()
 
     local playerX, playerY = GetMapPlayerPosition("player")
     local curvedZoom = ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom()
 
-    positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
+    MapRadar.positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
 
     -- reposition pins
     for k in pairs(activePins) do
@@ -294,27 +313,24 @@ local function initialize(eventType, addonName)
 
     local playerPinTexture = CreateControl("$(parent)PlayerPin", MapRadarContainer, CT_TEXTURE)
     playerPinTexture:SetTexture("EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds")
-    playerPinTexture:SetAnchor(CENTER, MapRadarContainer, CENTER)
     playerPinTexture:SetDimensions(20, 20)
     playerPinTexture:SetAlpha(0.5)
+    MapRadar.playerPinTexture = playerPinTexture
 
-    positionLabel = CreateControl("$(parent)PositionLabel", MapRadarContainer, CT_LABEL)
+    local positionLabel = CreateControl("$(parent)PositionLabel", MapRadarContainer, CT_LABEL)
     positionLabel:SetAnchor(TOPLEFT, MapRadarContainer, TOPRIGHT)
     positionLabel:SetFont("$(MEDIUM_FONT)|14|outline")
     positionLabel:SetColor(unpack({1, 1, 1, 1}))
+    MapRadar.positionLabel = positionLabel
 
-    local UIWidth, UIHeight = GuiRoot:GetDimensions()
-    local playerPinTexture2 = CreateControl("$(parent)PlayerPinOverlay", MapRadarContainer, CT_TEXTURE)
-    playerPinTexture2:SetTexture("EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds")
-    playerPinTexture2:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)
-    playerPinTexture2:SetDimensions(20, 20)
-    playerPinTexture2:SetAlpha(0.5)
+    -- Set mode to radar from start (should be saved to variables later)
+    setOverlayMode(MapRadar.isOverlayMode);
 
     local fragment = ZO_SimpleSceneFragment:New(MapRadarContainer)
     SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
     SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
 
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 100, mapUpdate)
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, mapUpdate)
     EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCount", 100, mapPinCountCheck)
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
         -- d("OnWorldMapChanged")
@@ -329,41 +345,42 @@ end
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_IN_PIN_AREA_CHANGED, function()
-    d(zo_strformat("EVENT_PLAYER_IN_PIN_AREA_CHANGED"))
+    debug("EVENT_PLAYER_IN_PIN_AREA_CHANGED")
 end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_OBJECTIVE_CONTROL_STATE, function()
-    d(zo_strformat("EVENT_OBJECTIVE_CONTROL_STATE"))
+    debug("EVENT_OBJECTIVE_CONTROL_STATE")
 end)
 
 -- This is good to trigger pin reset (if quest chnages 1 marker then pin count check does not see difference)
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_ADVANCED, function()
-    -- d(zo_strformat("EVENT_QUEST_ADVANCED"))
+    -- debug("EVENT_QUEST_ADVANCED")
     zo_callLater(pinReset, 200)
 end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_COMPLETE, function()
-    -- d(zo_strformat("EVENT_QUEST_COMPLETE"))
+    -- debug("EVENT_QUEST_COMPLETE")
     zo_callLater(pinReset, 200)
 end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_ADDED, function()
-    -- d(zo_strformat("EVENT_QUEST_ADDED "))
+    -- debug("EVENT_QUEST_ADDED ")
     zo_callLater(pinReset, 200)
 end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function()
-    -- d(zo_strformat("EVENT_QUEST_POSITION_REQUEST_COMPLETE "))
+    -- debug("EVENT_QUEST_POSITION_REQUEST_COMPLETE ")
     zo_callLater(pinReset, 200)
 end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function()
-    -- d(zo_strformat("EVENT_QUEST_CONDITION_COUNTER_CHANGED "))
+    -- debug("EVENT_QUEST_CONDITION_COUNTER_CHANGED ")
     zo_callLater(pinReset, 200)
 end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ALL_GUI_SCREENS_RESIZED, function()
-    d("EVENT_ALL_GUI_SCREENS_RESIZED")
+    UIWidth, UIHeight = GuiRoot:GetDimensions()
+    updateOverlay()
 end)
 
 -- ==================================================================================================
@@ -373,5 +390,5 @@ ZO_CreateStringId("SI_BINDING_NAME_MAPRADAR_TOGGLE", "Toggle mode")
 
 -- Hanller for configured hotkey
 function MapRadar_ToggleMode()
-    debug("Toggle!!")
+    setOverlayMode(not MapRadar.isOverlayMode)
 end

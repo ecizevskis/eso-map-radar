@@ -1,19 +1,24 @@
-local MapRadar = {
+MapRadar = {
     isOverlayMode = false,
     showPointer = true,
+    showPinCoords = false,
 
     currentMapWidth = 0,
     currentMapHeight = 0,
 
     maxDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
 
-    positionLabel = {}
+    positionLabel = {},
+
+    scale = 1 -- This meant to be used and scale param when measuring and calibrating pins on different zones
 }
 
 local UIWidth, UIHeight = GuiRoot:GetDimensions()
 local playerPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
 local pinsPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
+local coordsLabelPool = ZO_ControlPool:New("coordsLabelTemplate", MapRadarContainer, "Coords")
+
 local activePins = {}
 
 local function getVal(obj)
@@ -25,20 +30,6 @@ end
 
 local function debug(formatString, ...)
     d(zo_strformat(formatString, ...))
-end
-
-local function calcHypotenuse(a, b)
-    return math.sqrt(a ^ 2 + b ^ 2)
-end
-
-local function addPointerToPin(pinTexture)
-    local pointerTexture, pointerKey = pointerPool:AcquireObject()
-    pointerTexture:SetTexture("MapRadar/pointer.dds")
-    pointerTexture:SetAnchor(BOTTOM, MapRadar.playerPinTexture, CENTER)
-    pointerTexture:SetAlpha(0.05)
-    pointerTexture:SetDimensions(8, 64)
-
-    pinTexture.pointer = pointerTexture
 end
 
 function MapRadar_button()
@@ -99,8 +90,7 @@ local function IsValidPin(pin)
     end
 
     if pin:IsQuest() -- or pin:IsObjective() -- or pin:IsAvAObjective()
-    -- or pin:IsUnit()
-    -- or pin:IsPOI()
+    or pin:IsUnit() -- or pin:IsPOI()
     -- or pin:IsAssisted() -- or pin:IsMapPing()
     -- or pin:IsKillLocation()
     -- or pin:IsWorldEventUnitPin()
@@ -119,6 +109,14 @@ local function GetIcon(pin)
     -- local fileName = pin.backgroundControl:GetTextureFileName()
     -- local fileName = pin.highlightControl:GetTextureFileName()
     -- debug(fileName)
+
+    if pin:IsUnit() then
+        return "MapRadar/x.dds"
+    end
+
+    if pin:IsUnit() then
+        return pin:GetGroupIcon()
+    end
 
     if pin:IsQuest() then
         return pin:GetQuestIcon()
@@ -139,8 +137,26 @@ local function clearPins()
     end
     pinsPool:ReleaseAllObjects()
     pointerPool:ReleaseAllObjects()
+    coordsLabelPool:ReleaseAllObjects()
 end
 
+local function addPointerToPin(pinTexture)
+    local pointerTexture, pointerKey = pointerPool:AcquireObject()
+    pointerTexture:SetTexture("MapRadar/pointer.dds")
+    pointerTexture:SetAnchor(BOTTOM, MapRadar.playerPinTexture, CENTER)
+    pointerTexture:SetAlpha(0.5)
+    pointerTexture:SetDimensions(8, 64)
+
+    pinTexture.pointer = pointerTexture
+end
+
+local function addCoordsToPin(pinTexture)
+    local coordsLabel, labelKey = coordsLabelPool:AcquireObject()
+    coordsLabel:SetAnchor(TOPLEFT, pinTexture, TOPRIGHT)
+    -- coordsLabel:SetColor(unpack({1, 1, 1, 1}))
+
+    pinTexture.coordsLabel = coordsLabel
+end
 -- https://www.codecademy.com/resources/docs/lua/tables
 
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
@@ -160,6 +176,10 @@ local function registerMapPins()
             pinTexture.y = pin.normalizedY
             pinTexture.pin = pin
             pinTexture:SetTexture(GetIcon(pin))
+
+            if MapRadar.showPinCoords then
+                addCoordsToPin(pinTexture)
+            end
 
             if MapRadar.showPointer then
                 addPointerToPin(pinTexture)
@@ -205,13 +225,20 @@ local function setPinDimensions(pinTexture, size)
     pinTexture.size = size
 end
 
+-- local function calcHypotenuse(a, b)
+--    return math.sqrt(a ^ 2 + b ^ 2)
+-- end
+
 local function updatePinTexture(pinTexture, playerX, playerY, heading, curvedZoom)
-    local dx = (pinTexture.x - playerX) * MapRadar.currentMapWidth
-    local dy = (pinTexture.y - playerY) * MapRadar.currentMapHeight
+    local relative_dx = pinTexture.x - playerX
+    local relative_dy = pinTexture.y - playerY
+
+    local dx = relative_dx * MapRadar.currentMapWidth * MapRadar.scale
+    local dy = relative_dy * MapRadar.currentMapHeight * MapRadar.scale
     local size = 25 -- size is smaller for radar mode and will be bigger for overlay mode
 
     local angle = math.atan2(-dx, -dy) - heading
-    local distance = math.min(MapRadar.maxDistance, calcHypotenuse(dx, dy))
+    local distance = math.min(MapRadar.maxDistance, math.sqrt(dx ^ 2 + dy ^ 2))
 
     -- recalc coordinates to apply rotation
     dx = distance * -math.sin(angle)
@@ -219,6 +246,10 @@ local function updatePinTexture(pinTexture, playerX, playerY, heading, curvedZoo
 
     if pinTexture.pointer ~= nil then
         pinTexture.pointer:SetTextureRotation(angle, 0.5, 1)
+    end
+
+    if (pinTexture.coordsLabel ~= nil) then
+        pinTexture.coordsLabel:SetText(zo_strformat("<<1>> <<2>>", relative_dx * 10000000, relative_dy * 10000000))
     end
 
     -- TODO: need to set translparency/opacity of texture based on distance
@@ -323,6 +354,11 @@ local function initialize(eventType, addonName)
     positionLabel:SetColor(unpack({1, 1, 1, 1}))
     MapRadar.positionLabel = positionLabel
 
+    MapRadar.PinReset = function()
+        pinReset()
+    end
+    -- MapRadar_InitScaleCalibrator(playerPinTexture)
+
     -- Set mode to radar from start (should be saved to variables later)
     setOverlayMode(MapRadar.isOverlayMode);
 
@@ -345,7 +381,7 @@ end
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_IN_PIN_AREA_CHANGED, function()
-    debug("EVENT_PLAYER_IN_PIN_AREA_CHANGED")
+    -- debug("EVENT_PLAYER_IN_PIN_AREA_CHANGED")
 end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_OBJECTIVE_CONTROL_STATE, function()

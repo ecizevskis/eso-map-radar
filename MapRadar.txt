@@ -10,5 +10,6 @@ MapRadar.xml
 
 MapRadar.lua
 ScaleCalibrator.lua
+PinTypeNames.lua
 
 Bindings.xml

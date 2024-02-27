@@ -29,7 +29,7 @@
 		<Texture name="PinTemplate" virtual="true" />
 		<Texture name="PointerTemplate" virtual="true" />
 
-		<Label name="coordsLabelTemplate" virtual="true" font="$(MEDIUM_FONT)|14|outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+		<Label name="LabelTemplate" virtual="true" font="$(MEDIUM_FONT)|14|outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
 
 		<Button name="plusButtonTemplate" inherits="ZO_ButtonBehaviorClickSound" virtual="true" >
 			<Dimensions x="30" y="30" />

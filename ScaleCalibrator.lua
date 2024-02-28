@@ -49,12 +49,12 @@ local function showCalibrationData(pin)
     local map_dx = relative_dx * currentMapWidth
     local map_dy = relative_dy * currentMapHeight
 
-    local distance = math.sqrt(relative_dx ^ 2 + relative_dy ^ 2)
+    local distance = math.sqrt(map_dx ^ 2 + map_dy ^ 2) -- distance in map units as offset? pixels?
 
-    local unit1 = distance / measuredMeters -- calculate relative part for 1 meter
+    local unit1 = distance / measuredMeters -- calculate map part for 1 meter
     local unit1k = unit1 * 1000
 
-    local mrScale = 0; -- need to calculate here
+    local mrScale = measuredMeters / distance * 4; -- need to calculate here (x4 just to zoom in and aim for 160px marker)
 
     ScaleData.zoneName:SetText(ZO_WorldMap.zoneName)
     ScaleData.mapWidth:SetText(currentMapWidth)
@@ -76,10 +76,6 @@ local function CreateCalibrationDataForm()
 
     dataAnchorControl:SetAnchor(LEFT, GuiRoot, LEFT, 100)
     dataAnchorControl:SetDimensions(20, 100)
-
-    local line = CreateControl("$(parent)TestLine", MapRadarContainer, CT_LINE)
-    line:SetDimensions(20, 100)
-    line:SetAnchor(LEFT, dataAnchorControl, LEFT)
 
     local widthLabel = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Zone")
     ScaleData.zoneName = CreateLabel(LEFT, dataAnchorControl, RIGHT, "")
@@ -113,13 +109,13 @@ local function CreateCalibrationDataForm()
 
 end
 
-function MapRadar_InitScaleCalibrator(parent)
+local function MapRadar_InitScaleCalibrator()
 
     CreateCalibrationDataForm()
 
     local mgridTexture = CreateControl("$(parent)Mgrid", MapRadarContainer, CT_TEXTURE)
-    mgridTexture:SetTexture("MapRadar/mgrid.dds")
-    mgridTexture:SetAnchor(CENTER, parent, CENTER)
+    mgridTexture:SetTexture("MapRadar/textures/mgrid.dds")
+    mgridTexture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER)
     mgridTexture:SetDimensions(329, 329)
     -- mgridTexture:SetAlpha(0.5)
 
@@ -182,3 +178,8 @@ function MapRadar_InitScaleCalibrator(parent)
     end)
 end
 
+CALLBACK_MANAGER:RegisterCallback("OnMapRadarInitialized", function()
+    if MapRadar.showCalibrate then
+        MapRadar_InitScaleCalibrator()
+    end
+end)

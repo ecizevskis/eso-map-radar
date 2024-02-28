@@ -7,7 +7,7 @@
 				<Backdrop name="$(parent)BG" inherits="ZO_DarkThinFrame" excludeFromResizeToFitExtents="true" hidden="true">
                     <AnchorFill />
                 </Backdrop>
-				<Texture name="$(parent)RadarTexture" textureFile="MapRadar/radar.dds" alpha="0.5">
+				<Texture name="$(parent)RadarTexture" textureFile="MapRadar/textures/radar.dds" alpha="0.5">
 					<Dimensions x="220" y="220"/>
 					<Anchor point="CENTER" relativeTo="$(parent)" relativePoint="CENTER" />
 				</Texture>

@@ -2,14 +2,16 @@
 ## APIVersion: 101039 101040
 ## Version: 1.0.0
 ## Author: Dude
-## SavedVariables: MapRadar_SavedVariables
+## SavedVariables: MapRadar_Data
 ## Description: Need to come up with something
 ## IsLibrary: False
 
 MapRadar.xml
+Bindings.xml
 
-MapRadar.lua
 ScaleCalibrator.lua
 PinTypeNames.lua
+Settings.lua
 
-Bindings.xml
+MapRadarPin.lua
+MapRadar.lua

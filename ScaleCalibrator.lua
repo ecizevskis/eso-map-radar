@@ -2,19 +2,30 @@ local scaleLabel = {}
 local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 
 local ScaleData = {
-    zoneName = {},
-    mapWidth = {},
-    mapHeight = {},
-    curvedZoom = {},
+    zoneNameLabel = {},
+    mapWidthLabel = {},
+    mapHeightLabel = {},
+    curvedZoomLabel = {},
 
-    rel_dx = {},
-    rel_dy = {},
-    map_dx = {},
-    map_dy = {},
+    rel_dxLabel = {},
+    rel_dyLabel = {},
+    map_dxLabel = {},
+    map_dyLabel = {},
 
-    unit1 = {},
-    mrScale = {}
+    unit1Label = {},
+    mrScaleLabel = {},
+
+    map_dx = 0,
+    map_dy = 0,
+    unit1 = 0,
+    mrScale = 0
 }
+
+-- TODO: 
+-- Data save button to saved variables
+-- Create label/data form component with confing methods
+-- Create data stack component
+-- Add data label/datastack to form component
 
 local function setScaleLabel(val)
     MapRadar.scale = MapRadar.scale + val
@@ -46,26 +57,26 @@ local function showCalibrationData(pin)
     local relative_dx = pin.normalizedX - playerX
     local relative_dy = pin.normalizedY - playerY
 
-    local map_dx = relative_dx * currentMapWidth
-    local map_dy = relative_dy * currentMapHeight
+    ScaleData.map_dx = relative_dx * currentMapWidth
+    ScaleData.map_dy = relative_dy * currentMapHeight
 
-    local distance = math.sqrt(map_dx ^ 2 + map_dy ^ 2) -- distance in map units as offset? pixels?
+    local distance = math.sqrt(ScaleData.map_dx ^ 2 + ScaleData.map_dy ^ 2) -- distance in map units as offset? pixels?
 
-    local unit1 = distance / measuredMeters -- calculate map part for 1 meter
-    local unit1k = unit1 * 1000
+    ScaleData.unit1 = distance / measuredMeters -- calculate map part for 1 meter
+    local unit1k = ScaleData.unit1 * 1000
 
-    local mrScale = measuredMeters / distance * 4; -- need to calculate here (x4 just to zoom in and aim for 160px marker)
+    ScaleData.mrScale = measuredMeters / distance * 4; -- need to calculate here (x4 just to zoom in and aim for 160px marker)
 
-    ScaleData.zoneName:SetText(ZO_WorldMap.zoneName)
-    ScaleData.mapWidth:SetText(currentMapWidth)
-    ScaleData.mapHeight:SetText(currentMapHeight)
-    ScaleData.curvedZoom:SetText(curvedZoom)
-    ScaleData.rel_dx:SetText(zo_strformat("<<1>>", relative_dx * displayMultiplier))
-    ScaleData.rel_dy:SetText(zo_strformat("<<1>>", relative_dy * displayMultiplier))
-    ScaleData.map_dx:SetText(map_dx)
-    ScaleData.map_dy:SetText(map_dy)
-    ScaleData.unit1:SetText(unit1)
-    ScaleData.mrScale:SetText(mrScale)
+    ScaleData.zoneNameLabel:SetText(ZO_WorldMap.zoneName)
+    ScaleData.mapWidthLabel:SetText(currentMapWidth)
+    ScaleData.mapHeightLabel:SetText(currentMapHeight)
+    ScaleData.curvedZoomLabel:SetText(curvedZoom)
+    ScaleData.rel_dxLabel:SetText(zo_strformat("<<1>>", relative_dx * displayMultiplier))
+    ScaleData.rel_dyLabel:SetText(zo_strformat("<<1>>", relative_dy * displayMultiplier))
+    ScaleData.map_dxLabel:SetText(ScaleData.map_dx)
+    ScaleData.map_dyLabel:SetText(ScaleData.map_dy)
+    ScaleData.unit1Label:SetText(ScaleData.unit1)
+    ScaleData.mrScaleLabel:SetText(ScaleData.mrScale)
 
     -- just show actual scale value if it changed
     setScaleLabel(0)
@@ -77,35 +88,35 @@ local function CreateCalibrationDataForm()
     dataAnchorControl:SetAnchor(LEFT, GuiRoot, LEFT, 100)
     dataAnchorControl:SetDimensions(20, 100)
 
-    local widthLabel = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Zone")
-    ScaleData.zoneName = CreateLabel(LEFT, dataAnchorControl, RIGHT, "")
+    local zoneLabel = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Zone")
+    ScaleData.zoneNameLabel = CreateLabel(LEFT, dataAnchorControl, RIGHT, "")
 
-    local widthLabel = CreateLabel(TOPRIGHT, widthLabel, BOTTOMRIGHT, "Map Width")
-    ScaleData.mapWidth = CreateLabel(TOPLEFT, ScaleData.zoneName, BOTTOMLEFT, "0")
+    local widthLabel = CreateLabel(TOPRIGHT, zoneLabel, BOTTOMRIGHT, "Map Width")
+    ScaleData.mapWidthLabel = CreateLabel(TOPLEFT, ScaleData.zoneNameLabel, BOTTOMLEFT, "0")
 
     local heightLabel = CreateLabel(TOPRIGHT, widthLabel, BOTTOMRIGHT, "Map Height")
-    ScaleData.mapHeight = CreateLabel(TOPLEFT, ScaleData.mapWidth, BOTTOMLEFT, "0")
+    ScaleData.mapHeightLabel = CreateLabel(TOPLEFT, ScaleData.mapWidthLabel, BOTTOMLEFT, "0")
 
     local curvCoomLabel = CreateLabel(TOPRIGHT, heightLabel, BOTTOMRIGHT, "Curv zoom")
-    ScaleData.curvedZoom = CreateLabel(TOPLEFT, ScaleData.mapHeight, BOTTOMLEFT, "0")
+    ScaleData.curvedZoomLabel = CreateLabel(TOPLEFT, ScaleData.mapHeightLabel, BOTTOMLEFT, "0")
 
     local reldxLabel = CreateLabel(TOPRIGHT, curvCoomLabel, BOTTOMRIGHT, "Rel DX")
-    ScaleData.rel_dx = CreateLabel(TOPLEFT, ScaleData.curvedZoom, BOTTOMLEFT, "0")
+    ScaleData.rel_dxLabel = CreateLabel(TOPLEFT, ScaleData.curvedZoomLabel, BOTTOMLEFT, "0")
 
     local reldyLabel = CreateLabel(TOPRIGHT, reldxLabel, BOTTOMRIGHT, "Rel DY")
-    ScaleData.rel_dy = CreateLabel(TOPLEFT, ScaleData.rel_dx, BOTTOMLEFT, "0")
+    ScaleData.rel_dyLabel = CreateLabel(TOPLEFT, ScaleData.rel_dxLabel, BOTTOMLEFT, "0")
 
     local mapdxLabel = CreateLabel(TOPRIGHT, reldyLabel, BOTTOMRIGHT, "Map DX")
-    ScaleData.map_dx = CreateLabel(TOPLEFT, ScaleData.rel_dy, BOTTOMLEFT, "0")
+    ScaleData.map_dxLabel = CreateLabel(TOPLEFT, ScaleData.rel_dyLabel, BOTTOMLEFT, "0")
 
     local mapdyLabel = CreateLabel(TOPRIGHT, mapdxLabel, BOTTOMRIGHT, "Map DY")
-    ScaleData.map_dy = CreateLabel(TOPLEFT, ScaleData.map_dx, BOTTOMLEFT, "0")
+    ScaleData.map_dyLabel = CreateLabel(TOPLEFT, ScaleData.map_dxLabel, BOTTOMLEFT, "0")
 
     local unit1Label = CreateLabel(TOPRIGHT, mapdyLabel, BOTTOMRIGHT, "Unit1")
-    ScaleData.unit1 = CreateLabel(TOPLEFT, ScaleData.map_dy, BOTTOMLEFT, "0")
+    ScaleData.unit1Label = CreateLabel(TOPLEFT, ScaleData.map_dyLabel, BOTTOMLEFT, "0")
 
     local mrScaleLabel = CreateLabel(TOPRIGHT, unit1Label, BOTTOMRIGHT, "MR Scale")
-    ScaleData.mrScale = CreateLabel(TOPLEFT, ScaleData.unit1, BOTTOMLEFT, "0")
+    ScaleData.mrScaleLabel = CreateLabel(TOPLEFT, ScaleData.unit1Label, BOTTOMLEFT, "0")
 
 end
 

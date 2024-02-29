@@ -1,4 +1,5 @@
 -- TODO
+-- Pointer fading like icon on distance
 -- Create invoke analyzer
 -- Debounce methods for key bindings
 -- Automatic calibration calculation (from map width/height scale to specific 40 pixel count in offset )

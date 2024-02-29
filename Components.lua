@@ -2,9 +2,8 @@
 -- Local generation methods
 local function CreateLabel(name, parent, text)
     local label = CreateControl(name, parent, CT_LABEL)
-    label:SetFont("$(BOLD_FONT)|18|outline")
+    label:SetFont("$(BOLD_FONT)|16|outline")
     label:SetColor(unpack({1, 1, 1, 1}))
-    -- label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
 
     if text ~= nil then
         label:SetText(text)
@@ -19,6 +18,8 @@ local LabelStack = {}
 function LabelStack:New(name, parent, count)
     local control = CreateLabel(name, parent, " ") -- Empty space forces to render tabel text and calc its bottom position for anchors
 
+    control.SetFontBase = control.SetFont
+    control.SetColorBase = control.SetColor
     control.name = name
     control.count = count
     control.labels = {}
@@ -43,21 +44,22 @@ function LabelStack:New(name, parent, count)
         self.labels[1]:SetText(text)
     end
 
+    control.SetFont = function(self, ...)
+        self:SetFontBase(...)
+        for i = 1, count do
+            control.labels[i]:SetFont(...)
+        end
+    end
+
+    control.SetColor = function(self, ...)
+        self:SetColorBase(...)
+        for i = 1, count do
+            control.labels[i]:SetColor(...)
+        end
+    end
+
     return control
 end
-
---[[
-function LabelStack:SetFont(...)
-    -- maybe need to iterate child label components and set that
-    self.control:SetFont(...)
-end
-
-function LabelStack:SetColor(...)
-    -- maybe need to iterate child label components and set that
-    self.control:SetColor(...)
-end
-
---]]
 
 -- namespace to export class to public
 MapRadarCommon = {
@@ -65,11 +67,14 @@ MapRadarCommon = {
 }
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, function()
-    --[[
+
     local ls2 = MapRadarCommon.LabelStack:New("$(parent)Stacktest1", MapRadarContainer, 2)
     ls2:SetAnchor(TOP, GuiRoot, TOP, 0, 150)
+    ls2:SetFont("$(BOLD_FONT)|14|outline")
+
     local ls5 = MapRadarCommon.LabelStack:New("$(parent)StackTest2", MapRadarContainer, 5)
     ls5:SetAnchor(TOPLEFT, ls2, BOTTOMLEFT)
+    ls5:SetColor(unpack({1, 0.4, 0.6, 1}))
 
     zo_callLater(function()
         ls2:SetText(123)
@@ -95,6 +100,5 @@ EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, function()
         ls2:SetText(567)
         ls5:SetText(567)
     end, 9000)
---]]
 
 end)

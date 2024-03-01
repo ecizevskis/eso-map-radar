@@ -187,6 +187,11 @@ function MapRadarPin:New(pin, key)
     radarPin.pinType = pin:GetPinType()
     radarPin.texture:SetTexture(GetIcon(pin))
 
+    local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
+    if pinData ~= nil and pinData.tint ~= nil then
+        radarPin.texture:SetColor(pinData.tint:UnpackRGBA())
+    end
+
     if MapRadar.showDistance then
         local label = distanceLabelPool:AcquireObject()
         label:SetAnchor(TOPLEFT, radarPin.texture, TOPRIGHT)

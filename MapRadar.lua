@@ -128,6 +128,22 @@ local function GetIcon(pin)
 end
 --]]
 
+local function getMapScale()
+    -- For now set very apporx scale
+
+    -- Standard zone
+    if MapRadar.currentMapWidth == 3156 or MapRadar.currentMapWidth == 2752 then
+        return 4.15
+    end
+
+    -- Some DLC middle maps
+    if MapRadar.currentMapWidth == 1945 then
+        return 2.2
+    end
+
+    return 1.1 -- Standard subzone
+end
+
 -- https://www.codecademy.com/resources/docs/lua/tables
 
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
@@ -141,6 +157,7 @@ local function registerMapPins()
     end
 
     MapRadarPin:ReleaseAll()
+    MapRadar.scale = getMapScale()
 
     -- Add new pins
     local pins = ZO_WorldMap_GetPinManager():GetActiveObjects()
@@ -349,22 +366,6 @@ local function mapPinCountCheck()
     registerMapPins()
 end
 
-local function getMapScale()
-    -- For now set very apporx scale
-
-    -- Standard zone
-    if MapRadar.currentMapWidth == 3156 or MapRadar.currentMapWidth == 2752 then
-        return 4.15
-    end
-
-    -- Some DLC middle maps
-    if MapRadar.currentMapWidth == 1945 then
-        return 2.2
-    end
-
-    return 1.1 -- Standard subzone
-end
-
 local function initialize(eventType, addonName)
     if addonName ~= "MapRadar" then
         return
@@ -394,12 +395,14 @@ local function initialize(eventType, addonName)
     EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, mapUpdate)
     EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCount", 100, mapPinCountCheck)
 
+    --[[
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
         zo_callLater(function()
             MapRadar.scale = getMapScale()
         end, 200)
 
     end)
+    --]]
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarInitialized")
 end

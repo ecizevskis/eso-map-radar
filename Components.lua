@@ -67,7 +67,7 @@ MapRadarCommon = {
 }
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, function()
-
+    --[[
     local ls2 = MapRadarCommon.LabelStack:New("$(parent)Stacktest1", MapRadarContainer, 2)
     ls2:SetAnchor(TOP, GuiRoot, TOP, 0, 150)
     ls2:SetFont("$(BOLD_FONT)|14|outline")
@@ -100,5 +100,6 @@ EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, function()
         ls2:SetText(567)
         ls5:SetText(567)
     end, 9000)
+    --]]
 
 end)

@@ -9,6 +9,15 @@ local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer,
 -- ========================================================================================
 -- helper methods
 
+local function customPinName(pinType)
+    local cpin = pinManager.customPins[pinType]
+    if (cpin ~= nil) then
+        return cpin.pinTypeString
+    end
+
+    return nil
+end
+
 local function IsCustomQuestPin(pinType)
     -- First chek if this pin type is not default.
 
@@ -21,10 +30,10 @@ local function IsCustomQuestPin(pinType)
     end
     --]]
 
-    if pinType == 293 -- QuestMap_uncompleted?  Unaquired quest markers. Need to find you what constant that is or what Is<> method
-    -- or pinType == 295 -- QuestMap_hidden?  Unaquired quest markers. Need to find you what constant that is or what Is<> method
-    -- or pinType == 315 -- chests
-    or pinType == 301 -- QuestMap_zonestory?  zone story quest to grab
+    if customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory" -- or pinType == 315 -- chests
+    -- or customPinName(pinType) == "pinType_Treasure_Maps" -- from "Map Pins" by Hoft
+    or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
+    or customPinName(pinType) == "LostTreasure_TreasureMapPin" -- Treasure from LostTreasure
     then
         return true
     end
@@ -55,12 +64,20 @@ local function GetIcon(pin)
         return pin:GetGroupIcon()
     end
 
+    if pin:IsWorldEventUnitPin() then
+        return pin:GetWorldEventUnitIcon()
+    end
+
     if pin:IsQuest() then
         return pin:GetQuestIcon()
     end
 
     if pin:IsFastTravelWayShrine() or pin:IsFastTravelKeep() then
         return pin:GetFastTravelIcons()
+    end
+
+    if pin:IsPOI() then
+        return pin:GetPOIIcon()
     end
 
     local texture = ZO_MapPin.GetStaticPinTexture(pin:GetPinType())
@@ -74,10 +91,15 @@ end
 -- ========================================================================================
 -- MapRadarPin handling methods
 function MapRadarPin:SetVisibility()
-    -- For some pin tpes they should be visible only in certain range
+    -- For some pin types they should be visible only in certain range
     if IsCustomQuestPin(self.pinType) and self.distance > 1200 then
         self.texture:SetHidden(true)
         return false
+    end
+
+    if self.pin:IsFastTravelWayShrine() and self.distance > 1200 then
+        -- self.texture:SetHidden(true)
+        -- return false
     end
 
     self.texture:SetHidden(false)
@@ -130,7 +152,8 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, curvedZoom)
         self.distanceLabel:SetText(zo_strformat("<<1>>", self.distance))
 
         if MapRadar.showAllPins then
-            self.distanceLabel:SetText(zo_strformat("<<1>> <<2>>", self.pinType, MR_PinTypeNames[self.pinType]))
+            local name = MR_PinTypeNames[self.pinType] or customPinName(self.pinType)
+            self.distanceLabel:SetText(zo_strformat("<<1>> <<2>>", self.pinType, name))
         end
     end
 
@@ -152,7 +175,7 @@ end
 function MapRadarPin:IsValidPin(pin)
     local pinType = pin:GetPinType()
 
-    if pinType == MAP_PIN_TYPE_PLAYER -- or pin:GetPinType() == MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY or pin:GetPinType() == MAP_PIN_TYPE_DRAGON_IDLE_WEAK 
+    if pinType == MAP_PIN_TYPE_PLAYER -- or pinType == MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_DRAGON_IDLE_WEAK 
     or pin:IsCompanion() then
         return false
     end
@@ -164,8 +187,9 @@ function MapRadarPin:IsValidPin(pin)
     -- or pin:IsKillLocation()
     -- or pin:IsWorldEventUnitPin()
     -- or pin:IsZoneStory() or pin:IsSuggestion() -- or pin:IsAreaPin()
-    -- or pin:IsFastTravelWayShrine() or pin:IsFastTravelKeep() or pin:IsAntiquityDigSitePin() 
-    or IsCustomQuestPin(pinType) then
+    or pinType == MAP_PIN_TYPE_POI_SEEN or pin:IsFastTravelWayShrine() or pin:IsFastTravelKeep() -- or pin:IsAntiquityDigSitePin() 
+    -- or pinType == MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY or pinType ==  MAP_PIN_TYPE_DRAGON_IDLE_WEAK 
+    or pinType == MAP_PIN_TYPE_UNIT_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY or IsCustomQuestPin(pinType) then
         return true
     end
 
@@ -189,7 +213,15 @@ function MapRadarPin:New(pin, key)
 
     local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
     if pinData ~= nil and pinData.tint ~= nil then
-        radarPin.texture:SetColor(pinData.tint:UnpackRGBA())
+        -- local tintColor = pinData.tint:UnpackRGBA()
+
+        if type(pinData.tint) == "function" then
+            radarPin.texture:SetColor(pinData.tint(pin):UnpackRGBA())
+        else
+            radarPin.texture:SetColor(pinData.tint:UnpackRGBA())
+        end
+    else
+        radarPin.texture:SetColor(unpack({1, 1, 1, 1}))
     end
 
     if MapRadar.showDistance then

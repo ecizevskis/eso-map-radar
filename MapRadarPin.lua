@@ -51,6 +51,7 @@ local function IsValidForPointer(pin)
 end
 
 local function GetIcon(pin)
+    local pinType, pinTag = pin:GetPinTypeAndTag()
 
     if pin:IsUnit() then
         -- return "MapRadar/textures/x.dds"
@@ -77,6 +78,19 @@ local function GetIcon(pin)
     end
 
     if pin:IsPOI() then
+        -- 721, 3, /esoui/art/icons/poi/poi_wayshrine_incomplete.dds
+        -- 19, 49, poi_groupboss_incomplete
+        -- 19, 61, poi_groupinstance_incomplete
+
+        -- poi_groupboss_incomplete: 45, 47, 48
+        -- poi_groupinstance_incomplete: 39, 61, 62
+
+        -- [1] worldEventInstanceId
+        -- [2] UnitTag
+        -- [3] Icon
+        -- [4] 
+
+        -- MapRadar.debug("Pin tags: <<1>>, <<2>>, <<3>>", pinTag[1], pinTag[2], pinTag[3])
         return pin:GetPOIIcon()
     end
 
@@ -90,19 +104,29 @@ end
 
 -- ========================================================================================
 -- MapRadarPin handling methods
+function MapRadarPin:SetHidden(flag)
+    self.texture:SetHidden(flag)
+    if self.distanceLabel ~= nil then
+        self.distanceLabel:SetHidden(flag)
+    end
+    if self.pointer ~= nil then
+        self.pointer:SetHidden(flag)
+    end
+end
+
 function MapRadarPin:SetVisibility()
     -- For some pin types they should be visible only in certain range
     if IsCustomQuestPin(self.pinType) and self.distance > 1200 then
-        self.texture:SetHidden(true)
+        self:SetHidden(true)
         return false
     end
 
     if self.pin:IsFastTravelWayShrine() and self.distance > 1200 then
-        -- self.texture:SetHidden(true)
-        -- return false
+        self:SetHidden(true)
+        return false
     end
 
-    self.texture:SetHidden(false)
+    self:SetHidden(false)
 
     local alpha = 1
     if (self.distance > MapRadar.maxDistance * 2) then
@@ -204,11 +228,13 @@ function MapRadarPin:New(pin, key)
     self.__index = self
 
     local texture, textureKey = pinPool:AcquireObject()
+    local pinType, pinTag = pin:GetPinTypeAndTag()
 
     radarPin.texture = texture
     radarPin.key = key
     radarPin.pin = pin
-    radarPin.pinType = pin:GetPinType()
+    radarPin.pinType = pinType
+    radarPin.pinTag = pinTag
     radarPin.texture:SetTexture(GetIcon(pin))
 
     local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
@@ -252,7 +278,7 @@ function MapRadarPin:Dispose()
 end
 
 function MapRadarPin:ReleaseAll()
-    pinPool:ReleaseAllObjects()
     pointerPool:ReleaseAllObjects()
     distanceLabelPool:ReleaseAllObjects()
+    pinPool:ReleaseAllObjects()
 end

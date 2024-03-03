@@ -1,5 +1,9 @@
 -- TODO
--- Undiscovered wayshrines to radar ... does not reg as wayshrine
+-- MAP_PIN_TYPE_POI_SEEN type check by texture path (Public Dungeon, Group Dungeon, Delve, Wayshrine, Solo Dungeon?, GroupBoss )
+-- Prepare pinData on addon load to include supported pinTypes (also calc all pinTypes for custom pins) (table data loads: texture, scale/size, visibility)
+-- Create secondaryMethod (after pin type table) to fetch pinData by texture
+-- Custom pin types read and saved to internal constants (QuestMap, TreasuremMap)
+-- Convert get icon method to table data fetch (for better performance)
 -- Pointer fading like icon on distance
 -- Create invoke analyzer
 -- Debounce methods for key bindings

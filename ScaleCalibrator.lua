@@ -65,7 +65,8 @@ local function showCalibrationData(pin)
     ScaleData.unit1 = distance / measuredMeters -- calculate map part for 1 meter
     local unit1k = ScaleData.unit1 * 1000
 
-    ScaleData.mrScale = measuredMeters / distance * 4; -- need to calculate here (x4 just to zoom in and aim for 160px marker)
+    -- calculate scale koeficient to convert from map units to radar 
+    ScaleData.mrScale = measuredMeters / distance;
 
     ScaleData.zoneNameLabel:SetText(ZO_WorldMap.zoneName)
     ScaleData.mapWidthLabel:SetText(currentMapWidth)
@@ -85,7 +86,7 @@ end
 local function CreateCalibrationDataForm()
     local dataAnchorControl = CreateControl("$(parent)CalibrationDataAnchor", MapRadarContainer, CT_CONTROL)
 
-    dataAnchorControl:SetAnchor(LEFT, GuiRoot, LEFT, 100)
+    dataAnchorControl:SetAnchor(LEFT, GuiRoot, LEFT, 100, -100)
     dataAnchorControl:SetDimensions(20, 100)
 
     local zoneLabel = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Zone")
@@ -118,6 +119,27 @@ local function CreateCalibrationDataForm()
     local mrScaleLabel = CreateLabel(TOPRIGHT, unit1Label, BOTTOMRIGHT, "MR Scale")
     ScaleData.mrScaleLabel = CreateLabel(TOPLEFT, ScaleData.unit1Label, BOTTOMLEFT, "0")
 
+    local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", MapRadarContainer, "plusButtonTemplate")
+    btnSaveScaleData:SetAnchor(TOPLEFT, mrScaleLabel, BOTTOMLEFT)
+    btnSaveScaleData:SetHandler("OnClicked", function()
+        local curvedZoom = ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom()
+        local currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
+
+        local data = {
+            mapWidth = currentMapWidth,
+            mapHeight = currentMapHeight,
+            curvedZoom = curvedZoom,
+            mapDx = ScaleData.map_dx,
+            mapDy = ScaleData.map_dy,
+            unit1 = ScaleData.unit1,
+            mrScale = ScaleData.mrScale
+        }
+
+        MapRadar.config.scaleData[ZO_WorldMap.zoneName] = data
+
+        MapRadar.scale = ScaleData.mrScale * 4 -- x4 just to zoom in and aim for 160px marker
+        MapRadar.debug("Saved scale data for zone: <<1>>", ZO_WorldMap.zoneName)
+    end)
 end
 
 local function MapRadar_InitScaleCalibrator()
@@ -179,8 +201,8 @@ local function MapRadar_InitScaleCalibrator()
             -- MAP_PIN_TYPE_ACTIVE_COMPANION
             -- MAP_PIN_TYPE_GROUP_LEADER
 
-            if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER
-            and pin.normalizedX and pin.normalizedY then
+            if -- pin:IsCompanion() 
+            pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER and pin.normalizedX and pin.normalizedY then
                 showCalibrationData(pin)
                 return
             end
@@ -190,6 +212,11 @@ local function MapRadar_InitScaleCalibrator()
 end
 
 CALLBACK_MANAGER:RegisterCallback("OnMapRadarInitialized", function()
+
+    if MapRadar.config.scaleData == nil then
+        MapRadar.config.scaleData = {}
+    end
+
     if MapRadar.showCalibrate then
         MapRadar_InitScaleCalibrator()
     end

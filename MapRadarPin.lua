@@ -8,6 +8,18 @@ local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer,
 
 -- ========================================================================================
 -- helper methods
+-- TODO: convert to table with simple index use and default value
+local function getMapToMetersCoefficient()
+
+    local mapToMeterCoefficients = {
+        [3156] = 0.95, -- Standard zone
+        [1554] = 2.25 -- Standard subzone
+        -- [2752] = 0.95, -- no nstandard main map zone
+        -- [1945] = ?
+    }
+
+    return mapToMeterCoefficients[MapRadar.currentMapHeight] or 1
+end
 
 local function customPinName(pinType)
     local cpin = pinManager.customPins[pinType]
@@ -23,13 +35,6 @@ local function IsCustomQuestPin(pinType)
 
     -- Can check QuestMap pins here by name because pinType is dynamic most likely (depends on addon count and who register id first)
 
-    --[[
-    local cpin1 = pinManager.customPins[293]
-    if (cpin1 ~= nil) then
-        MapRadar.debug("Custom pin <<1>> is <<2>>", pinType, cpin1.pinTypeString)
-    end
-    --]]
-
     if customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory" -- or pinType == 315 -- chests
     -- or customPinName(pinType) == "pinType_Treasure_Maps" -- from "Map Pins" by Hoft
     or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
@@ -42,64 +47,38 @@ local function IsCustomQuestPin(pinType)
 end
 
 local function IsValidForPointer(pin)
-    -- List only specific pins to have pointers. usually just active quest pins
-    if pin:IsQuest() or pin:IsAssisted() then
+    -- List only specific pins to have pointers. just active quest pins now
+    if pin:IsQuest() then
         return true;
     end
 
     return false;
 end
 
-local function GetIcon(pin)
-    local pinType, pinTag = pin:GetPinTypeAndTag()
-
-    if pin:IsUnit() then
-        -- return "MapRadar/textures/x.dds"
+local function GetTintColor(radarPin)
+    local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
+    if (pinData == nil or pinData.tint == nil) then
+        return unpack({1, 1, 1, 1})
     end
 
-    if pin:IsCompanion() then
-        return "EsoUI/Art/MapPins/activeCompanion_pin.dds"
+    if type(pinData.tint) == "function" then
+        return pinData.tint(radarPin.pin):UnpackRGBA()
+    else
+        return pinData.tint:UnpackRGBA()
+    end
+end
+
+local function GetIcon(radarPin)
+    local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
+    if (pinData == nil or pinData.texture == nil) then
+        return "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" -- unknown pin
     end
 
-    if pin:IsUnit() then
-        return pin:GetGroupIcon()
+    if type(pinData.texture) == "function" then
+        return pinData.texture(radarPin.pin)
     end
 
-    if pin:IsWorldEventUnitPin() then
-        return pin:GetWorldEventUnitIcon()
-    end
-
-    if pin:IsQuest() then
-        return pin:GetQuestIcon()
-    end
-
-    if pin:IsFastTravelWayShrine() or pin:IsFastTravelKeep() then
-        return pin:GetFastTravelIcons()
-    end
-
-    if pin:IsPOI() then
-        -- 721, 3, /esoui/art/icons/poi/poi_wayshrine_incomplete.dds
-        -- 19, 49, poi_groupboss_incomplete
-        -- 19, 61, poi_groupinstance_incomplete
-
-        -- poi_groupboss_incomplete: 45, 47, 48
-        -- poi_groupinstance_incomplete: 39, 61, 62
-
-        -- [1] worldEventInstanceId
-        -- [2] UnitTag
-        -- [3] Icon
-        -- [4] 
-
-        -- MapRadar.debug("Pin tags: <<1>>, <<2>>, <<3>>", pinTag[1], pinTag[2], pinTag[3])
-        return pin:GetPOIIcon()
-    end
-
-    local texture = ZO_MapPin.GetStaticPinTexture(pin:GetPinType())
-    if texture ~= nil then
-        return texture
-    end
-
-    return "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds"
+    return pinData.texture
 end
 
 -- ========================================================================================
@@ -153,12 +132,12 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, curvedZoom)
     local relative_dx = self.pin.normalizedX - playerX
     local relative_dy = self.pin.normalizedY - playerY
 
-    local dx = relative_dx * MapRadar.currentMapWidth * MapRadar.scale
-    local dy = relative_dy * MapRadar.currentMapHeight * MapRadar.scale
+    local dx = relative_dx * MapRadar.currentMapWidth
+    local dy = relative_dy * MapRadar.currentMapHeight
 
     local angle = math.atan2(-dx, -dy) - heading
-    self.distance = math.sqrt(dx ^ 2 + dy ^ 2)
-    local radarDistance = math.min(MapRadar.maxDistance, self.distance)
+    self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / getMapToMetersCoefficient()
+    local radarDistance = math.min(MapRadar.maxDistance, self.distance) --  * MapRadar.scale
 
     -- recalc coordinates to apply rotation
     dx = radarDistance * -math.sin(angle)
@@ -235,20 +214,8 @@ function MapRadarPin:New(pin, key)
     radarPin.pin = pin
     radarPin.pinType = pinType
     radarPin.pinTag = pinTag
-    radarPin.texture:SetTexture(GetIcon(pin))
-
-    local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
-    if pinData ~= nil and pinData.tint ~= nil then
-        -- local tintColor = pinData.tint:UnpackRGBA()
-
-        if type(pinData.tint) == "function" then
-            radarPin.texture:SetColor(pinData.tint(pin):UnpackRGBA())
-        else
-            radarPin.texture:SetColor(pinData.tint:UnpackRGBA())
-        end
-    else
-        radarPin.texture:SetColor(unpack({1, 1, 1, 1}))
-    end
+    radarPin.texture:SetTexture(GetIcon(radarPin))
+    radarPin.texture:SetColor(GetTintColor(radarPin))
 
     if MapRadar.showDistance then
         local label = distanceLabelPool:AcquireObject()

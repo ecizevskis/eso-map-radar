@@ -7,11 +7,10 @@
 -- Pointer fading like icon on distance
 -- Create invoke analyzer
 -- Debounce methods for key bindings
--- Automatic calibration calculation (from map width/height scale to specific 40 pixel count in offset )
 -- Saved variable usage (save mode, save radar position)
 -- Configuration page
 -- Icon fading if distance is big (faded as constant if 2x maxDistance ... or gradient fade?)
--- Fast trakel wayshrines (up to 3 if in same distance +- some threshold)
+-- Fast trakel wayshrines (with range limit 1200 meters?)
 -- Closest dolmen
 -- Group via all map
 -- Survey/Treasure if you have map/item (load from LibTreasure)
@@ -37,6 +36,19 @@ MapRadar = {
         d(zo_strformat(formatString, ...))
     end,
 
+    lastdebugMsg = "",
+    debugDebounce = function(formatString, ...)
+        local msg = zo_strformat(formatString, ...)
+
+        if MapRadar.lastdebugMsg == msg then
+            return
+        end
+
+        d(msg)
+
+        MapRadar.lastdebugMsg = msg
+    end,
+
     getVal = function(obj)
         if obj == nil then
             return "nil"
@@ -58,15 +70,15 @@ local function getMapScale()
 
     -- Standard zone
     if MapRadar.currentMapWidth == 3156 or MapRadar.currentMapWidth == 2752 then
-        return 4.15
+        return 1.05
     end
 
-    -- Some DLC middle maps
+    -- Some DLC middle maps??
     if MapRadar.currentMapWidth == 1945 then
         return 2.2
     end
 
-    return 1.1 -- Standard subzone
+    return 0.44 -- Standard subzone
 end
 
 -- https://www.codecademy.com/resources/docs/lua/tables
@@ -147,7 +159,17 @@ local function mapUpdate()
     MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- read map width and height to local params not to invoke method in loop
-    MapRadar.currentMapWidth, MapRadar.currentMapHeight = ZO_WorldMap_GetMapDimensions()
+    local mapWidth, mapHeight = ZO_WorldMap_GetMapDimensions()
+    -- MapRadar.debugDebounce("Read map W: <<1>>  <<2>>", mapWidth, mapHeight)
+
+    -- This reassigns global values only if they are different to reduce value loss during write operartion.
+    -- Other read opperations may read unassigned value
+    if MapRadar.currentMapWidth ~= mapWidth then
+        MapRadar.currentMapWidth = mapWidth
+    end
+    if MapRadar.currentMapHeight ~= mapWidth then
+        MapRadar.currentMapHeight = mapHeight
+    end
 
     local playerX, playerY = GetMapPlayerPosition("player")
     local curvedZoom = ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom()
@@ -285,4 +307,5 @@ function MapRadar_button()
     MapRadar.debug("Map curvedZoom: <<1>>", ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom() * 1000)
     MapRadar.debug("UI -  W: <<1>>  H: <<2>>", UIWidth, UIHeight)
     MapRadar.debug("MR max distance: <<1>>", MapRadar.maxDistance)
+
 end

@@ -1,28 +1,36 @@
 MapRadarPin = {}
 
-local pinManager = ZO_WorldMap_GetPinManager()
-
+local zoMapPin = ZO_MapPin
 local pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
 local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
 
 -- ========================================================================================
 -- helper methods
--- TODO: convert to table with simple index use and default value
-local function getMapToMetersCoefficient()
+-- TODO: convert to table with zone name and data params + defaults
+local function getMeterCoefficient()
 
+    --[[
     local mapToMeterCoefficients = {
-        [3156] = 0.95, -- Standard zone
-        [1554] = 2.25 -- Standard subzone
-        -- [2752] = 0.95, -- no nstandard main map zone
-        -- [1945] = ?
+        [3156] = 0.0003, -- Standard zone
+        [1554] = 0.00145 -- Standard subzone
     }
+--]]
 
-    return mapToMeterCoefficients[MapRadar.currentMapHeight] or 1
+    -- TODO: this is not good. Subzone map changes faster than zone name load
+
+    -- using defaults for zone types
+    if MapRadar.getMapType() == MAPTYPE_SUBZONE then
+        -- MapRadar.debugDebounce("Assuming subzone meter: <<1>>", MapRadar.worldMap.zoneName)
+        return 0.00145
+    end
+
+    -- MapRadar.debugDebounce("Assuming zone meter: <<1>>", MapRadar.worldMap.zoneName)
+    return 0.0003
 end
 
 local function customPinName(pinType)
-    local cpin = pinManager.customPins[pinType]
+    local cpin = MapRadar.pinManager.customPins[pinType]
     if (cpin ~= nil) then
         return cpin.pinTypeString
     end
@@ -30,8 +38,13 @@ local function customPinName(pinType)
     return nil
 end
 
-local function IsCustomQuestPin(pinType)
-    -- First chek if this pin type is not default.
+local function IsWorldMapUnit(pinType)
+    return pinType == MAP_PIN_TYPE_UNIT_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY
+    -- or pinType == MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY or pinType ==  MAP_PIN_TYPE_DRAGON_IDLE_WEAK 
+end
+
+local function IsCustomPin(pinType)
+    -- First chek if this pin type is not default??
 
     -- Can check QuestMap pins here by name because pinType is dynamic most likely (depends on addon count and who register id first)
 
@@ -40,6 +53,22 @@ local function IsCustomQuestPin(pinType)
     or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
     or customPinName(pinType) == "LostTreasure_TreasureMapPin" -- Treasure from LostTreasure
     then
+        return true
+    end
+
+    return false
+end
+
+local function IsValidPOI(pin)
+    local pinType = pin:GetPinType()
+    -- Check here for ingame POI or other addons like Map Pins or Destinations 
+    -- Filter what POIs to show (guess by texture path) based on how config is set
+
+    -- pinType_Unknown_POI  (Map Pins)       alternative for POI pins
+    -- DEST_PinSet_Unknown  (Destinations)   alternative for POI pins
+
+    if customPinName(pinType) == "pinType_Unknown_POI" or customPinName(pinType) == "DEST_PinSet_Unknown" then
+        -- TODO: check texture here 
         return true
     end
 
@@ -56,7 +85,7 @@ local function IsValidForPointer(pin)
 end
 
 local function GetTintColor(radarPin)
-    local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
+    local pinData = zoMapPin.PIN_DATA[radarPin.pinType]
     if (pinData == nil or pinData.tint == nil) then
         return unpack({1, 1, 1, 1})
     end
@@ -69,7 +98,7 @@ local function GetTintColor(radarPin)
 end
 
 local function GetIcon(radarPin)
-    local pinData = ZO_MapPin.PIN_DATA[radarPin.pinType]
+    local pinData = zoMapPin.PIN_DATA[radarPin.pinType]
     if (pinData == nil or pinData.texture == nil) then
         return "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" -- unknown pin
     end
@@ -94,24 +123,21 @@ function MapRadarPin:SetHidden(flag)
 end
 
 function MapRadarPin:SetVisibility()
-    -- For some pin types they should be visible only in certain range
-    if IsCustomQuestPin(self.pinType) and self.distance > 1200 then
-        self:SetHidden(true)
-        return false
-    end
-
-    if self.pin:IsFastTravelWayShrine() and self.distance > 1200 then
+    -- Most pin types they should be visible only in certain range
+    if (not self.pin:IsQuest() and not self.pin:IsUnit() and self.distance > 1200) then
         self:SetHidden(true)
         return false
     end
 
     self:SetHidden(false)
 
-    local alpha = 1
+    local maxAlpha = 0.6
+
+    local alpha = maxAlpha
     if (self.distance > MapRadar.maxDistance * 2) then
         alpha = 0.3 -- maximum fade in so that icon is still seen
     elseif self.distance > MapRadar.maxDistance then
-        alpha = 1 - (self.distance - MapRadar.maxDistance) / MapRadar.maxDistance
+        alpha = maxAlpha - (self.distance - MapRadar.maxDistance) / MapRadar.maxDistance
     end
 
     self.texture:SetAlpha(alpha)
@@ -119,25 +145,32 @@ function MapRadarPin:SetVisibility()
 end
 
 function MapRadarPin:SetPinDimensions()
-    -- If value did not change then there is no need to trigger any UI actions
-    if self.size ~= nil and self.size == MapRadar.pinSize then
-        return
+
+    -- TODO: somehow add scaling for radar and overlay
+    -- if self.size ~= nil and self.size == MapRadar.pinSize then
+    --    return
+    -- end
+
+    local pinData = ZO_MapPin.PIN_DATA[self.pinType]
+    if (pinData == nil or pinData.size == nil) then
+        self.size = pinData.size
+        self.scaledSize = pinData.size
+    else
+        self.size = MapRadar.pinSize
+        self.scaledSize = MapRadar.pinSize
     end
 
-    self.texture:SetDimensions(MapRadar.pinSize, MapRadar.pinSize)
-    self.size = MapRadar.pinSize
+    self.texture:SetDimensions(self.scaledSize, self.scaledSize)
+    -- self.size = MapRadar.pinSize
 end
 
 function MapRadarPin:UpdatePin(playerX, playerY, heading, curvedZoom)
-    local relative_dx = self.pin.normalizedX - playerX
-    local relative_dy = self.pin.normalizedY - playerY
-
-    local dx = relative_dx * MapRadar.currentMapWidth
-    local dy = relative_dy * MapRadar.currentMapHeight
+    local dx = self.pin.normalizedX - playerX
+    local dy = self.pin.normalizedY - playerY
 
     local angle = math.atan2(-dx, -dy) - heading
-    self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / getMapToMetersCoefficient()
-    local radarDistance = math.min(MapRadar.maxDistance, self.distance) --  * MapRadar.scale
+    self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / getMeterCoefficient()
+    local radarDistance = math.min(MapRadar.maxDistance, self.distance)
 
     -- recalc coordinates to apply rotation
     dx = radarDistance * -math.sin(angle)
@@ -153,6 +186,11 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, curvedZoom)
     -- Show distance (or other test data) near pin on radar
     if (self.distanceLabel ~= nil) then
         self.distanceLabel:SetText(zo_strformat("<<1>>", self.distance))
+
+        if MapRadar.showPinLoc then
+            self.distanceLabel:SetText(zo_strformat("<<1>>   <<2>>", ZO_LocalizeDecimalNumber(self.pin.normalizedX),
+                                                    ZO_LocalizeDecimalNumber(self.pin.normalizedY)))
+        end
 
         if MapRadar.showAllPins then
             local name = MR_PinTypeNames[self.pinType] or customPinName(self.pinType)
@@ -185,14 +223,13 @@ function MapRadarPin:IsValidPin(pin)
 
     if pin:IsQuest() -- or pin:IsObjective() -- or pin:IsAvAObjective()
     or pin:IsUnit() -- Player/Group/Companion units
-    -- or pin:IsPOI()
+    -- or pin:IsPOI() 
     or pin:IsAssisted() -- or pin:IsMapPing()
     -- or pin:IsKillLocation()
     -- or pin:IsWorldEventUnitPin()
     -- or pin:IsZoneStory() or pin:IsSuggestion() -- or pin:IsAreaPin()
     or pinType == MAP_PIN_TYPE_POI_SEEN or pin:IsFastTravelWayShrine() or pin:IsFastTravelKeep() -- or pin:IsAntiquityDigSitePin() 
-    -- or pinType == MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_DRAGON_COMBAT_HEALTHY or pinType ==  MAP_PIN_TYPE_DRAGON_IDLE_WEAK 
-    or pinType == MAP_PIN_TYPE_UNIT_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY or IsCustomQuestPin(pinType) then
+    or IsWorldMapUnit(pinType) or IsCustomPin(pinType) or IsValidPOI(pin) then
         return true
     end
 

@@ -15,7 +15,28 @@
 -- Group via all map
 -- Survey/Treasure if you have map/item (load from LibTreasure)
 -- https://github.com/esoui/esoui/blob/3b9326af2f5946a748be4551bfce41672f084e39/esoui/ingame/map/worldmap.lua#L695
+-- GetCurrentMapIndex() 
+-- GetPlayerActiveSubzoneName() -> Returns: string subzoneName 
+-- GetPlayerActiveZoneName() -> Returns: string zoneName 
+-- Some maps load pins with certain distance only, add pin check from Destinations and MapPins (maybe some other addon too?)
+-- Hide in combat option
+-- Does Voltans minimap fucks all map params? Height - Width - CurvedZoom ??
 MapRadar = {
+    -- Localize global objects for better performance
+    worldMap = ZO_WorldMap,
+    getPanAndZoom = ZO_WorldMap_GetPanAndZoom,
+
+    getMapDimensions = ZO_WorldMap_GetMapDimensions,
+    orig_GetMapDimensions = orgZO_WorldMap_GetMapDimensions,
+
+    getPlayerCameraHeading = GetPlayerCameraHeading,
+    getMapPlayerPosition = GetMapPlayerPosition,
+
+    pinManager = ZO_WorldMap_GetPinManager(),
+
+    getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
+
+    -- flags
     showPointer = true,
     showDistance = true,
 
@@ -29,8 +50,12 @@ MapRadar = {
 
     scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
 
+    -- ==================================================================================================
+    -- Debug stuff
     showCalibrate = true,
     showAllPins = false,
+    showPinLoc = false,
+    showPinNames = false,
 
     debug = function(formatString, ...)
         d(zo_strformat(formatString, ...))
@@ -58,7 +83,7 @@ MapRadar = {
 }
 
 local UIWidth, UIHeight = GuiRoot:GetDimensions()
-local playerPin = ZO_WorldMap_GetPinManager():GetPlayerPin()
+local playerPin = MapRadar.pinManager:GetPlayerPin()
 local pinsPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
 local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
@@ -94,10 +119,10 @@ local function registerMapPins()
     end
 
     MapRadarPin:ReleaseAll()
-    MapRadar.scale = getMapScale()
+    -- MapRadar.scale = getMapScale()
 
     -- Add new pins
-    local pins = ZO_WorldMap_GetPinManager():GetActiveObjects()
+    local pins = MapRadar.pinManager:GetActiveObjects()
     for key, pin in pairs(pins) do
         if MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
             local radarPin = MapRadarPin:New(pin, key)
@@ -155,11 +180,11 @@ end
 --]]
 
 local function mapUpdate()
-    local heading = GetPlayerCameraHeading()
+    local heading = MapRadar.getPlayerCameraHeading()
     MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- read map width and height to local params not to invoke method in loop
-    local mapWidth, mapHeight = ZO_WorldMap_GetMapDimensions()
+    local mapWidth, mapHeight = MapRadar.getMapDimensions()
     -- MapRadar.debugDebounce("Read map W: <<1>>  <<2>>", mapWidth, mapHeight)
 
     -- This reassigns global values only if they are different to reduce value loss during write operartion.
@@ -171,8 +196,8 @@ local function mapUpdate()
         MapRadar.currentMapHeight = mapHeight
     end
 
-    local playerX, playerY = GetMapPlayerPosition("player")
-    local curvedZoom = ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom()
+    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
+    local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
 
     MapRadar.positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
 
@@ -186,14 +211,14 @@ end
 
 local prevPinCount = 0
 local function mapPinCountCheck()
-    local pins = ZO_WorldMap_GetPinManager():GetActiveObjects()
+    local pins = MapRadar.pinManager:GetActiveObjects()
     local maxn = table.maxn(pins)
 
     if prevPinCount == maxn then
         return
     end
 
-    -- df("Pin count changed %d", maxn)
+    -- MapRadar.debugDebounce("Pin count changed: <<1>>", maxn)
 
     prevPinCount = maxn
     registerMapPins()
@@ -295,17 +320,47 @@ function MapRadar_ToggleMode()
 end
 
 -- ==================================================================================================
+-- Slash commands
+SLASH_COMMANDS["/mapradar"] = function(args)
+    -- REFACTOR to support only one arg maybe?? without array?
+
+    local options = {}
+    local searchResult = {string.match(args, "^(%S*)%s*(.-)$")}
+    for i, v in pairs(searchResult) do
+        if (v ~= nil and v ~= "") then
+            options[i] = string.lower(v)
+        end
+    end
+
+    if #options == 0 or options[1] == "allpins" then
+        MapRadar.showAllPins = not MapRadar.showAllPins
+    end
+end
+
+-- ==================================================================================================
 -- Test stuff 
 
 function MapRadar_button()
     registerMapPins() -- reset all pins placement (for calibration)
 
-    local currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
-    local x, y, h = GetMapPlayerPosition("player")
+    local oW, oH = MapRadar.orgZO_WorldMap_GetMapDimensions()
+    local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
+    local x, y, h = MapRadar.getMapPlayerPosition("player")
 
     MapRadar.debug("Map dimension: <<1>> <<2>>", currentMapWidth, currentMapHeight)
-    MapRadar.debug("Map curvedZoom: <<1>>", ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom() * 1000)
+    MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
+    MapRadar.debug("Map curvedZoom: <<1>>", MapRadar.getPanAndZoom():GetCurrentCurvedZoom() * 1000)
     MapRadar.debug("UI -  W: <<1>>  H: <<2>>", UIWidth, UIHeight)
     MapRadar.debug("MR max distance: <<1>>", MapRadar.maxDistance)
 
 end
+
+--[[
+CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
+    local oW, oH = orgZO_WorldMap_GetMapDimensions()
+    local currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
+
+    MapRadar.debug("Map dimension: <<1>> <<2>>", currentMapWidth, currentMapHeight)
+    MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
+end)
+--]]

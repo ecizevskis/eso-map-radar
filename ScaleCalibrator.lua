@@ -7,16 +7,14 @@ local ScaleData = {
     mapHeightLabel = {},
     curvedZoomLabel = {},
 
-    rel_dxLabel = {},
-    rel_dyLabel = {},
-    map_dxLabel = {},
-    map_dyLabel = {},
+    dxLabel = {},
+    dyLabel = {},
 
     unit1Label = {},
     mrScaleLabel = {},
 
-    map_dx = 0,
-    map_dy = 0,
+    dx = 0,
+    dy = 0,
     unit1 = 0,
     mrScale = 0
 }
@@ -49,33 +47,26 @@ local function showCalibrationData(pin)
     local displayMultiplier = 10000000
     local measuredMeters = 40
 
-    local playerX, playerY = GetMapPlayerPosition("player")
-    local curvedZoom = ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom()
-    local currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
+    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
+    local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
+    local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
-    -- TODO  Take in account that map can be with different Width and Height (Do calc on paper for getting formulas right!!!)
-    local relative_dx = pin.normalizedX - playerX
-    local relative_dy = pin.normalizedY - playerY
+    ScaleData.dx = pin.normalizedX - playerX
+    ScaleData.dy = pin.normalizedY - playerY
 
-    ScaleData.map_dx = relative_dx * currentMapWidth
-    ScaleData.map_dy = relative_dy * currentMapHeight
-
-    local distance = math.sqrt(ScaleData.map_dx ^ 2 + ScaleData.map_dy ^ 2) -- distance in map units as offset? pixels?
+    local distance = math.sqrt(ScaleData.dx ^ 2 + ScaleData.dy ^ 2) -- distance in percentage
 
     ScaleData.unit1 = distance / measuredMeters -- calculate map part for 1 meter
-    local unit1k = ScaleData.unit1 * 1000
 
     -- calculate scale koeficient to convert from map units to radar 
     ScaleData.mrScale = measuredMeters / distance;
 
-    ScaleData.zoneNameLabel:SetText(ZO_WorldMap.zoneName)
+    ScaleData.zoneNameLabel:SetText(MapRadar.worldMap.zoneName)
     ScaleData.mapWidthLabel:SetText(currentMapWidth)
     ScaleData.mapHeightLabel:SetText(currentMapHeight)
     ScaleData.curvedZoomLabel:SetText(curvedZoom)
-    ScaleData.rel_dxLabel:SetText(zo_strformat("<<1>>", relative_dx * displayMultiplier))
-    ScaleData.rel_dyLabel:SetText(zo_strformat("<<1>>", relative_dy * displayMultiplier))
-    ScaleData.map_dxLabel:SetText(ScaleData.map_dx)
-    ScaleData.map_dyLabel:SetText(ScaleData.map_dy)
+    ScaleData.dxLabel:SetText(zo_strformat("<<1>>", ScaleData.dx * displayMultiplier))
+    ScaleData.dyLabel:SetText(zo_strformat("<<1>>", ScaleData.dy * displayMultiplier))
     ScaleData.unit1Label:SetText(ScaleData.unit1)
     ScaleData.mrScaleLabel:SetText(ScaleData.mrScale)
 
@@ -101,20 +92,14 @@ local function CreateCalibrationDataForm()
     local curvCoomLabel = CreateLabel(TOPRIGHT, heightLabel, BOTTOMRIGHT, "Curv zoom")
     ScaleData.curvedZoomLabel = CreateLabel(TOPLEFT, ScaleData.mapHeightLabel, BOTTOMLEFT, "0")
 
-    local reldxLabel = CreateLabel(TOPRIGHT, curvCoomLabel, BOTTOMRIGHT, "Rel DX")
-    ScaleData.rel_dxLabel = CreateLabel(TOPLEFT, ScaleData.curvedZoomLabel, BOTTOMLEFT, "0")
+    local dxLabel = CreateLabel(TOPRIGHT, curvCoomLabel, BOTTOMRIGHT, "Rel DX")
+    ScaleData.dxLabel = CreateLabel(TOPLEFT, ScaleData.curvedZoomLabel, BOTTOMLEFT, "0")
 
-    local reldyLabel = CreateLabel(TOPRIGHT, reldxLabel, BOTTOMRIGHT, "Rel DY")
-    ScaleData.rel_dyLabel = CreateLabel(TOPLEFT, ScaleData.rel_dxLabel, BOTTOMLEFT, "0")
+    local dyLabel = CreateLabel(TOPRIGHT, dxLabel, BOTTOMRIGHT, "Rel DY")
+    ScaleData.dyLabel = CreateLabel(TOPLEFT, ScaleData.dxLabel, BOTTOMLEFT, "0")
 
-    local mapdxLabel = CreateLabel(TOPRIGHT, reldyLabel, BOTTOMRIGHT, "Map DX")
-    ScaleData.map_dxLabel = CreateLabel(TOPLEFT, ScaleData.rel_dyLabel, BOTTOMLEFT, "0")
-
-    local mapdyLabel = CreateLabel(TOPRIGHT, mapdxLabel, BOTTOMRIGHT, "Map DY")
-    ScaleData.map_dyLabel = CreateLabel(TOPLEFT, ScaleData.map_dxLabel, BOTTOMLEFT, "0")
-
-    local unit1Label = CreateLabel(TOPRIGHT, mapdyLabel, BOTTOMRIGHT, "Unit1")
-    ScaleData.unit1Label = CreateLabel(TOPLEFT, ScaleData.map_dyLabel, BOTTOMLEFT, "0")
+    local unit1Label = CreateLabel(TOPRIGHT, dyLabel, BOTTOMRIGHT, "Unit1")
+    ScaleData.unit1Label = CreateLabel(TOPLEFT, ScaleData.dyLabel, BOTTOMLEFT, "0")
 
     local mrScaleLabel = CreateLabel(TOPRIGHT, unit1Label, BOTTOMRIGHT, "MR Scale")
     ScaleData.mrScaleLabel = CreateLabel(TOPLEFT, ScaleData.unit1Label, BOTTOMLEFT, "0")
@@ -122,23 +107,23 @@ local function CreateCalibrationDataForm()
     local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", MapRadarContainer, "plusButtonTemplate")
     btnSaveScaleData:SetAnchor(TOPLEFT, mrScaleLabel, BOTTOMLEFT)
     btnSaveScaleData:SetHandler("OnClicked", function()
-        local curvedZoom = ZO_WorldMap_GetPanAndZoom():GetCurrentCurvedZoom()
-        local currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
+        local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
+        local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
         local data = {
             mapWidth = currentMapWidth,
             mapHeight = currentMapHeight,
             curvedZoom = curvedZoom,
-            mapDx = ScaleData.map_dx,
-            mapDy = ScaleData.map_dy,
+            dx = ScaleData.dx,
+            dy = ScaleData.dy,
             unit1 = ScaleData.unit1,
             mrScale = ScaleData.mrScale
         }
 
-        MapRadar.config.scaleData[ZO_WorldMap.zoneName] = data
+        MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
 
         MapRadar.scale = ScaleData.mrScale * 4 -- x4 just to zoom in and aim for 160px marker
-        MapRadar.debug("Saved scale data for zone: <<1>>", ZO_WorldMap.zoneName)
+        MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
     end)
 end
 
@@ -195,14 +180,14 @@ local function MapRadar_InitScaleCalibrator()
     end)
 
     EVENT_MANAGER:RegisterForUpdate("MapRadar_PinReader", 100, function()
-        local pins = ZO_WorldMap_GetPinManager():GetActiveObjects()
+        local pins = MapRadar.pinManager:GetActiveObjects()
 
         for pinKey, pin in pairs(pins) do
             -- MAP_PIN_TYPE_ACTIVE_COMPANION
             -- MAP_PIN_TYPE_GROUP_LEADER
 
-            if -- pin:IsCompanion() 
-            pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER and pin.normalizedX and pin.normalizedY then
+            if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER 
+            and pin.normalizedX and pin.normalizedY then
                 showCalibrationData(pin)
                 return
             end

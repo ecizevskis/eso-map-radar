@@ -1,9 +1,12 @@
+-- TODO: 
+-- Some random pind get animated 
+-- on disabling showDistance need to close them all? or hide sonehow?
 MapRadarPin = {}
 
 local zoMapPin = ZO_MapPin
 local pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
-local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
+local pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
 
 -- ========================================================================================
 -- helper methods
@@ -90,13 +93,10 @@ local function GetTintColor(radarPin)
         return unpack({1, 1, 1, 1})
     end
 
-    if type(pinData.tint) == "function" then
-        return pinData.tint(radarPin.pin):UnpackRGBA()
-    else
-        return pinData.tint:UnpackRGBA()
-    end
+    return MapRadar.value(pinData.tint, radarPin.pin):UnpackRGBA()
 end
 
+--[[
 local function GetIcon(radarPin)
     local pinData = zoMapPin.PIN_DATA[radarPin.pinType]
     if (pinData == nil or pinData.texture == nil) then
@@ -107,15 +107,19 @@ local function GetIcon(radarPin)
         return pinData.texture(radarPin.pin)
     end
 
+    -- Some isses with MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY
+    -- maybe isAnimated is somehow involved
+
     return pinData.texture
 end
+--]]
 
 -- ========================================================================================
 -- MapRadarPin handling methods
 function MapRadarPin:SetHidden(flag)
     self.texture:SetHidden(flag)
-    if self.distanceLabel ~= nil then
-        self.distanceLabel:SetHidden(flag)
+    if self.label ~= nil then
+        self.label:SetHidden(flag)
     end
     if self.pointer ~= nil then
         self.pointer:SetHidden(flag)
@@ -124,23 +128,28 @@ end
 
 function MapRadarPin:SetVisibility()
     -- Most pin types they should be visible only in certain range
-    if (not self.pin:IsQuest() and not self.pin:IsUnit() and self.distance > 1200) then
+    -- Quest and Group are shown across all map
+    if (not self.pin:IsQuest() and not self.pin:IsUnit() and self.distance > MapRadar.maxRadarDistance * 2) then
         self:SetHidden(true)
         return false
     end
 
     self:SetHidden(false)
 
-    local maxAlpha = 0.6
+    -- Maybe grouop should not fade that much??!
+
+    local maxAlpha = 1
 
     local alpha = maxAlpha
-    if (self.distance > MapRadar.maxDistance * 2) then
-        alpha = 0.3 -- maximum fade in so that icon is still seen
-    elseif self.distance > MapRadar.maxDistance then
-        alpha = maxAlpha - (self.distance - MapRadar.maxDistance) / MapRadar.maxDistance
+    if self.distance > MapRadar.maxRadarDistance then
+        alpha = math.max(0.4, maxAlpha - (self.distance - MapRadar.maxRadarDistance) / MapRadar.maxRadarDistance)
     end
 
     self.texture:SetAlpha(alpha)
+
+    if self.label ~= nil then
+        self.label:SetAlpha(alpha)
+    end
     return true
 end
 
@@ -154,24 +163,53 @@ function MapRadarPin:SetPinDimensions()
     local pinData = ZO_MapPin.PIN_DATA[self.pinType]
     if (pinData ~= nil or pinData.size ~= nil) then
         self.size = pinData.size
-        self.scaledSize = pinData.size * 0.8
-        -- self.scaledSize = MapRadar.pinSize + 10
     else
         self.size = MapRadar.pinSize
-        self.scaledSize = MapRadar.pinSize
     end
 
+    local distanceScale = math.max(0.6, 0.9 - self.distance / MapRadar.maxRadarDistance)
+
+    self.scaledSize = self.size * distanceScale
     self.texture:SetDimensions(self.scaledSize, self.scaledSize)
-    -- self.size = MapRadar.pinSize
 end
 
-function MapRadarPin:UpdatePin(playerX, playerY, heading, curvedZoom)
+function MapRadarPin:ApplyTexture()
+    local texture = "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" -- unknown pin
+
+    if self.animationTimeline then
+        self.animationTimeline:Stop()
+    end
+
+    local pinData = zoMapPin.PIN_DATA[self.pinType]
+
+    if (pinData ~= nil and pinData.texture ~= nil) then
+        texture = MapRadar.value(pinData.texture, self.pin)
+
+        if MapRadar.value(pinData.isAnimated, self.pin) then
+            self.animation, self.animationTimeline = CreateSimpleAnimation(ANIMATION_TEXTURE, self.texture)
+            self.animation:SetImageData(pinData.framesWide, pinData.framesHigh)
+            self.animation:SetFramerate(pinData.framesPerSecond)
+
+            -- is this doing something??
+            self.animation:SetHandler("OnStop", function()
+                self.texture:SetTextureCoords(0, 1, 0, 1)
+            end)
+
+            self.animationTimeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+            self.animationTimeline:PlayFromStart()
+        end
+    end
+
+    self.texture:SetTexture(texture)
+end
+
+function MapRadarPin:UpdatePin(playerX, playerY, heading)
     local dx = self.pin.normalizedX - playerX
     local dy = self.pin.normalizedY - playerY
 
     local angle = math.atan2(-dx, -dy) - heading
     self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / getMeterCoefficient()
-    local radarDistance = math.min(MapRadar.maxDistance, self.distance)
+    local radarDistance = math.min(MapRadar.maxRadarDistance, self.distance)
 
     -- recalc coordinates to apply rotation
     dx = radarDistance * -math.sin(angle)
@@ -185,17 +223,26 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, curvedZoom)
     end
 
     -- Show distance (or other test data) near pin on radar
-    if (self.distanceLabel ~= nil) then
-        self.distanceLabel:SetText(zo_strformat("<<1>>", self.distance))
+    if (self.label ~= nil) then
+        self.label:SetText(zo_strformat("<<1>>", self.distance))
 
         if MapRadar.showPinLoc then
-            self.distanceLabel:SetText(zo_strformat("<<1>>   <<2>>", ZO_LocalizeDecimalNumber(self.pin.normalizedX),
-                                                    ZO_LocalizeDecimalNumber(self.pin.normalizedY)))
+            self.label:SetText(zo_strformat("<<1>>   <<2>>", ZO_LocalizeDecimalNumber(self.pin.normalizedX),
+                                            ZO_LocalizeDecimalNumber(self.pin.normalizedY)))
         end
 
-        if MapRadar.showAllPins then
+        if MapRadar.showPinNames then
             local name = MR_PinTypeNames[self.pinType] or customPinName(self.pinType)
-            self.distanceLabel:SetText(zo_strformat("<<1>> <<2>>", self.pinType, name))
+            self.label:SetText(zo_strformat("<<1>> <<2>>", self.pinType, name))
+        end
+
+        if MapRadar.showPinParams then
+            local pinData = zoMapPin.PIN_DATA[self.pinType]
+            if pinData ~= nil then
+                local animatedStr = MapRadar.value(pinData.isAnimated, self.pin) and "[A]" or "[N]"
+                -- later add more
+                self.label:SetText(zo_strformat("<<1>>", animatedStr))
+            end
         end
     end
 
@@ -252,13 +299,14 @@ function MapRadarPin:New(pin, key)
     radarPin.pin = pin
     radarPin.pinType = pinType
     radarPin.pinTag = pinTag
-    radarPin.texture:SetTexture(GetIcon(radarPin))
+
+    radarPin:ApplyTexture()
     radarPin.texture:SetColor(GetTintColor(radarPin))
 
     if MapRadar.showDistance then
-        local label = distanceLabelPool:AcquireObject()
+        local label = pinLabelPool:AcquireObject()
         label:SetAnchor(TOPLEFT, radarPin.texture, TOPRIGHT)
-        radarPin.distanceLabel = label
+        radarPin.label = label
     end
 
     if MapRadar.showPointer and IsValidForPointer(pin) then
@@ -284,6 +332,6 @@ end
 
 function MapRadarPin:ReleaseAll()
     pointerPool:ReleaseAllObjects()
-    distanceLabelPool:ReleaseAllObjects()
+    pinLabelPool:ReleaseAllObjects()
     pinPool:ReleaseAllObjects()
 end

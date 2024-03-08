@@ -1,26 +1,22 @@
 -- TODO
+-- Pointer fading like icon on distance
+-- Pin reading should be converted to event based. Read all pins and compare to current. Trigger pin create events and pin dispose events
+-- Saved variable usage (save mode, save radar position)
+-- ===================================================================================================
 -- MAP_PIN_TYPE_POI_SEEN type check by texture path (Public Dungeon, Group Dungeon, Delve, Wayshrine, Solo Dungeon?, GroupBoss )
 -- Prepare pinData on addon load to include supported pinTypes (also calc all pinTypes for custom pins) (table data loads: texture, scale/size, visibility)
 -- Create secondaryMethod (after pin type table) to fetch pinData by texture
 -- Custom pin types read and saved to internal constants (QuestMap, TreasuremMap)
 -- Convert get icon method to table data fetch (for better performance)
--- Pointer fading like icon on distance
 -- Create invoke analyzer
 -- Debounce methods for key bindings
--- Saved variable usage (save mode, save radar position)
 -- Configuration page
--- Icon fading if distance is big (faded as constant if 2x maxDistance ... or gradient fade?)
 -- Fast trakel wayshrines (with range limit 1200 meters?)
 -- Closest dolmen
--- Group via all map
--- Survey/Treasure if you have map/item (load from LibTreasure)
+-- Survey/Treasure if you have map/item (load from LibTreasure) or juts rely on TreasureMap, Destinations or whatnot else??
 -- https://github.com/esoui/esoui/blob/3b9326af2f5946a748be4551bfce41672f084e39/esoui/ingame/map/worldmap.lua#L695
--- GetCurrentMapIndex() 
--- GetPlayerActiveSubzoneName() -> Returns: string subzoneName 
--- GetPlayerActiveZoneName() -> Returns: string zoneName 
 -- Some maps load pins with certain distance only, add pin check from Destinations and MapPins (maybe some other addon too?)
 -- Hide in combat option
--- Does Voltans minimap fucks all map params? Height - Width - CurvedZoom ??
 MapRadar = {
     -- Localize global objects for better performance
     worldMap = ZO_WorldMap,
@@ -43,19 +39,27 @@ MapRadar = {
     currentMapWidth = 0,
     currentMapHeight = 0,
 
-    maxDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
+    maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
     pinSize = 0,
 
     positionLabel = {},
 
     scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
 
+    value = function(valueOrMethod, ...)
+        if type(valueOrMethod) == "function" then
+            return valueOrMethod(...)
+        else
+            return valueOrMethod
+        end
+    end,
     -- ==================================================================================================
     -- Debug stuff
     showCalibrate = true,
     showAllPins = false,
     showPinLoc = false,
     showPinNames = false,
+    showPinParams = false,
 
     debug = function(formatString, ...)
         d(zo_strformat(formatString, ...))
@@ -74,7 +78,7 @@ MapRadar = {
         MapRadar.lastdebugMsg = msg
     end,
 
-    getVal = function(obj)
+    getStrVal = function(obj)
         if obj == nil then
             return "nil"
         end
@@ -121,11 +125,15 @@ local function registerMapPins()
     MapRadarPin:ReleaseAll()
     -- MapRadar.scale = getMapScale()
 
+    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
+    local heading = MapRadar.getPlayerCameraHeading()
+
     -- Add new pins
     local pins = MapRadar.pinManager:GetActiveObjects()
     for key, pin in pairs(pins) do
         if MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
             local radarPin = MapRadarPin:New(pin, key)
+            radarPin:UpdatePin(playerX, playerY, heading)
             activePins[key] = radarPin
         end
     end
@@ -138,11 +146,11 @@ local function setOverlayMode(flag)
 
     if flag then
         MapRadar.playerPinTexture:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)
-        MapRadar.maxDistance = UIHeight * 0.5
+        MapRadar.maxRadarDistance = UIHeight * 0.5
         MapRadar.pinSize = 25
     else
         MapRadar.playerPinTexture:SetAnchor(CENTER, MapRadarContainer, CENTER)
-        MapRadar.maxDistance = 110
+        MapRadar.maxRadarDistance = 110
         MapRadar.pinSize = 20
     end
 
@@ -197,15 +205,14 @@ local function mapUpdate()
     end
 
     local playerX, playerY = MapRadar.getMapPlayerPosition("player")
-    local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
 
     MapRadar.positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
 
     -- reposition pins
     for key in pairs(activePins) do
         local radarPin = activePins[key]
-        -- MapRadar.debug("Fetching pin: <<1>>  <<2>>", key, MapRadar.getVal(radarPin))
-        radarPin:UpdatePin(playerX, playerY, heading, curvedZoom)
+        -- MapRadar.debug("Fetching pin: <<1>>  <<2>>", key, MapRadar.getStrVal(radarPin))
+        radarPin:UpdatePin(playerX, playerY, heading)
     end
 end
 
@@ -321,21 +328,28 @@ end
 
 -- ==================================================================================================
 -- Slash commands
-SLASH_COMMANDS["/mapradar"] = function(args)
+local function slashCommands(args)
     -- REFACTOR to support only one arg maybe?? without array?
 
-    local options = {}
-    local searchResult = {string.match(args, "^(%S*)%s*(.-)$")}
-    for i, v in pairs(searchResult) do
-        if (v ~= nil and v ~= "") then
-            options[i] = string.lower(v)
-        end
-    end
-
-    if #options == 0 or options[1] == "allpins" then
+    if args == "all" then
         MapRadar.showAllPins = not MapRadar.showAllPins
     end
+
+    if args == "names" then
+        MapRadar.showPinNames = not MapRadar.showPinNames
+    end
+
+    if args == "dist" then
+        MapRadar.showDistance = not MapRadar.showDistance
+    end
+
+    if args == "para" then
+        MapRadar.showPinParams = not MapRadar.showPinParams
+    end
 end
+
+SLASH_COMMANDS["/mapradar"] = slashCommands
+SLASH_COMMANDS["/mr"] = slashCommands
 
 -- ==================================================================================================
 -- Test stuff 
@@ -351,7 +365,7 @@ function MapRadar_button()
     MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
     MapRadar.debug("Map curvedZoom: <<1>>", MapRadar.getPanAndZoom():GetCurrentCurvedZoom() * 1000)
     MapRadar.debug("UI -  W: <<1>>  H: <<2>>", UIWidth, UIHeight)
-    MapRadar.debug("MR max distance: <<1>>", MapRadar.maxDistance)
+    MapRadar.debug("MR max distance: <<1>>", MapRadar.maxRadarDistance)
 
 end
 
@@ -364,3 +378,7 @@ CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
     MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
 end)
 --]]
+
+-- GetCurrentMapIndex() 
+-- GetPlayerActiveSubzoneName() -> Returns: string subzoneName 
+-- GetPlayerActiveZoneName() -> Returns: string zoneName 

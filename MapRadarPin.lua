@@ -1,6 +1,7 @@
 -- TODO: 
 -- Some random pind get animated 
 -- on disabling showDistance need to close them all? or hide sonehow?
+-- area pins / blobs
 MapRadarPin = {}
 
 local zoMapPin = ZO_MapPin
@@ -55,6 +56,7 @@ local function IsCustomPin(pinType)
     -- or customPinName(pinType) == "pinType_Treasure_Maps" -- from "Map Pins" by Hoft
     or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
     or customPinName(pinType) == "LostTreasure_TreasureMapPin" -- Treasure from LostTreasure
+    or customPinName(pinType) == "SkySMapPin_unknown" -- Destinations? Sky shards addon?
     then
         return true
     end
@@ -85,15 +87,6 @@ local function IsValidForPointer(pin)
     end
 
     return false;
-end
-
-local function GetTintColor(radarPin)
-    local pinData = zoMapPin.PIN_DATA[radarPin.pinType]
-    if (pinData == nil or pinData.tint == nil) then
-        return unpack({1, 1, 1, 1})
-    end
-
-    return MapRadar.value(pinData.tint, radarPin.pin):UnpackRGBA()
 end
 
 --[[
@@ -183,6 +176,10 @@ function MapRadarPin:ApplyTexture()
     local pinData = zoMapPin.PIN_DATA[self.pinType]
 
     if (pinData ~= nil and pinData.texture ~= nil) then
+        if (self.pin == nil) then
+            MapRadar.debugDebounce("Something wrong. Pin is nil")
+        end
+
         texture = MapRadar.value(pinData.texture, self.pin)
 
         if MapRadar.value(pinData.isAnimated, self.pin) then
@@ -201,6 +198,30 @@ function MapRadarPin:ApplyTexture()
     end
 
     self.texture:SetTexture(texture)
+end
+
+function MapRadarPin:ApplyTint()
+    local pinData = zoMapPin.PIN_DATA[self.pinType]
+
+    if (pinData ~= nil and pinData.tint ~= nil) then
+        self.texture:SetColor(MapRadar.value(pinData.tint, self.pin):UnpackRGBA())
+        return
+    end
+
+    self.texture:SetColor(unpack({1, 1, 1, 1}))
+end
+
+function MapRadarPin:CheckIfShouldStopAnimation()
+    local pinData = zoMapPin.PIN_DATA[self.pinType]
+    if (pinData ~= nil and pinData.texture ~= nil) then
+        if MapRadar.value(pinData.isAnimated, self.pin) then
+            return
+        end
+    end
+
+    if self.animationTimeline then
+        self.animationTimeline:Stop()
+    end
 end
 
 function MapRadarPin:UpdatePin(playerX, playerY, heading)
@@ -257,6 +278,11 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading)
     -- Reposition pin
     self.texture:ClearAnchors()
     self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
+
+    -- Reset texture params
+    -- self:ApplyTexture()  -- This crashes on map open, maybe because of pins being destroyed? Reenable once pin reload is done while map not opened??
+    self:ApplyTint()
+    -- self:CheckIfShouldStopAnimation() -- Maybe this is just temporary till ApplyTexture does not throw errors?
 end
 
 -- ========================================================================================
@@ -295,18 +321,21 @@ function MapRadarPin:New(pin, key)
     local pinType, pinTag = pin:GetPinTypeAndTag()
 
     radarPin.texture = texture
+    radarPin.textureKey = textureKey
+
     radarPin.key = key
     radarPin.pin = pin
     radarPin.pinType = pinType
     radarPin.pinTag = pinTag
 
     radarPin:ApplyTexture()
-    radarPin.texture:SetColor(GetTintColor(radarPin))
+    radarPin:ApplyTint()
 
     if MapRadar.showDistance then
-        local label = pinLabelPool:AcquireObject()
+        local label, labelKey = pinLabelPool:AcquireObject()
         label:SetAnchor(TOPLEFT, radarPin.texture, TOPRIGHT)
         radarPin.label = label
+        radarPin.labelKey = labelKey
     end
 
     if MapRadar.showPointer and IsValidForPointer(pin) then
@@ -316,6 +345,7 @@ function MapRadarPin:New(pin, key)
         pointerTexture:SetAlpha(0.5)
         pointerTexture:SetDimensions(8, 64)
         radarPin.pointer = pointerTexture
+        radarPin.pointerKey = pointerKey
     end
 
     return radarPin
@@ -324,10 +354,38 @@ end
 -- ========================================================================================
 -- deconstruct
 function MapRadarPin:Dispose()
+
+    if self.animationTimeline then
+        self.animationTimeline:Stop()
+        self.animationTimeline = nil
+        self.animation = nil
+    end
+
     self.texture:ClearAnchors()
+    pinPool:ReleaseObject(self.textureKey)
+    self.textureKey = nil
+    self.texture = nil
 
-    -- TODO release only this and assigned childs
+    if self.pointer ~= nil then
+        self.pointer:ClearAnchors()
+        pointerPool:ReleaseObject(self.pointerKey)
+        self.pointerKey = nil
+        self.pointer = nil
+    end
 
+    if self.label ~= nil then
+        self.label:SetText("")
+        pinLabelPool:ReleaseObject(self.labelKey)
+        self.labelKey = nil
+        self.label = nil
+    end
+
+    self.pin = nil
+    self.pinType = nil
+    self.pinTag = nil
+    self.distance = nil
+    self.size = nil
+    self.scaledSize = nil
 end
 
 function MapRadarPin:ReleaseAll()

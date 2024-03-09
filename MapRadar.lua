@@ -17,6 +17,7 @@
 -- https://github.com/esoui/esoui/blob/3b9326af2f5946a748be4551bfce41672f084e39/esoui/ingame/map/worldmap.lua#L695
 -- Some maps load pins with certain distance only, add pin check from Destinations and MapPins (maybe some other addon too?)
 -- Hide in combat option
+-- Hide radar texture when in Overlay mode
 MapRadar = {
     -- Localize global objects for better performance
     worldMap = ZO_WorldMap,
@@ -48,6 +49,7 @@ MapRadar = {
 
     value = function(valueOrMethod, ...)
         if type(valueOrMethod) == "function" then
+            -- MapRadar.debugDebounce("Execute method with params: <<1>>", MapRadar.getStrVal(...))
             return valueOrMethod(...)
         else
             return valueOrMethod
@@ -116,13 +118,12 @@ end
 -- https://esodata.uesp.net/100025/src/ingame/map/worldmap.lua.html
 local function registerMapPins()
     -- Clear existing pins
-    -- TODO: use dispose here!!!
     for k in pairs(activePins) do
         activePins[k]:Dispose()
         activePins[k] = nil
     end
 
-    MapRadarPin:ReleaseAll()
+    -- MapRadarPin:ReleaseAll()
     -- MapRadar.scale = getMapScale()
 
     local playerX, playerY = MapRadar.getMapPlayerPosition("player")
@@ -382,3 +383,24 @@ end)
 -- GetCurrentMapIndex() 
 -- GetPlayerActiveSubzoneName() -> Returns: string subzoneName 
 -- GetPlayerActiveZoneName() -> Returns: string zoneName 
+
+-- local worldMapMode = WORLD_MAP_MANAGER:GetMode()
+--[[
+MAP_MODE_AVA_KEEP_RECALL
+	6
+MAP_MODE_AVA_RESPAWN
+	5
+MAP_MODE_DIG_SITES
+	7
+MAP_MODE_FAST_TRAVEL
+	4
+MAP_MODE_KEEP_TRAVEL
+	3
+MAP_MODE_LARGE_CUSTOM
+	2
+MAP_MODE_SMALL_CUSTOM
+--]]
+
+-- ZO_WorldMapScroll:IsHidden()
+-- WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:IsShowing()
+-- SCENE_MANAGER:IsShowing("worldMap")

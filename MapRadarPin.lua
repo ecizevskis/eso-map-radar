@@ -89,24 +89,6 @@ local function IsValidForPointer(pin)
     return false;
 end
 
---[[
-local function GetIcon(radarPin)
-    local pinData = zoMapPin.PIN_DATA[radarPin.pinType]
-    if (pinData == nil or pinData.texture == nil) then
-        return "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" -- unknown pin
-    end
-
-    if type(pinData.texture) == "function" then
-        return pinData.texture(radarPin.pin)
-    end
-
-    -- Some isses with MAP_PIN_TYPE_UNIT_COMBAT_HEALTHY
-    -- maybe isAnimated is somehow involved
-
-    return pinData.texture
-end
---]]
-
 -- ========================================================================================
 -- MapRadarPin handling methods
 function MapRadarPin:SetHidden(flag)
@@ -160,6 +142,7 @@ function MapRadarPin:SetPinDimensions()
         self.size = MapRadar.pinSize
     end
 
+    -- Min scale: 0.6, max scale: 0.9
     local distanceScale = math.max(0.6, 0.9 - self.distance / MapRadar.maxRadarDistance)
 
     self.scaledSize = self.size * distanceScale
@@ -176,10 +159,6 @@ function MapRadarPin:ApplyTexture()
     local pinData = zoMapPin.PIN_DATA[self.pinType]
 
     if (pinData ~= nil and pinData.texture ~= nil) then
-        if (self.pin == nil) then
-            MapRadar.debugDebounce("Something wrong. Pin is nil")
-        end
-
         texture = MapRadar.value(pinData.texture, self.pin)
 
         if MapRadar.value(pinData.isAnimated, self.pin) then
@@ -188,9 +167,9 @@ function MapRadarPin:ApplyTexture()
             self.animation:SetFramerate(pinData.framesPerSecond)
 
             -- is this doing something??
-            self.animation:SetHandler("OnStop", function()
-                self.texture:SetTextureCoords(0, 1, 0, 1)
-            end)
+            -- self.animation:SetHandler("OnStop", function()
+            --    self.texture:SetTextureCoords(0, 1, 0, 1)
+            -- end)
 
             self.animationTimeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
             self.animationTimeline:PlayFromStart()
@@ -211,6 +190,7 @@ function MapRadarPin:ApplyTint()
     self.texture:SetColor(unpack({1, 1, 1, 1}))
 end
 
+--[[
 function MapRadarPin:CheckIfShouldStopAnimation()
     local pinData = zoMapPin.PIN_DATA[self.pinType]
     if (pinData ~= nil and pinData.texture ~= nil) then
@@ -223,6 +203,7 @@ function MapRadarPin:CheckIfShouldStopAnimation()
         self.animationTimeline:Stop()
     end
 end
+--]]
 
 function MapRadarPin:UpdatePin(playerX, playerY, heading)
     local dx = self.pin.normalizedX - playerX
@@ -285,8 +266,6 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading)
     -- self:CheckIfShouldStopAnimation() -- Maybe this is just temporary till ApplyTexture does not throw errors?
 end
 
--- ========================================================================================
--- Static methods
 function MapRadarPin:IsValidPin(pin)
     local pinType = pin:GetPinType()
 
@@ -319,6 +298,7 @@ function MapRadarPin:New(pin, key)
 
     local texture, textureKey = pinPool:AcquireObject()
     local pinType, pinTag = pin:GetPinTypeAndTag()
+    pin.mapRadarKey = key .. pinType
 
     radarPin.texture = texture
     radarPin.textureKey = textureKey

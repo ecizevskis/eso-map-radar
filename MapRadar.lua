@@ -117,25 +117,56 @@ end
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
 -- https://esodata.uesp.net/100025/src/ingame/map/worldmap.lua.html
 local function registerMapPins()
-    -- Clear existing pins
-    for k in pairs(activePins) do
+
+    --[[
+    if SCENE_MANAGER:IsShowing("worldMap") then
+        -- Dispose all pins because they are removed from pool and will get different keys
+        for k in pairs(activePins) do
+            activePins[k]:Dispose()
+            activePins[k] = nil
+        end
+        return -- Block further execution while map is opened
+    end
+    --]]
+
+    local pins = MapRadar.pinManager:GetActiveObjects()
+
+    -- Dispose pins that are not active 
+    --[[ 
+        Shit works only if you do not reset pins globally like map change)
+        To make it work need to update pins only when map scroll is closed!!!!
+        But if map was navigated and closed then all pins are recreated in pin manager and they have all their keys changed
+        Maybe on map close need to flush all pins and trigger register???
+    --]]
+
+    -- Pin count may stay the same and pin gets replaced (even with same key) with different pin
+    -- Need to add pinKey value to pin bades on its data??
+    -- how to make world unit or group unit pins unique?? Need to check what it contains!!!
+
+    -- When pins chanage with new zone then they all need to be reset because active pin keys now assigned to other pins
+    -- Could check custom pin key for content or existance
+
+    for k, radarPin in pairs(activePins) do
+        -- if pins[k] == nil or pins[k].mapRadarKey == nil or pins[k].mapRadarKey ~= activePins[k].pin.mapRadarKey then
+        CALLBACK_MANAGER:FireCallbacks("OnMapRadar_RemovePin", activePins[k])
         activePins[k]:Dispose()
         activePins[k] = nil
+        -- end
     end
 
-    -- MapRadarPin:ReleaseAll()
-    -- MapRadar.scale = getMapScale()
+    MapRadarPin:ReleaseAll()
 
     local playerX, playerY = MapRadar.getMapPlayerPosition("player")
     local heading = MapRadar.getPlayerCameraHeading()
 
-    -- Add new pins
-    local pins = MapRadar.pinManager:GetActiveObjects()
+    -- Add new pins that did not exist
     for key, pin in pairs(pins) do
-        if MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
+        if -- pin.mapRadarKey == nil and 
+        MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
             local radarPin = MapRadarPin:New(pin, key)
             radarPin:UpdatePin(playerX, playerY, heading)
             activePins[key] = radarPin
+            CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", radarPin)
         end
     end
 end
@@ -166,27 +197,6 @@ end
 
 -- ==================================================================================================
 -- Event handlers
-
--- zoneChangeCheck might not be needed at all
---[[
-local prevZone = ""
-local prevSubZone = ""
-local function zoneChangeCheck()
-    local playerZone = GetPlayerActiveZoneName()
-    local playerSubZone = GetPlayerActiveSubzoneName()
-
-    if prevZone == playerZone and prevSubZone == playerSubZone then
-        return
-    end
-    prevZone = playerZone
-    prevSubZone = playerSubZone
-
-    MapRadar.debug("ZoneChange: zone: <<1>>, subzone: <<2>>", playerZone, playerSubZone)
-
-    -- Trigger pin reset
-    registerMapPins()
-end
---]]
 
 local function mapUpdate()
     local heading = MapRadar.getPlayerCameraHeading()

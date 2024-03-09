@@ -1,8 +1,11 @@
-local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
+local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "InvokeCounter")
 
 local AnalyzerData = {
-    pinResetCount = 0,
-    pinResetLabel = {},
+    pinCreateCount = 0,
+    pinCreateLabel = {},
+
+    pinRemoveCount = 0,
+    pinRemoveLabel = {},
 
     pinUpdateCount = 0,
     pinUpdateLabel = {},
@@ -16,12 +19,24 @@ local AnalyzerData = {
 }
 
 -- TODO
--- Create component for pushing and displaying stack of values 
 -- Create component to show data form (register array of data fetch methods with label or stack)
 
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     local label, labelKey = labelPool:AcquireObject()
-    label:SetFont("$(BOLD_FONT)|18|outline")
+    label:SetFont("$(BOLD_FONT)|16|outline")
+    label:SetColor(unpack({1, 1, 1, 1}))
+    label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
+
+    if text ~= nil then
+        label:SetText(text)
+    end
+
+    return label;
+end
+
+local function CreateStack(id, anchorPoint, anchor, targetAnchorPoint, text)
+    local label = MapRadarCommon.LabelStack:New("$(parent)Stack" .. id, MapRadarContainer, 5)
+    label:SetFont("$(BOLD_FONT)|16|outline")
     label:SetColor(unpack({1, 1, 1, 1}))
     label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
 
@@ -33,19 +48,11 @@ local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
 end
 
 local function showAnalyzerData(pin)
-
-    --[[
-    ScaleData.zoneName:SetText(ZO_WorldMap.zoneName)
-    ScaleData.mapWidth:SetText(currentMapWidth)
-    ScaleData.mapHeight:SetText(currentMapHeight)
-    ScaleData.curvedZoom:SetText(curvedZoom)
-    ScaleData.rel_dx:SetText(zo_strformat("<<1>>", relative_dx * displayMultiplier))
-    ScaleData.rel_dy:SetText(zo_strformat("<<1>>", relative_dy * displayMultiplier))
-    ScaleData.map_dx:SetText(map_dx)
-    ScaleData.map_dy:SetText(map_dy)
-    ScaleData.unit1:SetText(unit1)
-    ScaleData.mrScale:SetText(mrScale)
---]]
+    AnalyzerData.pinCreateLabel:SetText(AnalyzerData.pinCreateCount)
+    AnalyzerData.pinRemoveLabel:SetText(AnalyzerData.pinRemoveCount)
+    -- AnalyzerData.pinUpdateLabel:SetText(AnalyzerData.pinUpdateCount)
+    -- AnalyzerData.pointerCreationLabel:SetText(AnalyzerData.pointerCreatinCount)
+    -- AnalyzerData.pointerRotateLabel:SetText(AnalyzerData.pointerRotateCount)
 end
 
 local function CreateInvokeAnalyzerDataForm()
@@ -54,43 +61,56 @@ local function CreateInvokeAnalyzerDataForm()
     dataAnchorControl:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 200)
     dataAnchorControl:SetDimensions(20, 100)
 
-    local widthLabel = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Zone")
-    ScaleData.zoneName = CreateLabel(LEFT, dataAnchorControl, RIGHT, "")
+    local l1 = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Pin create:")
+    AnalyzerData.pinCreateLabel = CreateStack("pinCreate", LEFT, dataAnchorControl, RIGHT, "")
 
-    local widthLabel = CreateLabel(TOPRIGHT, widthLabel, BOTTOMRIGHT, "Map Width")
-    ScaleData.mapWidth = CreateLabel(TOPLEFT, ScaleData.zoneName, BOTTOMLEFT, "0")
+    local l2 = CreateLabel(TOPRIGHT, l1, BOTTOMRIGHT, "Pin remove:")
+    AnalyzerData.pinRemoveLabel = CreateStack("pinRemove", TOPLEFT, AnalyzerData.pinCreateLabel, BOTTOMLEFT, "0")
 
-    local heightLabel = CreateLabel(TOPRIGHT, widthLabel, BOTTOMRIGHT, "Map Height")
-    ScaleData.mapHeight = CreateLabel(TOPLEFT, ScaleData.mapWidth, BOTTOMLEFT, "0")
+    --[[
+    local l3 = CreateLabel(TOPRIGHT, l2, BOTTOMRIGHT, "Pin update:")
+    AnalyzerData.pinUpdateLabel = CreateLabel(TOPLEFT, AnalyzerData.pinRemoveLabel, BOTTOMLEFT, "0")
 
-    local curvCoomLabel = CreateLabel(TOPRIGHT, heightLabel, BOTTOMRIGHT, "Curv zoom")
-    ScaleData.curvedZoom = CreateLabel(TOPLEFT, ScaleData.mapHeight, BOTTOMLEFT, "0")
+    local l4 = CreateLabel(TOPRIGHT, l3, BOTTOMRIGHT, "Pointer create:")
+    AnalyzerData.pointerCreationLabel = CreateLabel(TOPLEFT, AnalyzerData.pinUpdateLabel, BOTTOMLEFT, "0")
 
-    local reldxLabel = CreateLabel(TOPRIGHT, curvCoomLabel, BOTTOMRIGHT, "Rel DX")
-    ScaleData.rel_dx = CreateLabel(TOPLEFT, ScaleData.curvedZoom, BOTTOMLEFT, "0")
-
-    local reldyLabel = CreateLabel(TOPRIGHT, reldxLabel, BOTTOMRIGHT, "Rel DY")
-    ScaleData.rel_dy = CreateLabel(TOPLEFT, ScaleData.rel_dx, BOTTOMLEFT, "0")
-
-    local mapdxLabel = CreateLabel(TOPRIGHT, reldyLabel, BOTTOMRIGHT, "Map DX")
-    ScaleData.map_dx = CreateLabel(TOPLEFT, ScaleData.rel_dy, BOTTOMLEFT, "0")
-
-    local mapdyLabel = CreateLabel(TOPRIGHT, mapdxLabel, BOTTOMRIGHT, "Map DY")
-    ScaleData.map_dy = CreateLabel(TOPLEFT, ScaleData.map_dx, BOTTOMLEFT, "0")
-
-    local unit1Label = CreateLabel(TOPRIGHT, mapdyLabel, BOTTOMRIGHT, "Unit1")
-    ScaleData.unit1 = CreateLabel(TOPLEFT, ScaleData.map_dy, BOTTOMLEFT, "0")
-
-    local mrScaleLabel = CreateLabel(TOPRIGHT, unit1Label, BOTTOMRIGHT, "MR Scale")
-    ScaleData.mrScale = CreateLabel(TOPLEFT, ScaleData.unit1, BOTTOMLEFT, "0")
-
+    local l5 = CreateLabel(TOPRIGHT, l4, BOTTOMRIGHT, "Pointer rotate:")
+    AnalyzerData.pointerRotateLabel = CreateLabel(TOPLEFT, AnalyzerData.pointerCreationLabel, BOTTOMLEFT, "0")
+--]]
 end
 
-function MapRadar_InitInvokeAnalyzer()
+local function MapRadar_InitInvokeAnalyzer()
     CreateInvokeAnalyzerDataForm()
 
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_AnalyzerReader", 100, function()
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_AnalyzerReader", 1000, function()
         showAnalyzerData()
+
+        -- Rest counters
+        AnalyzerData.pinCreateCount = 0
+        AnalyzerData.pinRemoveCount = 0
+
+        --[[
+        local mapScrollHidden = MapRadar.getStrVal(ZO_WorldMapScroll:IsHidden())
+        local navOverlayShowing = MapRadar.getStrVal(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:IsShowing())
+        local worldmapShowing = MapRadar.getStrVal(SCENE_MANAGER:IsShowing("worldMap"))
+
+        MapRadar.debugDebounce("Scroll hidden: <<1>>,  NavOverlay: <<2>>,  WorldMap: <<3>>", mapScrollHidden, navOverlayShowing, worldmapShowing)
+--]]
     end)
+
+    CALLBACK_MANAGER:RegisterCallback("OnMapRadar_NewPin", function(radarPin)
+        -- MapRadar.debug("New radar pin: <<1>>", radarPin.key)
+        AnalyzerData.pinCreateCount = AnalyzerData.pinCreateCount + 1
+    end)
+
+    CALLBACK_MANAGER:RegisterCallback("OnMapRadar_RemovePin", function(radarPin)
+        -- MapRadar.debug("Removed radar pin: <<1>>", radarPin.key)
+        AnalyzerData.pinRemoveCount = AnalyzerData.pinRemoveCount + 1
+    end)
+
+    d("InvokeAnalyzer enabled")
 end
 
+CALLBACK_MANAGER:RegisterCallback("OnMapRadarInitializing", function()
+    MapRadar_InitInvokeAnalyzer()
+end)

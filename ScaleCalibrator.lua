@@ -32,7 +32,7 @@ end
 
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     local label, labelKey = labelPool:AcquireObject()
-    label:SetFont("$(BOLD_FONT)|18|outline")
+    label:SetFont("$(BOLD_FONT)|16|outline")
     label:SetColor(unpack({1, 1, 1, 1}))
     label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
 

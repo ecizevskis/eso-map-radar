@@ -1,22 +1,11 @@
 local scaleLabel = {}
 local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
+local dataForm = {}
 
 local ScaleData = {
-    zoneNameLabel = {},
-    mapWidthLabel = {},
-    mapHeightLabel = {},
-    curvedZoomLabel = {},
-
-    dxLabel = {},
-    dyLabel = {},
-
-    unit1Label = {},
-    mrScaleLabel = {},
-
     dx = 0,
     dy = 0,
-    unit1 = 0,
-    mrScale = 0
+    unit1 = 0
 }
 
 -- TODO: 
@@ -44,12 +33,9 @@ local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
 end
 
 local function showCalibrationData(pin)
-    local displayMultiplier = 10000000
-    local measuredMeters = 40
 
+    local measuredMeters = 40
     local playerX, playerY = MapRadar.getMapPlayerPosition("player")
-    local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
-    local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
     ScaleData.dx = pin.normalizedX - playerX
     ScaleData.dy = pin.normalizedY - playerY
@@ -58,71 +44,43 @@ local function showCalibrationData(pin)
 
     ScaleData.unit1 = distance / measuredMeters -- calculate map part for 1 meter
 
-    -- calculate scale koeficient to convert from map units to radar 
-    ScaleData.mrScale = measuredMeters / distance;
-
-    ScaleData.zoneNameLabel:SetText(MapRadar.worldMap.zoneName)
-    ScaleData.mapWidthLabel:SetText(currentMapWidth)
-    ScaleData.mapHeightLabel:SetText(currentMapHeight)
-    ScaleData.curvedZoomLabel:SetText(curvedZoom)
-    ScaleData.dxLabel:SetText(zo_strformat("<<1>>", ScaleData.dx * displayMultiplier))
-    ScaleData.dyLabel:SetText(zo_strformat("<<1>>", ScaleData.dy * displayMultiplier))
-    ScaleData.unit1Label:SetText(ScaleData.unit1)
-    ScaleData.mrScaleLabel:SetText(ScaleData.mrScale)
+    dataForm:Update()
 
     -- just show actual scale value if it changed
     setScaleLabel(0)
 end
 
+local displayMultiplier = 10000000
 local function CreateCalibrationDataForm()
-    local dataAnchorControl = CreateControl("$(parent)CalibrationDataAnchor", MapRadarContainer, CT_CONTROL)
 
-    dataAnchorControl:SetAnchor(LEFT, GuiRoot, LEFT, 100, -100)
-    dataAnchorControl:SetDimensions(20, 100)
-
-    local zoneLabel = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Zone")
-    ScaleData.zoneNameLabel = CreateLabel(LEFT, dataAnchorControl, RIGHT, "")
-
-    local widthLabel = CreateLabel(TOPRIGHT, zoneLabel, BOTTOMRIGHT, "Map Width")
-    ScaleData.mapWidthLabel = CreateLabel(TOPLEFT, ScaleData.zoneNameLabel, BOTTOMLEFT, "0")
-
-    local heightLabel = CreateLabel(TOPRIGHT, widthLabel, BOTTOMRIGHT, "Map Height")
-    ScaleData.mapHeightLabel = CreateLabel(TOPLEFT, ScaleData.mapWidthLabel, BOTTOMLEFT, "0")
-
-    local curvCoomLabel = CreateLabel(TOPRIGHT, heightLabel, BOTTOMRIGHT, "Curv zoom")
-    ScaleData.curvedZoomLabel = CreateLabel(TOPLEFT, ScaleData.mapHeightLabel, BOTTOMLEFT, "0")
-
-    local dxLabel = CreateLabel(TOPRIGHT, curvCoomLabel, BOTTOMRIGHT, "Rel DX")
-    ScaleData.dxLabel = CreateLabel(TOPLEFT, ScaleData.curvedZoomLabel, BOTTOMLEFT, "0")
-
-    local dyLabel = CreateLabel(TOPRIGHT, dxLabel, BOTTOMRIGHT, "Rel DY")
-    ScaleData.dyLabel = CreateLabel(TOPLEFT, ScaleData.dxLabel, BOTTOMLEFT, "0")
-
-    local unit1Label = CreateLabel(TOPRIGHT, dyLabel, BOTTOMRIGHT, "Unit1")
-    ScaleData.unit1Label = CreateLabel(TOPLEFT, ScaleData.dyLabel, BOTTOMLEFT, "0")
-
-    local mrScaleLabel = CreateLabel(TOPRIGHT, unit1Label, BOTTOMRIGHT, "MR Scale")
-    ScaleData.mrScaleLabel = CreateLabel(TOPLEFT, ScaleData.unit1Label, BOTTOMLEFT, "0")
+    dataForm = MapRadarCommon.DataForm:New("CalibrateDataForm", MapRadarContainer)
+    dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 100, -100)
+    dataForm:AddLabel("Zone", function()
+        return MapRadar.worldMap.zoneName
+    end)
+    dataForm:AddLabel("Rel DX", function()
+        return zo_strformat("<<1>>", ScaleData.dx * displayMultiplier)
+    end)
+    dataForm:AddLabel("Rel DY", function()
+        return zo_strformat("<<1>>", ScaleData.dy * displayMultiplier)
+    end)
+    dataForm:AddLabel("Unit1", function()
+        return ScaleData.unit1
+    end)
 
     local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", MapRadarContainer, "plusButtonTemplate")
-    btnSaveScaleData:SetAnchor(TOPLEFT, mrScaleLabel, BOTTOMLEFT)
+    btnSaveScaleData:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT)
     btnSaveScaleData:SetHandler("OnClicked", function()
         local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
         local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
         local data = {
-            mapWidth = currentMapWidth,
-            mapHeight = currentMapHeight,
-            curvedZoom = curvedZoom,
             dx = ScaleData.dx,
             dy = ScaleData.dy,
-            unit1 = ScaleData.unit1,
-            mrScale = ScaleData.mrScale
+            unit1 = ScaleData.unit1
         }
 
         MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
-
-        MapRadar.scale = ScaleData.mrScale * 4 -- x4 just to zoom in and aim for 160px marker
         MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
     end)
 end

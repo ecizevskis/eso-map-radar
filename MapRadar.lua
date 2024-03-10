@@ -1,23 +1,28 @@
--- TODO
+-- TODO For release
 -- Pointer fading like icon on distance
--- Pin reading should be converted to event based. Read all pins and compare to current. Trigger pin create events and pin dispose events
 -- Saved variable usage (save mode, save radar position)
--- ===================================================================================================
+-- Configuration page
+-- Filter configuration page radar and overlay separate config
+-- Hide radar texture when in Overlay mode
 -- MAP_PIN_TYPE_POI_SEEN type check by texture path (Public Dungeon, Group Dungeon, Delve, Wayshrine, Solo Dungeon?, GroupBoss )
+-- Fast trakel wayshrines (with range limit)
+-- Dolmen animation??
+-- Radar mode display range increase (it is lower than 200 - not good)
+-- calibrate dungeons
+-- calibrate delves
+-- calibrate elden root inner
+-- ===================================================================================================
+-- Pin reading should be converted to event based. Read all pins and compare to current. Trigger pin create events and pin dispose events
 -- Prepare pinData on addon load to include supported pinTypes (also calc all pinTypes for custom pins) (table data loads: texture, scale/size, visibility)
 -- Create secondaryMethod (after pin type table) to fetch pinData by texture
 -- Custom pin types read and saved to internal constants (QuestMap, TreasuremMap)
 -- Convert get icon method to table data fetch (for better performance)
 -- Create invoke analyzer
 -- Debounce methods for key bindings
--- Configuration page
--- Fast trakel wayshrines (with range limit 1200 meters?)
--- Closest dolmen
 -- Survey/Treasure if you have map/item (load from LibTreasure) or juts rely on TreasureMap, Destinations or whatnot else??
 -- https://github.com/esoui/esoui/blob/3b9326af2f5946a748be4551bfce41672f084e39/esoui/ingame/map/worldmap.lua#L695
 -- Some maps load pins with certain distance only, add pin check from Destinations and MapPins (maybe some other addon too?)
 -- Hide in combat option
--- Hide radar texture when in Overlay mode
 MapRadar = {
     -- Localize global objects for better performance
     worldMap = ZO_WorldMap,
@@ -145,6 +150,9 @@ local function registerMapPins()
 
     -- When pins chanage with new zone then they all need to be reset because active pin keys now assigned to other pins
     -- Could check custom pin key for content or existance
+
+    -- Need to compare references of pin objects!!
+    -- rawequal (v1, v2)
 
     for k, radarPin in pairs(activePins) do
         -- if pins[k] == nil or pins[k].mapRadarKey == nil or pins[k].mapRadarKey ~= activePins[k].pin.mapRadarKey then

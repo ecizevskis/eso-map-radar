@@ -2,7 +2,7 @@
 	<Controls>
 		<TopLevelControl name="MapRadarContainer" mouseEnabled="true" movable="true" clampedToScreen="true">
 			<Dimensions x="220" y="220" />
-			<Anchor point="BOTTOMLEFT" relativeTo="GUI_ROOT" relativePoint="BOTTOMLEFT" offsetX="600" />
+			<Anchor point="BOTTOMRIGHT" relativeTo="GUI_ROOT" relativePoint="BOTTOMRIGHT" offsetX="-300" offsetY="-40" />
 			<Controls>
 				<Backdrop name="$(parent)BG" inherits="ZO_DarkThinFrame" excludeFromResizeToFitExtents="true" hidden="true">
                     <AnchorFill />

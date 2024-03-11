@@ -32,6 +32,8 @@ MapRadar = {
 
     pinManager = ZO_WorldMap_GetPinManager(),
 
+    sceneManager = SCENE_MANAGER,
+
     getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
 
     -- flags
@@ -119,16 +121,16 @@ end
 -- https://esodata.uesp.net/100025/src/ingame/map/worldmap.lua.html
 local function registerMapPins()
 
-    --[[
-    if SCENE_MANAGER:IsShowing("worldMap") then
+    if MapRadar.sceneManager:IsShowing("worldMap") then
         -- Dispose all pins because they are removed from pool and will get different keys
+        --[[
         for k in pairs(activePins) do
             activePins[k]:Dispose()
             activePins[k] = nil
         end
+        ]]
         return -- Block further execution while map is opened
     end
-    --]]
 
     local pins = MapRadar.pinManager:GetActiveObjects()
 
@@ -152,7 +154,7 @@ local function registerMapPins()
 
     for k, radarPin in pairs(activePins) do
         -- if pins[k] == nil or pins[k].mapRadarKey == nil or pins[k].mapRadarKey ~= activePins[k].pin.mapRadarKey then
-        CALLBACK_MANAGER:FireCallbacks("OnMapRadar_RemovePin", activePins[k])
+
         activePins[k]:Dispose()
         activePins[k] = nil
         -- end
@@ -170,7 +172,7 @@ local function registerMapPins()
             local radarPin = MapRadarPin:New(pin, key)
             radarPin:UpdatePin(playerX, playerY, heading)
             activePins[key] = radarPin
-            CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", radarPin)
+
         end
     end
 end
@@ -203,6 +205,10 @@ end
 -- Event handlers
 
 local function mapUpdate()
+    if MapRadar.sceneManager:IsShowing("worldMap") then
+        return -- Block further execution while map is opened
+    end
+
     local heading = MapRadar.getPlayerCameraHeading()
     MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 

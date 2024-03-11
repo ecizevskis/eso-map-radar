@@ -73,12 +73,37 @@ function DataForm:New(id, parent)
     control.AddLabel = function(self, text, dataFunc)
         local index = table.maxn(self.labels) + 1
 
-        local textLabel = CreateLabel("$(parent)TextLabel" .. index, self)
-        textLabel:SetFont("$(BOLD_FONT)|16|outline")
-        textLabel:SetColor(unpack({1, 1, 1, 1}))
-        textLabel:SetText(text)
-
+        local textLabel = CreateLabel("$(parent)TextLabel" .. index, self, text)
         local dataLabel = CreateLabel("$(parent)DataLabel" .. index, self)
+
+        if (index == 1) then
+            textLabel:SetAnchor(TOPRIGHT, self, TOPLEFT, -10)
+            dataLabel:SetAnchor(TOPLEFT, self, TOPRIGHT, 10)
+        else
+            textLabel:SetAnchor(TOPRIGHT, lastTextLabel, BOTTOMRIGHT)
+            dataLabel:SetAnchor(TOPLEFT, control.labels[index - 1].control, BOTTOMLEFT)
+        end
+
+        self.labels[index] = {
+            control = dataLabel,
+            fetch = dataFunc
+        }
+
+        local baseWidth, baseHeight = self:GetDimensions()
+        local labelWidth, labelHeight = textLabel:GetDimensions()
+
+        self:SetDimensions(baseWidth, baseHeight + labelHeight)
+
+        lastTextLabel = textLabel
+    end
+
+    control.AddStack = function(self, text, dataFunc)
+        -- TODO: Unify two methods
+
+        local index = table.maxn(self.labels) + 1
+
+        local textLabel = CreateLabel("$(parent)TextLabel" .. index, self, text)
+        local dataLabel = MapRadarCommon.LabelStack:New("$(parent)DataLabel" .. index, self, 5)
         dataLabel:SetFont("$(BOLD_FONT)|16|outline")
         dataLabel:SetColor(unpack({1, 1, 1, 1}))
 
@@ -101,12 +126,6 @@ function DataForm:New(id, parent)
         self:SetDimensions(baseWidth, baseHeight + labelHeight)
 
         lastTextLabel = textLabel
-
-        return self -- For chaining methods
-    end
-
-    control.AddStack = function(self, text, dataFunc)
-        -- TODO:
     end
 
     control.Update = function(self)

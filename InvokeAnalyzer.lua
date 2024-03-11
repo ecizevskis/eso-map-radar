@@ -1,82 +1,30 @@
-local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "InvokeCounter")
+local dataForm = {}
 
 local AnalyzerData = {
     pinCreateCount = 0,
-    pinCreateLabel = {},
-
     pinRemoveCount = 0,
-    pinRemoveLabel = {},
-
     pinUpdateCount = 0,
-    pinUpdateLabel = {},
-
     pointerCreatinCount = 0,
-    pointerCreationLabel = {},
-
-    pointerRotateCount = 0,
-    pointerRotateLabel = {}
-
+    pointerRotateCount = 0
 }
 
--- TODO
--- Create component to show data form (register array of data fetch methods with label or stack)
-
-local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
-    local label, labelKey = labelPool:AcquireObject()
-    label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(unpack({1, 1, 1, 1}))
-    label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
-
-    if text ~= nil then
-        label:SetText(text)
-    end
-
-    return label;
-end
-
-local function CreateStack(id, anchorPoint, anchor, targetAnchorPoint, text)
-    local label = MapRadarCommon.LabelStack:New("$(parent)Stack" .. id, MapRadarContainer, 5)
-    label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(unpack({1, 1, 1, 1}))
-    label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
-
-    if text ~= nil then
-        label:SetText(text)
-    end
-
-    return label;
-end
-
-local function showAnalyzerData(pin)
-    AnalyzerData.pinCreateLabel:SetText(AnalyzerData.pinCreateCount)
-    AnalyzerData.pinRemoveLabel:SetText(AnalyzerData.pinRemoveCount)
-    -- AnalyzerData.pinUpdateLabel:SetText(AnalyzerData.pinUpdateCount)
-    -- AnalyzerData.pointerCreationLabel:SetText(AnalyzerData.pointerCreatinCount)
-    -- AnalyzerData.pointerRotateLabel:SetText(AnalyzerData.pointerRotateCount)
+local function showAnalyzerData()
+    dataForm:Update()
 end
 
 local function CreateInvokeAnalyzerDataForm()
-    local dataAnchorControl = CreateControl("$(parent)InvokeAnalyzerDataAnchor", MapRadarContainer, CT_CONTROL)
 
-    dataAnchorControl:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 200)
-    dataAnchorControl:SetDimensions(20, 100)
-
-    local l1 = CreateLabel(RIGHT, dataAnchorControl, LEFT, "Pin create:")
-    AnalyzerData.pinCreateLabel = CreateStack("pinCreate", LEFT, dataAnchorControl, RIGHT, "")
-
-    local l2 = CreateLabel(TOPRIGHT, l1, BOTTOMRIGHT, "Pin remove:")
-    AnalyzerData.pinRemoveLabel = CreateStack("pinRemove", TOPLEFT, AnalyzerData.pinCreateLabel, BOTTOMLEFT, "0")
-
-    --[[
-    local l3 = CreateLabel(TOPRIGHT, l2, BOTTOMRIGHT, "Pin update:")
-    AnalyzerData.pinUpdateLabel = CreateLabel(TOPLEFT, AnalyzerData.pinRemoveLabel, BOTTOMLEFT, "0")
-
-    local l4 = CreateLabel(TOPRIGHT, l3, BOTTOMRIGHT, "Pointer create:")
-    AnalyzerData.pointerCreationLabel = CreateLabel(TOPLEFT, AnalyzerData.pinUpdateLabel, BOTTOMLEFT, "0")
-
-    local l5 = CreateLabel(TOPRIGHT, l4, BOTTOMRIGHT, "Pointer rotate:")
-    AnalyzerData.pointerRotateLabel = CreateLabel(TOPLEFT, AnalyzerData.pointerCreationLabel, BOTTOMLEFT, "0")
---]]
+    dataForm = MapRadarCommon.DataForm:New("InvokeAnalyzerDataForm", MapRadarContainer)
+    dataForm:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 200)
+    dataForm:AddStack("Pin Create", function()
+        return AnalyzerData.pinCreateCount
+    end)
+    dataForm:AddStack("Pin Remove", function()
+        return AnalyzerData.pinRemoveCount
+    end)
+    dataForm:AddStack("Pin Update", function()
+        return AnalyzerData.pinUpdateCount
+    end)
 end
 
 local function MapRadar_InitInvokeAnalyzer()
@@ -88,6 +36,7 @@ local function MapRadar_InitInvokeAnalyzer()
         -- Rest counters
         AnalyzerData.pinCreateCount = 0
         AnalyzerData.pinRemoveCount = 0
+        AnalyzerData.pinUpdateCount = 0
 
         --[[
         local mapScrollHidden = MapRadar.getStrVal(ZO_WorldMapScroll:IsHidden())
@@ -106,6 +55,11 @@ local function MapRadar_InitInvokeAnalyzer()
     CALLBACK_MANAGER:RegisterCallback("OnMapRadar_RemovePin", function(radarPin)
         -- MapRadar.debug("Removed radar pin: <<1>>", radarPin.key)
         AnalyzerData.pinRemoveCount = AnalyzerData.pinRemoveCount + 1
+    end)
+
+    CALLBACK_MANAGER:RegisterCallback("OnMapRadar_UpdatePin", function(radarPin)
+        -- MapRadar.debug("Removed radar pin: <<1>>", radarPin.key)
+        AnalyzerData.pinUpdateCount = AnalyzerData.pinUpdateCount + 1
     end)
 
     d("InvokeAnalyzer enabled")

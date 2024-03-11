@@ -61,7 +61,7 @@ end
 
 local function IsValidPOI(pin)
     local pinType = pin:GetPinType()
-    local pinData = ZO_MapPin.PIN_DATA[pinType]
+    local pinData = zoMapPin.PIN_DATA[pinType]
     local texturePath = MapRadar.value(pinData.texture, pin)
     -- Check here for ingame POI or other addons like Map Pins or Destinations 
     -- Filter what POIs to show (guess by texture path) based on how config is set
@@ -73,6 +73,7 @@ local function IsValidPOI(pin)
     -- MAP_PIN_TYPE_POI_COMPLETE
     -- MAP_PIN_TYPE_POI_SEEN
 
+    --[[
     -- Later replace this with separate conditions for each supported types
     local excludedTypes = {"poi_group_house_unowned", "poi_town_incomplete", "poi_town_complete", "poi_areaofinterest_incomplete",
                            "poi_cemetary_incomplete", "poi_keep_incomplete", "poi_cave_incomplete", "poi_battlefield_incomplete",
@@ -84,6 +85,16 @@ local function IsValidPOI(pin)
             return false
         end
     end
+    ]]
+
+    -- TODO: add setting usage here
+    if texturePath:find("poi_wayshrine") -- Wayshrine
+    or texturePath:find("poi_dungeon") --
+    or texturePath:find("poi_delve") --
+    or texturePath:find("poi_raiddungeon") --
+    then
+        return true
+    end
 
     -- Used
     -- poi_dungeon_incomplete
@@ -91,12 +102,13 @@ local function IsValidPOI(pin)
     -- poi_delve_complete
     -- poi_raiddungeon_incomplete
     -- Skyshard-unknown
+    -- poi_wayshrine
 
     -- May not need to even check custom type, just filter by texture!
-    if customPinName(pinType) == "pinType_Unknown_POI" or customPinName(pinType) == "DEST_PinSet_Unknown" then
-        -- TODO: check texture here 
-        return true
-    end
+    -- if customPinName(pinType) == "pinType_Unknown_POI" or customPinName(pinType) == "DEST_PinSet_Unknown" then
+    -- TODO: check texture here 
+    --    return true
+    -- end
 
     return false
 end
@@ -125,7 +137,7 @@ end
 function MapRadarPin:SetVisibility()
     -- Most pin types they should be visible only in certain range
     -- TODO: Range is too low for Radar mode!!!!!
-    if not radarPin.isRangeUnlimited and self.distance > MapRadar.maxRadarDistance * 2 then
+    if not self.isRangeUnlimited and self.distance > MapRadar.maxRadarDistance * 2 then
         self:SetHidden(true)
         return false
     end
@@ -156,7 +168,7 @@ function MapRadarPin:SetPinDimensions()
     --    return
     -- end
 
-    local pinData = ZO_MapPin.PIN_DATA[self.pinType]
+    local pinData = zoMapPin.PIN_DATA[self.pinType]
     if (pinData ~= nil or pinData.size ~= nil) then
         self.size = pinData.size
     else
@@ -212,14 +224,23 @@ function MapRadarPin:ApplyTint()
 end
 
 function MapRadarPin:UpdatePin(playerX, playerY, heading)
+
     local dx = self.pin.normalizedX - playerX
     local dy = self.pin.normalizedY - playerY
 
-    local angle = math.atan2(-dx, -dy) - heading
+    -- TODO: add param that player moved and add check here that coords for pin chnaged and then skip update!!
+
     self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / getMeterCoefficient()
+
+    -- Set visibility (hidden or transparency) and if not vissible then stop processing further 
+    if not self:SetVisibility() then
+        return
+    end
+
     local radarDistance = math.min(MapRadar.maxRadarDistance, self.distance)
 
     -- recalc coordinates to apply rotation
+    local angle = math.atan2(-dx, -dy) - heading
     dx = radarDistance * -math.sin(angle)
     dy = radarDistance * -math.cos(angle)
 
@@ -262,11 +283,6 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading)
         self.label:SetText(text)
     end
 
-    -- Set visibility (hidden or transparency) and if not vissible then stop processing further 
-    if not self:SetVisibility() then
-        return
-    end
-
     -- Resize pin 
     self:SetPinDimensions()
 
@@ -277,6 +293,8 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading)
     -- Reset texture params
     -- self:ApplyTexture()  -- This crashes on map open, maybe because of pins being destroyed? Reenable once pin reload is done while map not opened??
     self:ApplyTint()
+
+    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
 end
 
 function MapRadarPin:IsValidPin(pin)
@@ -287,15 +305,19 @@ function MapRadarPin:IsValidPin(pin)
         return false
     end
 
+    -- zoneStoryQuest_icon_door
+    -- quest_icon_door
+    -- repeatableQuest_icon_door
+    -- zoneStoryQuest_icon_door_assisted
+
     if pin:IsQuest() -- or pin:IsObjective() -- or pin:IsAvAObjective()
     or pin:IsUnit() -- Player/Group/Companion units
     or pin:IsWorldEventPOIPin() -- Active Dolmens
-    -- or pin:IsPOI() -- enable once can filter by trexture (Dolmens, dungeons, delves)
     -- or pin:IsAssisted() -- or pin:IsMapPing()
     -- or pin:IsKillLocation()
     or pin:IsWorldEventUnitPin() -- Dragons and whatnot
     -- or pin:IsZoneStory() or pin:IsSuggestion() -- or pin:IsAreaPin()
-    or pin:IsFastTravelWayShrine() -- Somehow some houses are in this category "MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE" (Some addon shitting?)
+    -- or pin:IsFastTravelWayShrine() -- Somehow some houses are in this category "MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE" (Some addon shitting?)
     or IsCustomPin(pinType) -- Custom pins from other addons. Maybe valid POI method can handle it?
     or IsValidPOI(pin) -- Filters POIs by texture
     then
@@ -346,12 +368,16 @@ function MapRadarPin:New(pin, key)
 
     radarPin.isRangeUnlimited = pin:IsQuest() or pin:IsUnit() or pin:IsWorldEventPOIPin()
 
+    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", radarPin)
+
     return radarPin
 end
 
 -- ========================================================================================
 -- deconstruct
 function MapRadarPin:Dispose()
+
+    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_RemovePin", self)
 
     if self.animationTimeline then
         self.animationTimeline:Stop()

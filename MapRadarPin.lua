@@ -92,6 +92,7 @@ local function IsValidPOI(pin)
     or texturePath:find("poi_dungeon") --
     or texturePath:find("poi_delve") --
     or texturePath:find("poi_raiddungeon") --
+    or texturePath:find("poi_portal") -- dolmen but also other portals :/
     then
         return true
     end
@@ -176,7 +177,7 @@ function MapRadarPin:SetPinDimensions()
     end
 
     -- Min scale: 0.6, max scale: 0.9
-    local distanceScale = math.max(0.6, 0.9 - self.distance / MapRadar.maxRadarDistance)
+    local distanceScale = math.max(0.6, 0.9 - self.distance / MapRadar.maxRadarDistance / 2)
 
     self.scaledSize = self.size * distanceScale
     self.texture:SetDimensions(self.scaledSize, self.scaledSize)

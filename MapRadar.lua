@@ -222,6 +222,11 @@ local function mapPinCountCheck()
     registerMapPins()
 end
 
+local function reset()
+    -- trigger map pin update even if nothing moves
+    playerHeading = 0
+end
+
 local function initialize(eventType, addonName)
     if addonName ~= "MapRadar" then
         return
@@ -324,18 +329,30 @@ local function slashCommands(args)
 
     if args == "all" then
         MapRadar.showAllPins = not MapRadar.showAllPins
+        local flagStr = MapRadar.showAllPins and "ON" or "OFF"
+        MapRadar.debug("Show all pins: <<1>>", flagStr)
+        reset()
     end
 
     if args == "names" then
         MapRadar.showPinNames = not MapRadar.showPinNames
+        local flagStr = MapRadar.showPinNames and "ON" or "OFF"
+        MapRadar.debug("Show names: <<1>>", flagStr)
+        reset()
     end
 
     if args == "dist" then
         MapRadar.showDistance = not MapRadar.showDistance
+        local flagStr = MapRadar.showDistance and "ON" or "OFF"
+        MapRadar.debug("Show disatnce: <<1>>", flagStr)
+        reset()
     end
 
     if args == "para" then
         MapRadar.showPinParams = not MapRadar.showPinParams
+        local flagStr = MapRadar.showPinParams and "ON" or "OFF"
+        MapRadar.debug("Show params: <<1>>", flagStr)
+        reset()
     end
 end
 
@@ -348,7 +365,7 @@ SLASH_COMMANDS["/mr"] = slashCommands
 function MapRadar_button()
     registerMapPins() -- reset all pins placement (for calibration)
 
-    local oW, oH = MapRadar.orgZO_WorldMap_GetMapDimensions()
+    local oW, oH = MapRadar.orig_GetMapDimensions()
     local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
     local x, y, h = MapRadar.getMapPlayerPosition("player")
 

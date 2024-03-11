@@ -223,12 +223,21 @@ function MapRadarPin:ApplyTint()
     self.texture:SetColor(unpack({1, 1, 1, 1}))
 end
 
-function MapRadarPin:UpdatePin(playerX, playerY, heading)
+function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
 
-    local dx = self.pin.normalizedX - playerX
-    local dy = self.pin.normalizedY - playerY
+    local pinX = self.pin.normalizedX
+    local pinY = self.pin.normalizedY
 
-    -- TODO: add param that player moved and add check here that coords for pin chnaged and then skip update!!
+    -- TODO: perhaps move that to separate method with checking also texture, tint or something else?
+    if not hasPlayerMoved and self.x == pinX and self.y == pinY then
+        return -- If nothing changed then skip update. 
+    end
+
+    self.x = pinX
+    self.y = pinY
+
+    local dx = pinX - playerX
+    local dy = pinY - playerY
 
     self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / getMeterCoefficient()
 
@@ -345,6 +354,10 @@ function MapRadarPin:New(pin, key)
     radarPin.pin = pin
     radarPin.pinType = pinType
     radarPin.pinTag = pinTag
+
+    -- To track changes in position
+    radarPin.x = 0
+    radarPin.y = 0
 
     radarPin:ApplyTexture()
     radarPin:ApplyTint()

@@ -40,9 +40,6 @@ MapRadar = {
     showPointer = true,
     showDistance = true,
 
-    currentMapWidth = 0,
-    currentMapHeight = 0,
-
     maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
     pinSize = 0,
 
@@ -99,22 +96,6 @@ local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer,
 
 local activePins = {}
 
-local function getMapScale()
-    -- For now set very apporx scale
-
-    -- Standard zone
-    if MapRadar.currentMapWidth == 3156 or MapRadar.currentMapWidth == 2752 then
-        return 1.05
-    end
-
-    -- Some DLC middle maps??
-    if MapRadar.currentMapWidth == 1945 then
-        return 2.2
-    end
-
-    return 0.44 -- Standard subzone
-end
-
 -- https://www.codecademy.com/resources/docs/lua/tables
 
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
@@ -170,7 +151,7 @@ local function registerMapPins()
         if -- pin.mapRadarKey == nil and 
         MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
             local radarPin = MapRadarPin:New(pin, key)
-            radarPin:UpdatePin(playerX, playerY, heading)
+            radarPin:UpdatePin(playerX, playerY, heading, true)
             activePins[key] = radarPin
 
         end
@@ -203,37 +184,26 @@ end
 
 -- ==================================================================================================
 -- Event handlers
-
+local playerHeading, playerX, playerY = 0, 0, 0
 local function mapUpdate()
     if MapRadar.sceneManager:IsShowing("worldMap") then
         return -- Block further execution while map is opened
     end
 
+    local px, py = MapRadar.getMapPlayerPosition("player")
     local heading = MapRadar.getPlayerCameraHeading()
-    MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
-    -- read map width and height to local params not to invoke method in loop
-    local mapWidth, mapHeight = MapRadar.getMapDimensions()
-    -- MapRadar.debugDebounce("Read map W: <<1>>  <<2>>", mapWidth, mapHeight)
-
-    -- This reassigns global values only if they are different to reduce value loss during write operartion.
-    -- Other read opperations may read unassigned value
-    if MapRadar.currentMapWidth ~= mapWidth then
-        MapRadar.currentMapWidth = mapWidth
-    end
-    if MapRadar.currentMapHeight ~= mapWidth then
-        MapRadar.currentMapHeight = mapHeight
-    end
-
-    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
+    local hasPlayerMoved = playerHeading ~= heading or playerX ~= px or playerY ~= py
+    playerHeading = heading
+    playerX = px
+    playerY = py
 
     MapRadar.positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
+    MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- reposition pins
-    for key in pairs(activePins) do
-        local radarPin = activePins[key]
-        -- MapRadar.debug("Fetching pin: <<1>>  <<2>>", key, MapRadar.getStrVal(radarPin))
-        radarPin:UpdatePin(playerX, playerY, heading)
+    for key, radarPin in pairs(activePins) do
+        radarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     end
 end
 

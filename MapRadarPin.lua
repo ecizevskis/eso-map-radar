@@ -72,6 +72,10 @@ local function IsValidPOI(pin)
     -- pinType_Unknown_POI  (Map Pins)       alternative for POI pins
     -- DEST_PinSet_Unknown  (Destinations)   alternative for POI pins
 
+    -- ZO_MapPin:IsPOI()
+    -- MAP_PIN_TYPE_POI_COMPLETE
+    -- MAP_PIN_TYPE_POI_SEEN
+
     if customPinName(pinType) == "pinType_Unknown_POI" or customPinName(pinType) == "DEST_PinSet_Unknown" then
         -- TODO: check texture here 
         return true
@@ -104,7 +108,7 @@ end
 function MapRadarPin:SetVisibility()
     -- Most pin types they should be visible only in certain range
     -- Quest and Group are shown across all map
-    if (not self.pin:IsQuest() and not self.pin:IsUnit() and self.distance > MapRadar.maxRadarDistance * 2) then
+    if (not self.pin:IsQuest() and not self.pin:IsUnit() and not self.pin:IsWorldEventPOIPin() and self.distance > MapRadar.maxRadarDistance * 2) then
         self:SetHidden(true)
         return false
     end
@@ -166,10 +170,10 @@ function MapRadarPin:ApplyTexture()
             self.animation:SetImageData(pinData.framesWide, pinData.framesHigh)
             self.animation:SetFramerate(pinData.framesPerSecond)
 
-            -- is this doing something??
-            -- self.animation:SetHandler("OnStop", function()
-            --    self.texture:SetTextureCoords(0, 1, 0, 1)
-            -- end)
+            -- returns texture to default state 
+            self.animation:SetHandler("OnStop", function()
+                self.texture:SetTextureCoords(0, 1, 0, 1)
+            end)
 
             self.animationTimeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
             self.animationTimeline:PlayFromStart()
@@ -276,7 +280,8 @@ function MapRadarPin:IsValidPin(pin)
 
     if pin:IsQuest() -- or pin:IsObjective() -- or pin:IsAvAObjective()
     or pin:IsUnit() -- Player/Group/Companion units
-    -- or pin:IsPOI() 
+    or pin:IsWorldEventPOIPin() -- Active Dolmens
+    -- or pin:IsPOI() enable once can filter by trexture (Dolmens, dungeons, delves)
     or pin:IsAssisted() -- or pin:IsMapPing()
     -- or pin:IsKillLocation()
     -- or pin:IsWorldEventUnitPin()

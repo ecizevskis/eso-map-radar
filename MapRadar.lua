@@ -96,6 +96,13 @@ local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer,
 
 local activePins = {}
 
+-- This is to track if player moved to reduce update actions on pins
+local playerHeading, playerX, playerY = 0, 0, 0
+local function reset()
+    -- trigger map pin update even if nothing moves
+    playerHeading = 0
+end
+
 -- https://www.codecademy.com/resources/docs/lua/tables
 
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
@@ -161,6 +168,7 @@ end
 -- ==================================================================================================
 -- Mode change
 local function setOverlayMode(flag)
+    reset()
     MapRadar.playerPinTexture:ClearAnchors()
 
     if flag then
@@ -184,7 +192,7 @@ end
 
 -- ==================================================================================================
 -- Event handlers
-local playerHeading, playerX, playerY = 0, 0, 0
+
 local function mapUpdate()
     if MapRadar.sceneManager:IsShowing("worldMap") then
         return -- Block further execution while map is opened
@@ -220,11 +228,6 @@ local function mapPinCountCheck()
 
     prevPinCount = maxn
     registerMapPins()
-end
-
-local function reset()
-    -- trigger map pin update even if nothing moves
-    playerHeading = 0
 end
 
 local function initialize(eventType, addonName)
@@ -314,12 +317,21 @@ EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 
 -- ==================================================================================================
 -- Key binding
+local hotkeyDebouncer = MapRadarCommon.Debouncer:New(function(count)
 
-ZO_CreateStringId("SI_BINDING_NAME_MAPRADAR_TOGGLE", "Toggle mode")
+    if count == 2 then
+        MapRadar.debug("This will open configuration")
+        return
+    end
 
--- Hanller for configured hotkey
-function MapRadar_ToggleMode()
     setOverlayMode(not MapRadar.config.isOverlayMode)
+end)
+
+ZO_CreateStringId("SI_BINDING_NAME_MAPRADAR_HOTKEY", "Hotkey")
+
+-- Handler for configured hotkey
+function MapRadar_Hotkey()
+    hotkeyDebouncer:Invoke()
 end
 
 -- ==================================================================================================

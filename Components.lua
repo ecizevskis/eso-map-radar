@@ -137,10 +137,50 @@ function DataForm:New(id, parent)
     return control
 end
 
+-- ==================================================================================================
+-- Debouncer
+local Debouncer = {}
+function Debouncer:New(callback, waitTimeMs)
+    local instance = {
+        callback = callback,
+        debounce = false,
+        timeout = 0,
+        count = 0,
+        waitTimeMs = waitTimeMs or 300
+    }
+
+    local function waitForTimeout(self)
+        self.timeout = self.timeout - 100
+
+        if self.timeout > 0 then
+            zo_callLater(function()
+                waitForTimeout(self)
+            end, 100)
+        else
+            self.callback(self.count)
+            self.debounce = false
+            self.count = 0
+        end
+    end
+
+    instance.Invoke = function(self)
+        self.timeout = self.waitTimeMs
+        self.count = self.count + 1
+        if self.debounce then
+            return
+        end
+        self.debounce = true
+
+        waitForTimeout(self)
+    end
+
+    return instance
+end
 -- namespace to export class to public
 MapRadarCommon = {
     LabelStack = LabelStack,
-    DataForm = DataForm
+    DataForm = DataForm,
+    Debouncer = Debouncer
 }
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, function()

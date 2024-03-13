@@ -1,8 +1,6 @@
 -- TODO For release
 -- Saved variable usage (save mode, save radar position)
 -- Filter configuration page radar and overlay separate config
--- Hide radar texture when in Overlay mode
--- Fast trakel wayshrines (with range limit)
 -- Radar mode display range increase (it is lower than 200 - not good)
 -- calibrate dungeons
 -- calibrate delves
@@ -196,6 +194,7 @@ end
 local function setOverlayMode(flag)
     reset()
     MapRadar.playerPinTexture:ClearAnchors()
+    MapRadarContainerRadarTexture:SetHidden(flag)
 
     if flag then
         MapRadar.playerPinTexture:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)

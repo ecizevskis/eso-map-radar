@@ -1,5 +1,4 @@
 -- TODO: 
--- Some random pind get animated 
 -- on disabling showDistance need to close them all? or hide sonehow?
 -- area pins / blobs
 MapRadarPin = {}

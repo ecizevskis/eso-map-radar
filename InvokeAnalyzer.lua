@@ -16,6 +16,13 @@ local function CreateInvokeAnalyzerDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("InvokeAnalyzerDataForm", MapRadarContainer)
     dataForm:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 200)
+
+    dataForm:AddStack("Pins", function()
+        return MapRadar.tablelength(MapRadar.pinManager:GetActiveObjects())
+    end)
+    dataForm:AddStack("ActivePins", function()
+        return MapRadar.tablelength(MapRadar.activePins)
+    end)
     dataForm:AddStack("Pin Create", function()
         return AnalyzerData.pinCreateCount
     end)

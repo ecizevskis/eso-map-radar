@@ -168,8 +168,9 @@ function MapRadarPin:SetPinDimensions()
     -- if self.size ~= nil and self.size == MapRadar.pinSize then
     --    return
     -- end
+    local pinType = self.pin:GetPinType()
+    local pinData = zoMapPin.PIN_DATA[pinType]
 
-    local pinData = zoMapPin.PIN_DATA[self.pinType]
     if (pinData ~= nil or pinData.size ~= nil) then
         self.size = pinData.size
     else
@@ -190,7 +191,7 @@ function MapRadarPin:ApplyTexture()
         self.animationTimeline:Stop()
     end
 
-    local pinData = zoMapPin.PIN_DATA[self.pinType]
+    local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
 
     if (pinData ~= nil and pinData.texture ~= nil) then
         texture = MapRadar.value(pinData.texture, self.pin)
@@ -214,7 +215,7 @@ function MapRadarPin:ApplyTexture()
 end
 
 function MapRadarPin:ApplyTint()
-    local pinData = zoMapPin.PIN_DATA[self.pinType]
+    local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
 
     if (pinData ~= nil and pinData.tint ~= nil) then
         self.texture:SetColor(MapRadar.value(pinData.tint, self.pin):UnpackRGBA())
@@ -225,6 +226,12 @@ function MapRadarPin:ApplyTint()
 end
 
 function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
+    local pinType = self.pin:GetPinType()
+
+    if pinType == nil then
+        -- Somehow pin gets corrupted (maybe because of pin reload on map change) and will be filtered out later
+        return
+    end
 
     local pinX = self.pin.normalizedX
     local pinY = self.pin.normalizedY
@@ -276,12 +283,12 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
         end
 
         if MapRadar.showPinNames then
-            local name = MR_PinTypeNames[self.pinType] or customPinName(self.pinType)
-            text = zo_strformat("<<1>> <<2>>", self.pinType, name)
+            local name = MR_PinTypeNames[pinType] or customPinName(pinType)
+            text = zo_strformat("<<1>> <<2>>", pinType, name)
         end
 
         if MapRadar.showPinParams then
-            local pinData = zoMapPin.PIN_DATA[self.pinType]
+            local pinData = zoMapPin.PIN_DATA[pinType]
             if pinData ~= nil then
                 local animatedStr = MapRadar.value(pinData.isAnimated, self.pin) and "[A]" or "[N]"
                 local texturePath = MapRadar.value(pinData.texture, self.pin)
@@ -301,7 +308,7 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
 
     -- Reset texture params
-    -- self:ApplyTexture()  -- This crashes on map open, maybe because of pins being destroyed? Reenable once pin reload is done while map not opened??
+    self:ApplyTexture() -- This crashes on map open, maybe because of pins being destroyed? Reenable once pin reload is done while map not opened??
     self:ApplyTint()
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
@@ -309,6 +316,10 @@ end
 
 function MapRadarPin:IsValidPin(pin)
     local pinType = pin:GetPinType()
+
+    if pinType == nil then
+        return false
+    end
 
     if pinType == MAP_PIN_TYPE_PLAYER -- or pinType == MAP_PIN_TYPE_DRAGON_IDLE_HEALTHY or pinType == MAP_PIN_TYPE_DRAGON_IDLE_WEAK 
     or pin:IsCompanion() then
@@ -345,16 +356,12 @@ function MapRadarPin:New(pin, key)
     self.__index = self
 
     local texture, textureKey = pinPool:AcquireObject()
-    local pinType, pinTag = pin:GetPinTypeAndTag()
-    pin.mapRadarKey = key .. pinType
 
     radarPin.texture = texture
     radarPin.textureKey = textureKey
 
     radarPin.key = key
     radarPin.pin = pin
-    radarPin.pinType = pinType
-    radarPin.pinTag = pinTag
 
     -- To track changes in position
     radarPin.x = 0
@@ -419,8 +426,6 @@ function MapRadarPin:Dispose()
     end
 
     self.pin = nil
-    self.pinType = nil
-    self.pinTag = nil
     self.distance = nil
     self.size = nil
     self.scaledSize = nil

@@ -44,6 +44,7 @@ MapRadar = {
     pinSize = 0,
 
     positionLabel = {},
+    activePins = {},
 
     scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
 
@@ -85,7 +86,16 @@ MapRadar = {
             return "nil"
         end
         return tostring(obj)
+    end,
+
+    tablelength = function(T)
+        local count = 0
+        for _ in pairs(T) do
+            count = count + 1
+        end
+        return count
     end
+
 }
 
 local UIWidth, UIHeight = GuiRoot:GetDimensions()
@@ -93,8 +103,6 @@ local playerPin = MapRadar.pinManager:GetPlayerPin()
 local pinsPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
 local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
-
-local activePins = {}
 
 -- This is to track if player moved to reduce update actions on pins
 local playerHeading, playerX, playerY = 0, 0, 0
@@ -112,12 +120,12 @@ local function registerMapPins()
     if MapRadar.sceneManager:IsShowing("worldMap") then
         -- Dispose all pins because they are removed from pool and will get different keys
         --[[
-        for k in pairs(activePins) do
-            activePins[k]:Dispose()
-            activePins[k] = nil
+        for k in pairs(MapRadar.activePins) do
+            MapRadar.activePins[k]:Dispose()
+            MapRadar.activePins[k] = nil
         end
         ]]
-        return -- Block further execution while map is opened
+        -- return -- Block further execution while map is opened
     end
 
     local pins = MapRadar.pinManager:GetActiveObjects()
@@ -140,27 +148,45 @@ local function registerMapPins()
     -- Need to compare references of pin objects!!
     -- rawequal (v1, v2)
 
-    for k, radarPin in pairs(activePins) do
-        -- if pins[k] == nil or pins[k].mapRadarKey == nil or pins[k].mapRadarKey ~= activePins[k].pin.mapRadarKey then
+    for k, radarPin in pairs(MapRadar.activePins) do
+        --[[
+        if pins[k] == nil or pins[k] ~= MapRadar.activePins[k].pin then
+            MapRadar.debugDebounce("Pin compare: <<1>>,  <<2>>", MapRadar.getStrVal(pins[k]), MapRadar.getStrVal(MapRadar.activePins[k].pin))
+        else
+            local t1 = pins[k]:GetPinType()
+            local t2 = MapRadar.activePins[k].pin:GetPinType()
+            if t1 ~= t2 then
+                MapRadar.debugDebounce("Probe:  <<1>> <-> <<2>>", t1, t2)
+            end
+        end
+        ]]
 
-        activePins[k]:Dispose()
-        activePins[k] = nil
-        -- end
+        -- Pins are reloaded but some pins then have wrong pinType and thus are shown and with wrong texture
+        -- But if you dispose ALL then no such issues. WHY???
+
+        --[[
+        if (self.pinType ~= self.pin:GetPinType()) then
+            MapRadar.debug("Inconsistency detected: <<1>> - <<2>>", self.pinType, self.pin:GetPinType())
+            self:Dispose()
+        end
+        ]]
+
+        -- This not disposing enough somehow
+        if not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
+            MapRadar.activePins[k]:Dispose()
+            MapRadar.activePins[k] = nil
+        end
     end
-
-    MapRadarPin:ReleaseAll()
 
     local playerX, playerY = MapRadar.getMapPlayerPosition("player")
     local heading = MapRadar.getPlayerCameraHeading()
 
     -- Add new pins that did not exist
     for key, pin in pairs(pins) do
-        if -- pin.mapRadarKey == nil and 
-        MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
+        if MapRadar.activePins[key] == nil and MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
             local radarPin = MapRadarPin:New(pin, key)
             radarPin:UpdatePin(playerX, playerY, heading, true)
-            activePins[key] = radarPin
-
+            MapRadar.activePins[key] = radarPin
         end
     end
 end
@@ -210,7 +236,7 @@ local function mapUpdate()
     MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- reposition pins
-    for key, radarPin in pairs(activePins) do
+    for key, radarPin in pairs(MapRadar.activePins) do
         radarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     end
 end
@@ -221,7 +247,7 @@ local function mapPinCountCheck()
     local maxn = table.maxn(pins)
 
     if prevPinCount == maxn then
-        return
+        -- return
     end
 
     -- MapRadar.debugDebounce("Pin count changed: <<1>>", maxn)
@@ -337,8 +363,6 @@ end
 -- ==================================================================================================
 -- Slash commands
 local function slashCommands(args)
-    -- REFACTOR to support only one arg maybe?? without array?
-
     if args == "all" then
         MapRadar.showAllPins = not MapRadar.showAllPins
         local flagStr = MapRadar.showAllPins and "ON" or "OFF"
@@ -375,14 +399,15 @@ SLASH_COMMANDS["/mr"] = slashCommands
 -- Test stuff 
 
 function MapRadar_button()
-    registerMapPins() -- reset all pins placement (for calibration)
-
-    local oW, oH = MapRadar.orig_GetMapDimensions()
+    -- registerMapPins() -- reset all pins placement (for calibration)
+    local pins = MapRadar.pinManager:GetActiveObjects()
+    MapRadar.debug("Pins: <<1>>", table.maxn(pins))
+    -- local oW, oH = MapRadar.orig_GetMapDimensions()
     local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
     local x, y, h = MapRadar.getMapPlayerPosition("player")
 
     MapRadar.debug("Map dimension: <<1>> <<2>>", currentMapWidth, currentMapHeight)
-    MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
+    -- MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
     MapRadar.debug("Map curvedZoom: <<1>>", MapRadar.getPanAndZoom():GetCurrentCurvedZoom() * 1000)
     MapRadar.debug("UI -  W: <<1>>  H: <<2>>", UIWidth, UIHeight)
     MapRadar.debug("MR max distance: <<1>>", MapRadar.maxRadarDistance)

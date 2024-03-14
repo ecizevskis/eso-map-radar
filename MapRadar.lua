@@ -4,6 +4,7 @@
 -- Radar mode display range increase (it is lower than 200 - not good)
 -- Fix pointer showning on something not quest (Some pins get updated but not Disposed because they are valid! Maybe should destroy them to simplify stuff?)
 -- Skyshard-unknown?
+-- Config page should be over overlay pins and text
 -- calibrate dungeons
 -- calibrate delves
 -- calibrate elden root inner
@@ -106,11 +107,6 @@ local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Po
 local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
 
 -- This is to track if player moved to reduce update actions on pins
-local playerHeading, playerX, playerY = 0, 0, 0
-local function reset()
-    playerHeading = 0
-end
-
 -- https://www.codecademy.com/resources/docs/lua/tables
 
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
@@ -174,7 +170,7 @@ local function setOverlayMode(flag)
     else
         MapRadar.modeSettings = MapRadar.config.radarSettings
     end
-    reset()
+    CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
 end
 
 local function updateOverlay()
@@ -185,7 +181,7 @@ end
 
 -- ==================================================================================================
 -- Event handlers
-
+local playerHeading, playerX, playerY = 0, 0, 0
 local function mapUpdate()
     if MapRadar.sceneManager:IsShowing("worldMap") then
         return -- Block further execution while map is opened
@@ -251,6 +247,10 @@ local function initialize(eventType, addonName)
 
     EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, mapUpdate)
     EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCount", 100, mapPinCountCheck)
+
+    CALLBACK_MANAGER:RegisterCallback("MapRadar_Reset", function()
+        playerHeading = 0
+    end)
 
     --[[
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
@@ -337,28 +337,28 @@ local function slashCommands(args)
         MapRadar.showAllPins = not MapRadar.showAllPins
         local flagStr = MapRadar.showAllPins and "ON" or "OFF"
         MapRadar.debug("Show all pins: <<1>>", flagStr)
-        reset()
+        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
 
     if args == "names" then
         MapRadar.showPinNames = not MapRadar.showPinNames
         local flagStr = MapRadar.showPinNames and "ON" or "OFF"
         MapRadar.debug("Show names: <<1>>", flagStr)
-        reset()
+        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
 
     if args == "dist" then
         MapRadar.showDistance = not MapRadar.showDistance
         local flagStr = MapRadar.showDistance and "ON" or "OFF"
         MapRadar.debug("Show disatnce: <<1>>", flagStr)
-        reset()
+        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
 
     if args == "para" then
         MapRadar.showPinParams = not MapRadar.showPinParams
         local flagStr = MapRadar.showPinParams and "ON" or "OFF"
         MapRadar.debug("Show params: <<1>>", flagStr)
-        reset()
+        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
 end
 
@@ -418,3 +418,6 @@ MAP_MODE_SMALL_CUSTOM
 -- ZO_WorldMapScroll:IsHidden()
 -- WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:IsShowing()
 -- SCENE_MANAGER:IsShowing("worldMap")
+
+-- local zoneId, pwx1, pwh1, pwy1 = GetUnitRawWorldPosition("player")
+-- local _, pwx2, pwh2, pwy2 = GetUnitWorldPosition("player")

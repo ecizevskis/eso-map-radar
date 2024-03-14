@@ -178,6 +178,10 @@ function Debouncer:New(callback, waitTimeMs)
 end
 -- namespace to export class to public
 MapRadarCommon = {
+    -- simple construcotr metods
+    CreateLabel = CreateLabel,
+
+    -- components
     LabelStack = LabelStack,
     DataForm = DataForm,
     Debouncer = Debouncer

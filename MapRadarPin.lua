@@ -47,11 +47,11 @@ local function IsCustomPin(pinType)
 
     -- Can check QuestMap pins here by name because pinType is dynamic most likely (depends on addon count and who register id first)
 
-    if customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory" -- Quest map
+    if MapRadar.modeSettings.showQuests and (customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory") -- Quest map
     or customPinName(pinType) == "pinType_Treasure_Maps" -- from "Map Pins" by Hoft
     or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
     or customPinName(pinType) == "LostTreasure_TreasureMapPin" -- Treasure from LostTreasure
-    or customPinName(pinType) == "SkySMapPin_unknown" -- Destinations? Sky shards addon?
+    or MapRadar.modeSettings.showSkyshards and customPinName(pinType) == "SkySMapPin_unknown" -- Destinations? Sky shards addon?
     then
         return true
     end
@@ -63,53 +63,14 @@ local function IsValidPOI(pin)
     local pinType = pin:GetPinType()
     local pinData = zoMapPin.PIN_DATA[pinType]
     local texturePath = MapRadar.value(pinData.texture, pin)
-    -- Check here for ingame POI or other addons like Map Pins or Destinations 
-    -- Filter what POIs to show (guess by texture path) based on how config is set
 
-    -- pinType_Unknown_POI  (Map Pins)       alternative for POI pins
-    -- DEST_PinSet_Unknown  (Destinations)   alternative for POI pins
-
-    -- ZO_MapPin:IsPOI()
-    -- MAP_PIN_TYPE_POI_COMPLETE
-    -- MAP_PIN_TYPE_POI_SEEN
-
-    --[[
-    -- Later replace this with separate conditions for each supported types
-    local excludedTypes = {"poi_group_house_unowned", "poi_town_incomplete", "poi_town_complete", "poi_areaofinterest_incomplete",
-                           "poi_cemetary_incomplete", "poi_keep_incomplete", "poi_cave_incomplete", "poi_battlefield_incomplete",
-                           "poi_crafting_incomplete", "poi_farm_incomplete"}
-
-    for i, typeName in pairs(excludedTypes) do
-        if texturePath:find(typeName) then
-            d("Excluding: " .. typeName)
-            return false
-        end
-    end
-    ]]
-
-    -- TODO: add setting usage here
-    if texturePath:find("poi_wayshrine") -- Wayshrine
-    or texturePath:find("poi_dungeon") --
-    or texturePath:find("poi_delve") --
-    -- or texturePath:find("poi_raiddungeon") --
-    or texturePath:find("poi_portal") -- dolmen but also other portals :/
+    if texturePath:find("poi_wayshrine") and MapRadar.modeSettings.showWayshrines -- Wayshrine
+    or texturePath:find("poi_dungeon") and MapRadar.modeSettings.showDungeons --
+    or texturePath:find("poi_delve") and MapRadar.modeSettings.showDelves --
+    or texturePath:find("poi_portal") and MapRadar.modeSettings.showPortals -- dolmen but also other portals :/
     then
         return true
     end
-
-    -- Used
-    -- poi_dungeon_incomplete
-    -- poi_delve_incomplete
-    -- poi_delve_complete
-    -- poi_raiddungeon_incomplete
-    -- Skyshard-unknown
-    -- poi_wayshrine
-
-    -- May not need to even check custom type, just filter by texture!
-    -- if customPinName(pinType) == "pinType_Unknown_POI" or customPinName(pinType) == "DEST_PinSet_Unknown" then
-    -- TODO: check texture here 
-    --    return true
-    -- end
 
     return false
 end
@@ -332,8 +293,8 @@ function MapRadarPin:IsValidPin(pin)
     -- repeatableQuest_icon_door
     -- zoneStoryQuest_icon_door_assisted
 
-    if pin:IsQuest() -- or pin:IsObjective() -- or pin:IsAvAObjective()
-    or pin:IsUnit() -- Player/Group/Companion units
+    if pin:IsQuest() and MapRadar.modeSettings.showQuests -- or pin:IsObjective() -- or pin:IsAvAObjective()
+    or pin:IsUnit() and MapRadar.modeSettings.showGroup -- Player/Group/Companion units
     or pin:IsWorldEventPOIPin() -- Active Dolmens
     -- or pin:IsAssisted() -- or pin:IsMapPing()
     -- or pin:IsKillLocation()

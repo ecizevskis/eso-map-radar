@@ -1,6 +1,7 @@
 -- TODO: 
 -- on disabling showDistance need to close them all? or hide sonehow?
 -- area pins / blobs
+-- Texture apply removed from update, test that animation gets started? test on dragon!!!!
 MapRadarPin = {}
 
 local zoMapPin = ZO_MapPin
@@ -90,7 +91,7 @@ local function IsValidPOI(pin)
     if texturePath:find("poi_wayshrine") -- Wayshrine
     or texturePath:find("poi_dungeon") --
     or texturePath:find("poi_delve") --
-    or texturePath:find("poi_raiddungeon") --
+    -- or texturePath:find("poi_raiddungeon") --
     or texturePath:find("poi_portal") -- dolmen but also other portals :/
     then
         return true
@@ -137,7 +138,7 @@ end
 function MapRadarPin:SetVisibility()
     -- Most pin types they should be visible only in certain range
     -- TODO: Range is too low for Radar mode!!!!!
-    if not self.isRangeUnlimited and self.distance > MapRadar.maxRadarDistance * 2 then
+    if not self.isRangeUnlimited and self.distance > MapRadar.modeSettings.maxDistance then
         self:SetHidden(true)
         return false
     end
@@ -210,6 +211,7 @@ function MapRadarPin:ApplyTexture()
         end
     end
 
+    -- change texture only if it changed
     self.texture:SetTexture(texture)
 end
 
@@ -307,7 +309,7 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
 
     -- Reset texture params
-    self:ApplyTexture() -- This crashes on map open, maybe because of pins being destroyed? Reenable once pin reload is done while map not opened??
+    -- self:ApplyTexture()
     self:ApplyTint()
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
@@ -361,6 +363,7 @@ function MapRadarPin:New(pin, key)
 
     radarPin.key = key
     radarPin.pin = pin
+    radarPin.pinType = pin:GetPinType()
 
     -- To track changes in position
     radarPin.x = 0
@@ -371,7 +374,7 @@ function MapRadarPin:New(pin, key)
 
     if MapRadar.showDistance then
         local label, labelKey = pinLabelPool:AcquireObject()
-        label:SetAnchor(TOPLEFT, radarPin.texture, TOPRIGHT)
+        label:SetAnchor(BOTTOMLEFT, radarPin.texture, BOTTOMRIGHT)
         radarPin.label = label
         radarPin.labelKey = labelKey
     end

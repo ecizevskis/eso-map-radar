@@ -2,6 +2,8 @@
 -- Saved variable usage (save mode, save radar position)
 -- Filter configuration page radar and overlay separate config
 -- Radar mode display range increase (it is lower than 200 - not good)
+-- Fix pointer showning on something not quest (Some pins get updated but not Disposed because they are valid! Maybe should destroy them to simplify stuff?)
+-- Skyshard-unknown?
 -- calibrate dungeons
 -- calibrate delves
 -- calibrate elden root inner
@@ -43,6 +45,7 @@ MapRadar = {
 
     positionLabel = {},
     activePins = {},
+    modeSettings = {},
 
     scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
 
@@ -105,7 +108,6 @@ local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer,
 -- This is to track if player moved to reduce update actions on pins
 local playerHeading, playerX, playerY = 0, 0, 0
 local function reset()
-    -- trigger map pin update even if nothing moves
     playerHeading = 0
 end
 
@@ -128,49 +130,9 @@ local function registerMapPins()
 
     local pins = MapRadar.pinManager:GetActiveObjects()
 
-    -- Dispose pins that are not active 
-    --[[ 
-        Shit works only if you do not reset pins globally like map change)
-        To make it work need to update pins only when map scroll is closed!!!!
-        But if map was navigated and closed then all pins are recreated in pin manager and they have all their keys changed
-        Maybe on map close need to flush all pins and trigger register???
-    --]]
-
-    -- Pin count may stay the same and pin gets replaced (even with same key) with different pin
-    -- Need to add pinKey value to pin bades on its data??
-    -- how to make world unit or group unit pins unique?? Need to check what it contains!!!
-
-    -- When pins chanage with new zone then they all need to be reset because active pin keys now assigned to other pins
-    -- Could check custom pin key for content or existance
-
-    -- Need to compare references of pin objects!!
-    -- rawequal (v1, v2)
-
+    -- Dispose invalid pins
     for k, radarPin in pairs(MapRadar.activePins) do
-        --[[
-        if pins[k] == nil or pins[k] ~= MapRadar.activePins[k].pin then
-            MapRadar.debugDebounce("Pin compare: <<1>>,  <<2>>", MapRadar.getStrVal(pins[k]), MapRadar.getStrVal(MapRadar.activePins[k].pin))
-        else
-            local t1 = pins[k]:GetPinType()
-            local t2 = MapRadar.activePins[k].pin:GetPinType()
-            if t1 ~= t2 then
-                MapRadar.debugDebounce("Probe:  <<1>> <-> <<2>>", t1, t2)
-            end
-        end
-        ]]
-
-        -- Pins are reloaded but some pins then have wrong pinType and thus are shown and with wrong texture
-        -- But if you dispose ALL then no such issues. WHY???
-
-        --[[
-        if (self.pinType ~= self.pin:GetPinType()) then
-            MapRadar.debug("Inconsistency detected: <<1>> - <<2>>", self.pinType, self.pin:GetPinType())
-            self:Dispose()
-        end
-        ]]
-
-        -- This not disposing enough somehow
-        if not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
+        if not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin or radarPin.pinType ~= radarPin.pin:GetPinType() then
             MapRadar.activePins[k]:Dispose()
             MapRadar.activePins[k] = nil
         end
@@ -192,7 +154,6 @@ end
 -- ==================================================================================================
 -- Mode change
 local function setOverlayMode(flag)
-    reset()
     MapRadar.playerPinTexture:ClearAnchors()
     MapRadarContainerRadarTexture:SetHidden(flag)
 
@@ -207,6 +168,13 @@ local function setOverlayMode(flag)
     end
 
     MapRadar.config.isOverlayMode = flag
+
+    if flag then
+        MapRadar.modeSettings = MapRadar.config.overlaySettings
+    else
+        MapRadar.modeSettings = MapRadar.config.radarSettings
+    end
+    reset()
 end
 
 local function updateOverlay()
@@ -345,7 +313,10 @@ EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 local hotkeyDebouncer = MapRadarCommon.Debouncer:New(function(count)
 
     if count == 2 then
-        MapRadar.debug("This will open configuration")
+        local openConfig = MapRadar_Settings:IsHidden()
+        MapRadar_Settings:SetHidden(not openConfig)
+        SetGameCameraUIMode(openConfig)
+        -- MapRadar.debug("This will open configuration")
         return
     end
 

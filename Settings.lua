@@ -64,6 +64,7 @@ end
 
 local function CreateForm()
 
+    -- ===================================================================================================
     local radarLabel = MapRadarCommon.CreateLabel("radarLabel", MapRadar_Settings, "Radar mode settings")
     radarLabel:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
 
@@ -80,16 +81,45 @@ local function CreateForm()
     radarOptionStack:addPinButton("showDungeons", "/esoui/art/icons/poi/poi_dungeon_complete.dds")
     radarOptionStack:addPinButton("showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds")
 
-    -- To add!!
+    -- This can maybe stay unconfigured?
     -- LostTreasure  LostTreasure_SurveyReportPin
     -- LostTreasure_TreasureMapPin
     -- Map Pins  pinType_Treasure_Maps
 
-    -- Check if skushards addon is active
-    radarOptionStack:addPinButton("showSkyshards", "SkyShards/Icons/Skyshard-unknown.dds")
-    -- radarOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_seen.dds")
-    -- radarOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_complete.dds")
-    --
+    -- TODO: check map filter somehow and show both shard icons (user can then choose)
+    -- But need to get tooltip working!!!!!!!!!!!!!!!!!!!!
+    -- For now Skyshards, surveys and treasures will just be displayed without config. (Lets assume this is desired always :))
+
+    --[[
+    if hasSkyShardAddon then
+        radarOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_seen.dds")
+        -- radarOptionStack:addPinButton("showSkyshards", "SkyShards/Icons/Skyshard-unknown.dds")
+        -- radarOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_complete.dds")
+    end
+    ]]
+
+    -- ===================================================================================================
+    local overlayLabel = MapRadarCommon.CreateLabel("OverlayLabel", MapRadar_Settings, "Overlay mode settings")
+    overlayLabel:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 200)
+
+    local overlaySectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_overlaySectionDivider", MapRadar_Settings, "ZO_Options_Divider")
+    overlaySectionDivider:SetAnchor(TOPLEFT, overlayLabel, BOTTOMLEFT)
+
+    local overlayOptionStack = CreatePinOptionStack("$(parent)overlayOptionStack", MapRadar_Settings, MapRadar.config.overlaySettings)
+    overlayOptionStack:SetAnchor(TOPLEFT, overlaySectionDivider, BOTTOMLEFT)
+
+    overlayOptionStack:addPinButton("showQuests", "EsoUi/Art/Compass/quest_icon_assisted.dds")
+    overlayOptionStack:addPinButton("showWayshrines", "/esoui/art/icons/poi/poi_wayshrine_complete.dds")
+    overlayOptionStack:addPinButton("showGroup", "/esoui/art/compass/groupleader.dds")
+    overlayOptionStack:addPinButton("showDelves", "/esoui/art/icons/poi/poi_delve_complete.dds")
+    overlayOptionStack:addPinButton("showDungeons", "/esoui/art/icons/poi/poi_dungeon_complete.dds")
+    overlayOptionStack:addPinButton("showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds")
+
+    --[[
+    if hasSkyShardAddon then
+        overlayOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_seen.dds")
+    end
+    ]]
 end
 
 CALLBACK_MANAGER:RegisterCallback("OnMapRadarInitializing", function()
@@ -97,3 +127,4 @@ CALLBACK_MANAGER:RegisterCallback("OnMapRadarInitializing", function()
     CreateForm()
 end)
 
+-- WORLD_MAP_MANAGER:GetFilterValue(pinGroup)

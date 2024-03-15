@@ -1,13 +1,13 @@
 -- TODO For release
 -- Saved variable usage (save mode, save radar position)
--- Filter configuration page radar and overlay separate config
--- Radar mode display range increase (it is lower than 200 - not good)
--- Fix pointer showning on something not quest (Some pins get updated but not Disposed because they are valid! Maybe should destroy them to simplify stuff?)
--- Skyshard-unknown?
+-- Remove position calibration buttons, remove or hide Radar X button, relove position label (or hide with radar?)
+-- Show distance checkbox configurations!!!!!
 -- Config page should be over overlay pins and text
+-- Config page close on ESC or Button with key E??
 -- calibrate dungeons
 -- calibrate delves
 -- calibrate elden root inner
+-- Create zoneData table with: meterCoef, isZone, isSubzone, isDungeon, isDelve, isTrial
 -- ===================================================================================================
 -- Pin reading should be converted to event based. Read all pins and compare to current. Trigger pin create events and pin dispose events
 -- Prepare pinData on addon load to include supported pinTypes (also calc all pinTypes for custom pins) (table data loads: texture, scale/size, visibility)
@@ -348,8 +348,8 @@ local function slashCommands(args)
     end
 
     if args == "dist" then
-        MapRadar.showDistance = not MapRadar.showDistance
-        local flagStr = MapRadar.showDistance and "ON" or "OFF"
+        MapRadar.modeSettings.showDistance = not MapRadar.modeSettings.showDistance
+        local flagStr = MapRadar.modeSettings.showDistance and "ON" or "OFF"
         MapRadar.debug("Show disatnce: <<1>>", flagStr)
         CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
@@ -374,7 +374,10 @@ function MapRadar_button()
     MapRadar.debug("Pins: <<1>>", table.maxn(pins))
     -- local oW, oH = MapRadar.orig_GetMapDimensions()
     local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
-    local x, y, h = MapRadar.getMapPlayerPosition("player")
+
+    local mapTexture = GetMapTileTexture()
+    MapRadar.debug("Map texture: <<1>>", mapTexture)
+    MapRadarContainerRadarTexture:SetTexture(mapTexture)
 
     MapRadar.debug("Map dimension: <<1>> <<2>>", currentMapWidth, currentMapHeight)
     -- MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
@@ -382,6 +385,32 @@ function MapRadar_button()
     MapRadar.debug("UI -  W: <<1>>  H: <<2>>", UIWidth, UIHeight)
     MapRadar.debug("MR max distance: <<1>>", MapRadar.maxRadarDistance)
 
+    local x, y, h = GetMapPlayerPosition("player")
+    MapRadar.debug("GetMapPlayerPosition: <<1>>  <<2>>  <<3>>", x, y, h)
+
+    local zoneId, pwx1, pwh1, pwy1 = GetUnitRawWorldPosition("player")
+    MapRadar.debug("GetUnitRawWorldPosition: <<1>>  <<2>>  <<3>>", pwx1, pwh1, pwy1)
+
+    local _, pwx2, pwh2, pwy2 = GetUnitWorldPosition("player")
+    MapRadar.debug("GetUnitWorldPosition: <<1>>  <<2>> <<3>>", pwx2, pwh2, pwy2)
+
+    MapRadar.debug("ZO_WorldMapContainer: <<1>>  <<2>>", ZO_WorldMapContainer:GetDimensions())
+
+    --[[
+    MapRadar.debug("GetFilterValue: <<1>>", MapRadar.getStrVal(ZO_WorldMapManager:GetFilterValue(MAP_FILTER_WAYSHRINES)))
+
+    local modeData = ZO_WorldMapManager:GetModeData()
+    MapRadar.debug("Mode data: <<1>>", MapRadar.getStrVal(modeData))
+    local mapFilterType = GetMapFilterType()
+    local filters = modeData.filters[mapFilterType]
+    if filters then
+        for k, filter in pairs(filters) do
+            MapRadar.debug("<<1>> <<2>>", k, filter)
+        end
+    end
+
+    -- MAP_MODE_LARGE_CUSTOM
+    ]]
 end
 
 --[[
@@ -421,3 +450,20 @@ MAP_MODE_SMALL_CUSTOM
 
 -- local zoneId, pwx1, pwh1, pwy1 = GetUnitRawWorldPosition("player")
 -- local _, pwx2, pwh2, pwy2 = GetUnitWorldPosition("player")
+
+-- GetMapTileTexture()    whats that??
+
+--[[
+local x, y = GetMapPlayerPosition("player")
+local numTiles = GetMapNumTiles()
+local tilePixelWidth = ZO_WorldMapContainer1:GetTextureFileDimensions()
+local totalPixels = numTiles * tilePixelWidth
+local w, h = ZO_WorldMapScroll:GetDimensions()
+]]
+
+-- 			needChange, oldMapType, mapId = not DoesCurrentMapMatchMapForPlayerLocation(), GetMapType(), GetMapTileTexture()
+-- DoesCurrentMapShowPlayerWorld()
+
+-- Search on ESOUI Source Code WorldPositionToGuiRender3DPosition(integer worldX, integer worldY, integer worldZ)
+-- Returns: number renderX, number renderY, number renderZ 
+

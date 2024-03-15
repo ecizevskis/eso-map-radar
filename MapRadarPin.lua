@@ -1,7 +1,13 @@
 -- TODO: 
 -- on disabling showDistance need to close them all? or hide sonehow?
 -- area pins / blobs
--- Texture apply removed from update, test that animation gets started? test on dragon!!!!
+-- Texture apply removed from update, test that animation gets started? test on dragon!!!! - This works
+-- Texture might change for item (pin updated with some data but with same type so it is not filtered out, 
+--    need to check texture integrity but not reload it)
+-- Sky shards may load from different addons. Check each:
+-- SkyShards
+-- MapPins
+-- Destinations
 MapRadarPin = {}
 
 local zoMapPin = ZO_MapPin
@@ -11,7 +17,8 @@ local pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Dis
 
 -- ========================================================================================
 -- helper methods
--- TODO: convert to table with zone name and data params + defaults
+-- TODO: convert to table with zone name and data params + defaultsm
+
 local function getMeterCoefficient()
 
     --[[
@@ -21,7 +28,7 @@ local function getMeterCoefficient()
     }
 --]]
 
-    -- TODO: this is not good. Subzone map changes faster than zone name load
+    -- TODO: All should come from zone data table. Use only defaults if not found in zoene table
 
     -- using defaults for zone types
     if MapRadar.getMapType() == MAPTYPE_SUBZONE then
@@ -45,14 +52,23 @@ end
 local function IsCustomPin(pinType)
     -- First chek if this pin type is not default??
 
+    -- Skyshards="Skyshards",Skyshards_done="Skyshards (done)", config of MapPins
+    -- 	SKYS_FILTER_UNKNOWN			= "(Sky) Unknown skyshards",   SkyShards
+
+    -- SkyShards <- global object exist
+    -- maybe should check map filters instead
+
+    -- How to read specific map filter??
+
     -- Can check QuestMap pins here by name because pinType is dynamic most likely (depends on addon count and who register id first)
 
     if MapRadar.modeSettings.showQuests and (customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory") -- Quest map
     or customPinName(pinType) == "pinType_Treasure_Maps" -- from "Map Pins" by Hoft
     or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
     or customPinName(pinType) == "LostTreasure_TreasureMapPin" -- Treasure from LostTreasure
-    or MapRadar.modeSettings.showSkyshards and customPinName(pinType) == "SkySMapPin_unknown" -- Destinations? Sky shards addon?
-    then
+    or MapRadar.modeSettings.showSkyshards and (customPinName(pinType) == "pinType_Skyshards" -- Map Pins addon
+    or customPinName(pinType) == "SkySMapPin_unknown" -- SkyShards addon
+    ) then
         return true
     end
 
@@ -236,7 +252,7 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     if (self.label ~= nil) then
         local text = ""
 
-        if MapRadar.showDistance then
+        if MapRadar.modeSettings.showDistance then
             text = zo_strformat("<<1>>", self.distance)
         end
 

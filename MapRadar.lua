@@ -4,12 +4,14 @@
 -- Show distance checkbox configurations!!!!!
 -- Config page should be over overlay pins and text
 -- Config page close on ESC or Button with key E??
+-- Game default Skyshards
+-- Pointer showing to config and setup page
+-- InvokeCount and Calibrator to saved variables and switch by CMD
 -- calibrate dungeons
 -- calibrate delves
 -- calibrate elden root inner
 -- Create zoneData table with: meterCoef, isZone, isSubzone, isDungeon, isDelve, isTrial
 -- ===================================================================================================
--- Pin reading should be converted to event based. Read all pins and compare to current. Trigger pin create events and pin dispose events
 -- Prepare pinData on addon load to include supported pinTypes (also calc all pinTypes for custom pins) (table data loads: texture, scale/size, visibility)
 -- Create secondaryMethod (after pin type table) to fetch pinData by texture
 -- Custom pin types read and saved to internal constants (QuestMap, TreasuremMap)
@@ -17,8 +19,6 @@
 -- Create invoke analyzer
 -- Debounce methods for key bindings
 -- Survey/Treasure if you have map/item (load from LibTreasure) or juts rely on TreasureMap, Destinations or whatnot else??
--- https://github.com/esoui/esoui/blob/3b9326af2f5946a748be4551bfce41672f084e39/esoui/ingame/map/worldmap.lua#L695
--- Some maps load pins with certain distance only, add pin check from Destinations and MapPins (maybe some other addon too?)
 -- Hide in combat option
 MapRadar = {
     -- Localize global objects for better performance
@@ -248,9 +248,10 @@ local function initialize(eventType, addonName)
     EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, mapUpdate)
     EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCount", 100, mapPinCountCheck)
 
-    CALLBACK_MANAGER:RegisterCallback("MapRadar_Reset", function()
-        playerHeading = 0
-    end)
+    CALLBACK_MANAGER:RegisterCallback(
+        "MapRadar_Reset", function()
+            playerHeading = 0
+        end)
 
     --[[
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
@@ -267,61 +268,70 @@ end
 -- ==================================================================================================
 -- Event subscribtion
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_IN_PIN_AREA_CHANGED, function()
-    -- MapRadar.debug("EVENT_PLAYER_IN_PIN_AREA_CHANGED")
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_PLAYER_IN_PIN_AREA_CHANGED, function()
+        -- MapRadar.debug("EVENT_PLAYER_IN_PIN_AREA_CHANGED")
+    end)
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_OBJECTIVE_CONTROL_STATE, function()
-    MapRadar.debug("EVENT_OBJECTIVE_CONTROL_STATE")
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_OBJECTIVE_CONTROL_STATE, function()
+        MapRadar.debug("EVENT_OBJECTIVE_CONTROL_STATE")
+    end)
 
 -- This is good to trigger pin reset (if quest chnages 1 marker then pin count check does not see difference)
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_ADVANCED, function()
-    -- MapRadar.debug("EVENT_QUEST_ADVANCED")
-    zo_callLater(registerMapPins, 200)
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_QUEST_ADVANCED, function()
+        -- MapRadar.debug("EVENT_QUEST_ADVANCED")
+        zo_callLater(registerMapPins, 200)
+    end)
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_COMPLETE, function()
-    -- MapRadar.debug("EVENT_QUEST_COMPLETE")
-    zo_callLater(registerMapPins, 200)
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_QUEST_COMPLETE, function()
+        -- MapRadar.debug("EVENT_QUEST_COMPLETE")
+        zo_callLater(registerMapPins, 200)
+    end)
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_ADDED, function()
-    -- MapRadar.debug("EVENT_QUEST_ADDED ")
-    zo_callLater(registerMapPins, 200)
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_QUEST_ADDED, function()
+        -- MapRadar.debug("EVENT_QUEST_ADDED ")
+        zo_callLater(registerMapPins, 200)
+    end)
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function()
-    -- MapRadar.debug("EVENT_QUEST_POSITION_REQUEST_COMPLETE ")
-    zo_callLater(registerMapPins, 200)
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function()
+        -- MapRadar.debug("EVENT_QUEST_POSITION_REQUEST_COMPLETE ")
+        zo_callLater(registerMapPins, 200)
+    end)
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function()
-    -- MapRadar.debug("EVENT_QUEST_CONDITION_COUNTER_CHANGED ")
-    zo_callLater(registerMapPins, 200)
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function()
+        -- MapRadar.debug("EVENT_QUEST_CONDITION_COUNTER_CHANGED ")
+        zo_callLater(registerMapPins, 200)
+    end)
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ALL_GUI_SCREENS_RESIZED, function()
-    UIWidth, UIHeight = GuiRoot:GetDimensions()
-    updateOverlay()
-end)
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_ALL_GUI_SCREENS_RESIZED, function()
+        UIWidth, UIHeight = GuiRoot:GetDimensions()
+        updateOverlay()
+    end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 
 -- ==================================================================================================
 -- Key binding
-local hotkeyDebouncer = MapRadarCommon.Debouncer:New(function(count)
+local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
+    function(count)
 
-    if count == 2 then
-        local openConfig = MapRadar_Settings:IsHidden()
-        MapRadar_Settings:SetHidden(not openConfig)
-        SetGameCameraUIMode(openConfig)
-        -- MapRadar.debug("This will open configuration")
-        return
-    end
+        if count == 2 then
+            local openConfig = MapRadar_Settings:IsHidden()
+            MapRadar_Settings:SetHidden(not openConfig)
+            SetGameCameraUIMode(openConfig)
+            -- MapRadar.debug("This will open configuration")
+            return
+        end
 
-    setOverlayMode(not MapRadar.config.isOverlayMode)
-end)
+        setOverlayMode(not MapRadar.config.isOverlayMode)
+    end)
 
 ZO_CreateStringId("SI_BINDING_NAME_MAPRADAR_HOTKEY", "Hotkey")
 

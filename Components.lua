@@ -153,9 +153,10 @@ function Debouncer:New(callback, waitTimeMs)
         self.timeout = self.timeout - 100
 
         if self.timeout > 0 then
-            zo_callLater(function()
-                waitForTimeout(self)
-            end, 100)
+            zo_callLater(
+                function()
+                    waitForTimeout(self)
+                end, 100)
         else
             self.callback(self.count)
             self.debounce = false
@@ -187,8 +188,9 @@ MapRadarCommon = {
     Debouncer = Debouncer
 }
 
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, function()
-    --[[
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar", EVENT_PLAYER_ACTIVATED, function()
+        --[[
     local ls2 = MapRadarCommon.LabelStack:New("$(parent)Stacktest1", MapRadarContainer, 2)
     ls2:SetAnchor(TOP, GuiRoot, TOP, 0, 150)
     ls2:SetFont("$(BOLD_FONT)|14|outline")
@@ -223,4 +225,4 @@ EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, function()
     end, 9000)
     --]]
 
-end)
+    end)

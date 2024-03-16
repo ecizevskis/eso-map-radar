@@ -15,8 +15,8 @@ local ScaleData = {
 -- Add data label/datastack to form component
 
 local function setScaleLabel(val)
-    MapRadar.scale = MapRadar.scale + val
-    scaleLabel:SetText(MapRadar.scale)
+    -- MapRadar.scale = MapRadar.scale + val
+    -- scaleLabel:SetText(MapRadar.scale)
 end
 
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
@@ -55,34 +55,39 @@ local function CreateCalibrationDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("CalibrateDataForm", MapRadarContainer)
     dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 100, -100)
-    dataForm:AddLabel("Zone", function()
-        return MapRadar.worldMap.zoneName
-    end)
-    dataForm:AddLabel("Rel DX", function()
-        return zo_strformat("<<1>>", ScaleData.dx * displayMultiplier)
-    end)
-    dataForm:AddLabel("Rel DY", function()
-        return zo_strformat("<<1>>", ScaleData.dy * displayMultiplier)
-    end)
-    dataForm:AddLabel("Unit1", function()
-        return ScaleData.unit1
-    end)
+    dataForm:AddLabel(
+        "Zone", function()
+            return MapRadar.worldMap.zoneName
+        end)
+    dataForm:AddLabel(
+        "Rel DX", function()
+            return zo_strformat("<<1>>", ScaleData.dx * displayMultiplier)
+        end)
+    dataForm:AddLabel(
+        "Rel DY", function()
+            return zo_strformat("<<1>>", ScaleData.dy * displayMultiplier)
+        end)
+    dataForm:AddLabel(
+        "Unit1", function()
+            return ScaleData.unit1
+        end)
 
     local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", MapRadarContainer, "plusButtonTemplate")
     btnSaveScaleData:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT)
-    btnSaveScaleData:SetHandler("OnClicked", function()
-        local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
-        local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
+    btnSaveScaleData:SetHandler(
+        "OnClicked", function()
+            local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
+            local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
-        local data = {
-            dx = ScaleData.dx,
-            dy = ScaleData.dy,
-            unit1 = ScaleData.unit1
-        }
+            local data = {
+                dx = ScaleData.dx,
+                dy = ScaleData.dy,
+                unit1 = ScaleData.unit1
+            }
 
-        MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
-        MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
-    end)
+            MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
+            MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
+        end)
 end
 
 local function MapRadar_InitScaleCalibrator()
@@ -95,6 +100,7 @@ local function MapRadar_InitScaleCalibrator()
     mgridTexture:SetDimensions(329, 329)
     -- mgridTexture:SetAlpha(0.5)
 
+    --[[
     scaleLabel = CreateControl("$(parent)ScaleLabel", MapRadarContainer, CT_LABEL)
     scaleLabel:SetAnchor(TOPLEFT, MapRadarContainer, TOPRIGHT, 20, 40)
     scaleLabel:SetFont("$(MEDIUM_FONT)|14|outline")
@@ -136,31 +142,36 @@ local function MapRadar_InitScaleCalibrator()
     btnSub0001:SetHandler("OnClicked", function()
         setScaleLabel(-0.001)
     end)
+]]
 
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinReader", 100, function()
-        local pins = MapRadar.pinManager:GetActiveObjects()
+    -- ===================================================================================
+    -- Fetch party leader pin to use for calculation
+    EVENT_MANAGER:RegisterForUpdate(
+        "MapRadar_PinReader", 100, function()
+            local pins = MapRadar.pinManager:GetActiveObjects()
 
-        for pinKey, pin in pairs(pins) do
-            -- MAP_PIN_TYPE_ACTIVE_COMPANION
-            -- MAP_PIN_TYPE_GROUP_LEADER
+            for pinKey, pin in pairs(pins) do
+                -- MAP_PIN_TYPE_ACTIVE_COMPANION
+                -- MAP_PIN_TYPE_GROUP_LEADER
 
-            if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER 
-            and pin.normalizedX and pin.normalizedY then
-                showCalibrationData(pin)
-                return
+                if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER 
+                and pin.normalizedX and pin.normalizedY then
+                    showCalibrationData(pin)
+                    return
+                end
             end
-        end
 
-    end)
+        end)
 end
 
-CALLBACK_MANAGER:RegisterCallback("OnMapRadarInitialized", function()
+CALLBACK_MANAGER:RegisterCallback(
+    "OnMapRadarInitialized", function()
 
-    if MapRadar.config.scaleData == nil then
-        MapRadar.config.scaleData = {}
-    end
+        if MapRadar.config.scaleData == nil then
+            MapRadar.config.scaleData = {}
+        end
 
-    if MapRadar.showCalibrate then
-        MapRadar_InitScaleCalibrator()
-    end
-end)
+        if MapRadar.showCalibrate then
+            MapRadar_InitScaleCalibrator()
+        end
+    end)

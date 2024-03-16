@@ -179,9 +179,10 @@ function MapRadarPin:ApplyTexture()
             self.animation:SetFramerate(pinData.framesPerSecond)
 
             -- returns texture to default state 
-            self.animation:SetHandler("OnStop", function()
-                self.texture:SetTextureCoords(0, 1, 0, 1)
-            end)
+            self.animation:SetHandler(
+                "OnStop", function()
+                    self.texture:SetTextureCoords(0, 1, 0, 1)
+                end)
 
             self.animationTimeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
             self.animationTimeline:PlayFromStart()
@@ -249,7 +250,7 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     end
 
     -- Show distance (or other test data) near pin on radar
-    if (self.label ~= nil) then
+    if self.label ~= nil then
         local text = ""
 
         if MapRadar.modeSettings.showDistance then
@@ -278,6 +279,10 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
         self.label:SetText(text)
     end
 
+    if self.pointer ~= nil then
+        self.pointer:SetHidden(not MapRadar.modeSettings.showPointers)
+    end
+
     -- Resize pin 
     self:SetPinDimensions()
 
@@ -303,6 +308,8 @@ function MapRadarPin:IsValidPin(pin)
     or pin:IsCompanion() then
         return false
     end
+
+    -- MAP_PIN_TYPW_SKYSHARD_SEEN
 
     -- zoneStoryQuest_icon_door
     -- quest_icon_door
@@ -349,19 +356,18 @@ function MapRadarPin:New(pin, key)
     radarPin:ApplyTexture()
     radarPin:ApplyTint()
 
-    if MapRadar.showDistance then
-        local label, labelKey = pinLabelPool:AcquireObject()
-        label:SetAnchor(BOTTOMLEFT, radarPin.texture, BOTTOMRIGHT)
-        radarPin.label = label
-        radarPin.labelKey = labelKey
-    end
+    local label, labelKey = pinLabelPool:AcquireObject()
+    label:SetAnchor(BOTTOMLEFT, radarPin.texture, BOTTOMRIGHT)
+    radarPin.label = label
+    radarPin.labelKey = labelKey
 
-    if MapRadar.showPointer and IsValidForPointer(pin) then
+    if IsValidForPointer(pin) then
         local pointerTexture, pointerKey = pointerPool:AcquireObject()
         pointerTexture:SetTexture("MapRadar/textures/pointer.dds")
         pointerTexture:SetAnchor(BOTTOM, MapRadar.playerPinTexture, CENTER)
         pointerTexture:SetAlpha(0.5)
         pointerTexture:SetDimensions(8, 64)
+        pointerTexture:SetHidden(true)
         radarPin.pointer = pointerTexture
         radarPin.pointerKey = pointerKey
     end

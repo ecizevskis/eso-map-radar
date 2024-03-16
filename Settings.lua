@@ -7,6 +7,7 @@ local function SettingsInit()
         radarSettings = {
             maxDistance = 800,
             showDistance = false,
+            showPointers = false,
             showQuests = true,
             showSkyshards = true,
             showWayshrines = true,
@@ -18,6 +19,7 @@ local function SettingsInit()
         overlaySettings = {
             maxDistance = 1200,
             showDistance = false,
+            showPointers = false,
             showQuests = true,
             showSkyshards = true,
             showWayshrines = true,
@@ -31,25 +33,78 @@ local function SettingsInit()
     MapRadar.config = ZO_SavedVars:NewCharacterIdSettings("MapRadar_Data", 1, nil, defaults)
 end
 
+local function CreateCheckBox(id, parent, data, key, text, tooltip, w, h)
+    local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
+    control:SetMouseEnabled(true)
+    control:SetDimensions(w or 150, h or 35)
+
+    control.checkbox = WINDOW_MANAGER:CreateControl("$(parent)_cbx", control, CT_TEXTURE)
+    control.checkbox:SetDimensions(35, 35)
+    control.checkbox:SetAnchor(TOPLEFT, control, TOPLEFT)
+
+    control.label = MapRadarCommon.CreateLabel("$(parent)_label", control, text)
+    control.label:SetAnchor(LEFT, control.checkbox, RIGHT, 0, 1)
+
+    control.SetChecked = function(self, value)
+        data[key] = value
+        self.checkbox:SetTexture(value and "esoui/art/cadwell/checkboxicon_checked.dds" or "esoui/art/cadwell/checkboxicon_unchecked.dds")
+    end
+
+    control:SetHandler(
+        "OnMouseEnter", function(self)
+            if tooltip then
+                ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
+            end
+        end)
+    control:SetHandler(
+        "OnMouseExit", function(self)
+            if tooltip then
+                ZO_Tooltips_HideTextTooltip()
+            end
+        end)
+    control:SetHandler(
+        "OnMouseDown", function(self, button, ctrl, alt, shift)
+            self:SetChecked(not data[key])
+            CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
+        end)
+
+    -- Init state
+    control:SetChecked(data[key])
+    return control
+end
+
 local function CreatePinOptionStack(id, parent, config)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
 
     control.config = config
     control.buttons = {}
 
-    control.addPinButton = function(self, optionKey, texture)
+    control.addPinButton = function(self, optionKey, texture, tooltip)
         local index = table.maxn(self.buttons) + 1
         local btn = WINDOW_MANAGER:CreateControl("$(parent)Button" .. index, self, CT_BUTTON)
         btn.config = self.config
         btn:SetDimensions(40, 40)
         btn:SetNormalTexture(texture)
         btn:SetAlpha(self.config[optionKey] and 1 or 0.3)
-        btn:SetHandler("OnClicked", function(self)
-            self.config[optionKey] = not self.config[optionKey]
-            self:SetAlpha(self.config[optionKey] and 1 or 0.3)
-            CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
-        end)
+        btn:SetHandler(
+            "OnClicked", function(self)
+                self.config[optionKey] = not self.config[optionKey]
+                self:SetAlpha(self.config[optionKey] and 1 or 0.3)
+                CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
+            end)
 
+        btn:SetHandler(
+            "OnMouseEnter", function(self)
+                if tooltip then
+                    ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
+                end
+            end)
+        btn:SetHandler(
+            "OnMouseExit", function(self)
+                if tooltip then
+                    ZO_Tooltips_HideTextTooltip()
+                end
+            end)
         if (index == 1) then
             btn:SetAnchor(TOPLEFT, self, TOPLEFT)
         else
@@ -62,58 +117,48 @@ local function CreatePinOptionStack(id, parent, config)
     return control
 end
 
+local function CreateModeSection(id, parent, title, config, w, h)
+    local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
+    control:SetDimensions(w or 500, h or 150)
+
+    local title = MapRadarCommon.CreateLabel("$(parent)_title", control, title)
+    title:SetAnchor(TOPLEFT, control, TOPLEFT)
+
+    local sectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_sectionDivider", control, "ZO_Options_Divider")
+    sectionDivider:SetAnchor(TOPLEFT, title, BOTTOMLEFT)
+
+    local optionStack = CreatePinOptionStack("$(parent)_optionStack", control, config)
+    optionStack:SetAnchor(TOPLEFT, sectionDivider, BOTTOMLEFT)
+    optionStack:SetDimensions(200, 50)
+
+    optionStack:addPinButton("showQuests", "EsoUi/Art/Compass/quest_icon_assisted.dds", "Show quests (from Quest Map too)")
+    optionStack:addPinButton("showWayshrines", "/esoui/art/icons/poi/poi_wayshrine_complete.dds", "Show wayshrines")
+    optionStack:addPinButton("showGroup", "/esoui/art/compass/groupleader.dds", "Show your group units")
+    optionStack:addPinButton("showDelves", "/esoui/art/icons/poi/poi_delve_complete.dds", "Show delves")
+    optionStack:addPinButton("showDungeons", "/esoui/art/icons/poi/poi_dungeon_complete.dds", "Show dungeons")
+    optionStack:addPinButton(
+        "showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds",
+        "Show porals (originally those are Dolmens but MapPins can add more of portals)")
+
+    local showDistanceCbx = CreateCheckBox(
+        "$(parent)_distCbx", control, config, "showDistance", "Show distance", "Show distance in meters for each radar pin")
+    showDistanceCbx:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT)
+
+    local showPointersCbx = CreateCheckBox(
+        "$(parent)_pointerCbx", control, config, "showPointers", "Show poiners", "Show pointers from player pin towards all quest pins")
+    showPointersCbx:SetAnchor(TOPLEFT, showDistanceCbx, TOPRIGHT)
+
+    return control
+end
+
 local function CreateForm()
 
-    -- ===================================================================================================
-    local radarLabel = MapRadarCommon.CreateLabel("radarLabel", MapRadar_Settings, "Radar mode settings")
-    radarLabel:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
+    local radarModeSection = CreateModeSection("$(parent)_radarSection", MapRadar_Settings, "Radar mode settings", MapRadar.config.radarSettings)
+    radarModeSection:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
 
-    local radarSectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_radarSectionDivider", MapRadar_Settings, "ZO_Options_Divider")
-    radarSectionDivider:SetAnchor(TOPLEFT, radarLabel, BOTTOMLEFT)
-
-    local radarOptionStack = CreatePinOptionStack("$(parent)radarOptionStack", MapRadar_Settings, MapRadar.config.radarSettings)
-    radarOptionStack:SetAnchor(TOPLEFT, radarSectionDivider, BOTTOMLEFT)
-
-    radarOptionStack:addPinButton("showQuests", "EsoUi/Art/Compass/quest_icon_assisted.dds")
-    radarOptionStack:addPinButton("showWayshrines", "/esoui/art/icons/poi/poi_wayshrine_complete.dds")
-    radarOptionStack:addPinButton("showGroup", "/esoui/art/compass/groupleader.dds")
-    radarOptionStack:addPinButton("showDelves", "/esoui/art/icons/poi/poi_delve_complete.dds")
-    radarOptionStack:addPinButton("showDungeons", "/esoui/art/icons/poi/poi_dungeon_complete.dds")
-    radarOptionStack:addPinButton("showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds")
-
-    -- This can maybe stay unconfigured?
-    -- LostTreasure  LostTreasure_SurveyReportPin
-    -- LostTreasure_TreasureMapPin
-    -- Map Pins  pinType_Treasure_Maps
-
-    -- TODO: check map filter somehow and show both shard icons (user can then choose)
-    -- But need to get tooltip working!!!!!!!!!!!!!!!!!!!!
-    -- For now Skyshards, surveys and treasures will just be displayed without config. (Lets assume this is desired always :))
-
-    --[[
-    if hasSkyShardAddon then
-        radarOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_seen.dds")
-        -- radarOptionStack:addPinButton("showSkyshards", "SkyShards/Icons/Skyshard-unknown.dds")
-        -- radarOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_complete.dds")
-    end
-    ]]
-
-    -- ===================================================================================================
-    local overlayLabel = MapRadarCommon.CreateLabel("OverlayLabel", MapRadar_Settings, "Overlay mode settings")
-    overlayLabel:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 200)
-
-    local overlaySectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_overlaySectionDivider", MapRadar_Settings, "ZO_Options_Divider")
-    overlaySectionDivider:SetAnchor(TOPLEFT, overlayLabel, BOTTOMLEFT)
-
-    local overlayOptionStack = CreatePinOptionStack("$(parent)overlayOptionStack", MapRadar_Settings, MapRadar.config.overlaySettings)
-    overlayOptionStack:SetAnchor(TOPLEFT, overlaySectionDivider, BOTTOMLEFT)
-
-    overlayOptionStack:addPinButton("showQuests", "EsoUi/Art/Compass/quest_icon_assisted.dds")
-    overlayOptionStack:addPinButton("showWayshrines", "/esoui/art/icons/poi/poi_wayshrine_complete.dds")
-    overlayOptionStack:addPinButton("showGroup", "/esoui/art/compass/groupleader.dds")
-    overlayOptionStack:addPinButton("showDelves", "/esoui/art/icons/poi/poi_delve_complete.dds")
-    overlayOptionStack:addPinButton("showDungeons", "/esoui/art/icons/poi/poi_dungeon_complete.dds")
-    overlayOptionStack:addPinButton("showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds")
+    local overlayModeSection = CreateModeSection(
+        "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings)
+    overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
 
     --[[
     if hasSkyShardAddon then
@@ -122,9 +167,10 @@ local function CreateForm()
     ]]
 end
 
-CALLBACK_MANAGER:RegisterCallback("OnMapRadarInitializing", function()
-    SettingsInit()
-    CreateForm()
-end)
+CALLBACK_MANAGER:RegisterCallback(
+    "OnMapRadarInitializing", function()
+        SettingsInit()
+        CreateForm()
+    end)
 
 -- WORLD_MAP_MANAGER:GetFilterValue(pinGroup)

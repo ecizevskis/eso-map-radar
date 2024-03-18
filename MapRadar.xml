@@ -25,7 +25,7 @@
 				</Button>
 
 				<Control name="MapRadar_Settings" hidden="true">
-					<Dimensions x="600" y="600" />
+					<Dimensions x="700" y="600" />
 					<Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="CENTER" offsetX="" />
 					<Controls>
 						<Backdrop name="$(parent)BG" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack" hidden="false" />

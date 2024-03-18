@@ -229,6 +229,7 @@ local function CreateSlider(id, parent, data, key, text, tooltip, w, h)
 
     control.label = MapRadarCommon.CreateLabel("$(parent)_label", control, text)
     control.label:SetAnchor(TOPLEFT, control, TOPLEFT)
+    control.label:SetDimensions(100, 30)
 
     control.slider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_slider", control, "ZO_Slider")
     control.slider:SetAnchor(TOPLEFT, control.label, TOPRIGHT, 5, 0)

@@ -84,6 +84,7 @@ local function IsValidPOI(pin)
     or texturePath:find("poi_dungeon") and MapRadar.modeSettings.showDungeons --
     or texturePath:find("poi_delve") and MapRadar.modeSettings.showDelves --
     or texturePath:find("poi_portal") and MapRadar.modeSettings.showPortals -- dolmen but also other portals :/
+    or texturePath:find("poi_groupboss") -- 
     then
         return true
     end
@@ -124,14 +125,19 @@ function MapRadarPin:SetVisibility()
 
     -- Maybe grouop should not fade that much??!
 
-    local maxAlpha = 1
+    local minAlpha = MapRadar.modeSettings.minAlpha / 100
+    local maxAlpha = MapRadar.modeSettings.maxAlpha / 100
 
     local alpha = maxAlpha
     if self.distance > MapRadar.maxRadarDistance then
-        alpha = math.max(0.4, maxAlpha - (self.distance - MapRadar.maxRadarDistance) / MapRadar.maxRadarDistance)
+        alpha = math.max(minAlpha, maxAlpha - (self.distance - MapRadar.maxRadarDistance) / MapRadar.maxRadarDistance)
     end
 
     self.texture:SetAlpha(alpha)
+
+    if self.pointer ~= nil then
+        self.pointer:SetAlpha(alpha)
+    end
 
     if self.label ~= nil then
         self.label:SetAlpha(alpha)
@@ -154,8 +160,10 @@ function MapRadarPin:SetPinDimensions()
         self.size = MapRadar.pinSize
     end
 
-    -- Min scale: 0.6, max scale: 0.9
-    local distanceScale = math.max(0.6, 0.9 - self.distance / MapRadar.maxRadarDistance / 2)
+    local minScale = MapRadar.modeSettings.minScale / 100
+    local maxScale = MapRadar.modeSettings.maxScale / 100
+
+    local distanceScale = math.max(minScale, maxScale - self.distance / MapRadar.maxRadarDistance / 2)
 
     self.scaledSize = self.size * distanceScale
     self.texture:SetDimensions(self.scaledSize, self.scaledSize)
@@ -292,7 +300,7 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
 
     -- Reset texture params
     -- self:ApplyTexture()
-    self:ApplyTint()
+    -- self:ApplyTint()
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
 end

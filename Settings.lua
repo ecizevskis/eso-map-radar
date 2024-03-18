@@ -14,7 +14,12 @@ local function SettingsInit()
             showDungeons = true,
             showDelves = true,
             showGroup = true,
-            showPortals = true
+            showPortals = true,
+
+            minAlpha = 40,
+            maxAlpha = 100,
+            minScale = 60,
+            maxScale = 100
         },
         overlaySettings = {
             maxDistance = 1200,
@@ -26,7 +31,12 @@ local function SettingsInit()
             showDungeons = true,
             showDelves = true,
             showGroup = true,
-            showPortals = true
+            showPortals = true,
+
+            minAlpha = 40,
+            maxAlpha = 100,
+            minScale = 60,
+            maxScale = 100
         }
     }
 
@@ -113,6 +123,24 @@ local function CreateModeSection(id, parent, title, config, w, h)
         "Set maximum distance for pin to be displayed in radar (Quest and Group pins ingnore this)", 100, 30)
     maxDistanceSlider:SetAnchor(TOPLEFT, showDistanceCbx, BOTTOMLEFT, 0, 10)
     maxDistanceSlider:SetMinMaxStep(400, 2500, 50)
+
+    -- Pin alpha sliders
+    local minAlphaSlider = MapRadarCommon.CreateSlider("$(parent)_minAlphaSlider", control, config, "minAlpha", "Min Alpha", "", 300, 30)
+    minAlphaSlider:SetAnchor(TOPLEFT, maxDistanceSlider, BOTTOMLEFT)
+    minAlphaSlider:SetMinMaxStep(10, 100, 5)
+
+    local maxAlphaSlider = MapRadarCommon.CreateSlider("$(parent)_maxAlphaSlider", control, config, "maxAlpha", "Max Alpha", "", 100, 30)
+    maxAlphaSlider:SetAnchor(TOPLEFT, minAlphaSlider, TOPRIGHT)
+    maxAlphaSlider:SetMinMaxStep(10, 100, 5)
+
+    -- Pin scale sliders
+    local minScaleSlider = MapRadarCommon.CreateSlider("$(parent)_minScaleSlider", control, config, "minScale", "Min Scale", "", 300, 30)
+    minScaleSlider:SetAnchor(TOPLEFT, minAlphaSlider, BOTTOMLEFT)
+    minScaleSlider:SetMinMaxStep(50, 200, 5)
+
+    local maxScaleSlider = MapRadarCommon.CreateSlider("$(parent)_maxScaleSlider", control, config, "maxScale", "Max Scale", "", 100, 30)
+    maxScaleSlider:SetAnchor(TOPLEFT, minScaleSlider, TOPRIGHT)
+    maxScaleSlider:SetMinMaxStep(50, 200, 5)
 
     -- TODO: 
     -- Check for custom pin types by names and show filter option

@@ -26,7 +26,7 @@ local function getMeterCoefficient()
         [3156] = 0.0003, -- Standard zone
         [1554] = 0.00145 -- Standard subzone
     }
---]]
+    ]]
 
     -- TODO: All should come from zone data table. Use only defaults if not found in zoene table
 

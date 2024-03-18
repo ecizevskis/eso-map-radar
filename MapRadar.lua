@@ -1,7 +1,6 @@
 -- TODO For release
 -- Saved variable usage (save mode, save radar position)
 -- Remove position calibration buttons, remove or hide Radar X button, relove position label (or hide with radar?)
--- Show distance checkbox configurations!!!!!
 -- Config page should be over overlay pins and text
 -- Config page close on ESC or Button with key E??
 -- Game default Skyshards

@@ -177,10 +177,121 @@ function Debouncer:New(callback, waitTimeMs)
 
     return instance
 end
+
+-- ==================================================================================================
+-- CheckBox
+local function CreateCheckBox(id, parent, data, key, text, tooltip, w, h)
+    local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
+    control:SetMouseEnabled(true)
+    control:SetDimensions(w or 150, h or 35)
+
+    control.checkbox = WINDOW_MANAGER:CreateControl("$(parent)_cbx", control, CT_TEXTURE)
+    control.checkbox:SetDimensions(35, 35)
+    control.checkbox:SetAnchor(TOPLEFT, control, TOPLEFT)
+
+    control.label = MapRadarCommon.CreateLabel("$(parent)_label", control, text)
+    control.label:SetAnchor(LEFT, control.checkbox, RIGHT, 0, 1)
+
+    control.SetChecked = function(self, value)
+        data[key] = value
+        self.checkbox:SetTexture(value and "esoui/art/cadwell/checkboxicon_checked.dds" or "esoui/art/cadwell/checkboxicon_unchecked.dds")
+    end
+
+    control:SetHandler(
+        "OnMouseEnter", function(self)
+            if tooltip then
+                ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
+            end
+        end)
+    control:SetHandler(
+        "OnMouseExit", function(self)
+            if tooltip then
+                ZO_Tooltips_HideTextTooltip()
+            end
+        end)
+    control:SetHandler(
+        "OnMouseDown", function(self, button, ctrl, alt, shift)
+            self:SetChecked(not data[key])
+            CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
+        end)
+
+    -- Init state
+    control:SetChecked(data[key])
+    return control
+end
+
+-- ==================================================================================================
+-- Slider
+local function CreateSlider(id, parent, data, key, text, tooltip, w, h)
+    local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
+    control:SetMouseEnabled(true)
+    control:SetDimensions(w or 500, h or 35)
+
+    control.label = MapRadarCommon.CreateLabel("$(parent)_label", control, text)
+    control.label:SetAnchor(TOPLEFT, control, TOPLEFT)
+
+    control.slider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_slider", control, "ZO_Slider")
+    control.slider:SetAnchor(TOPLEFT, control.label, TOPRIGHT, 5, 0)
+
+    control.SetMinMaxStep = function(self, min, max, step)
+        self.slider:SetValueStep(step)
+        self.slider:SetMinMax(min, max)
+
+        self.slider:SetValue(data[key])
+        self.value:SetText(data[key])
+    end
+
+    control.SetLabelDimensions = function(self, w, h)
+        self.lable:SetDimensions(w, h)
+    end
+
+    -- Value label
+    control.value = CreateLabel("$(parent)_valueLabel", control, text)
+    control.value:SetAnchor(LEFT, control.slider, RIGHT, 10)
+
+    control.slider:SetHandler(
+        "OnValueChanged", function(self, value, eventReason)
+            -- This gets fired on some internal creation or something else and provides minimum value. Need to ignore it then
+            if eventReason == EVENT_REASON_SOFTWARE then
+                return
+            end
+            control.value:SetText(value)
+            data[key] = value
+            CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
+        end)
+
+    control.slider:SetHandler(
+        "OnSliderReleased", function(self, value)
+
+        end)
+
+    -- Tooltip
+    control:SetHandler(
+        "OnMouseEnter", function(self)
+            if tooltip then
+                ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
+            end
+        end)
+    control:SetHandler(
+        "OnMouseExit", function(self)
+            if tooltip then
+                ZO_Tooltips_HideTextTooltip()
+            end
+        end)
+
+    -- Init values
+    control:SetMinMaxStep(0, 100, 1)
+
+    return control
+end
+
+-- ==================================================================================================
 -- namespace to export class to public
 MapRadarCommon = {
     -- simple construcotr metods
     CreateLabel = CreateLabel,
+    CreateCheckBox = CreateCheckBox,
+    CreateSlider = CreateSlider,
 
     -- components
     LabelStack = LabelStack,
@@ -188,41 +299,10 @@ MapRadarCommon = {
     Debouncer = Debouncer
 }
 
+-- Just event to load some test demo
+--[[
 EVENT_MANAGER:RegisterForEvent(
     "MapRadar", EVENT_PLAYER_ACTIVATED, function()
-        --[[
-    local ls2 = MapRadarCommon.LabelStack:New("$(parent)Stacktest1", MapRadarContainer, 2)
-    ls2:SetAnchor(TOP, GuiRoot, TOP, 0, 150)
-    ls2:SetFont("$(BOLD_FONT)|14|outline")
-
-    local ls5 = MapRadarCommon.LabelStack:New("$(parent)StackTest2", MapRadarContainer, 5)
-    ls5:SetAnchor(TOPLEFT, ls2, BOTTOMLEFT)
-    ls5:SetColor(unpack({1, 0.4, 0.6, 1}))
-
-    zo_callLater(function()
-        ls2:SetText(123)
-        ls5:SetText(123)
-    end, 1000)
-
-    zo_callLater(function()
-        ls2:SetText(234)
-        ls5:SetText(234)
-    end, 3000)
-
-    zo_callLater(function()
-        ls2:SetText(345)
-        ls5:SetText(345)
-    end, 5000)
-
-    zo_callLater(function()
-        ls2:SetText(456)
-        ls5:SetText(456)
-    end, 7000)
-
-    zo_callLater(function()
-        ls2:SetText(567)
-        ls5:SetText(567)
-    end, 9000)
-    --]]
 
     end)
+]]

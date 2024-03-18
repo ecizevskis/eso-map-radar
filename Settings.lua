@@ -33,46 +33,6 @@ local function SettingsInit()
     MapRadar.config = ZO_SavedVars:NewCharacterIdSettings("MapRadar_Data", 1, nil, defaults)
 end
 
-local function CreateCheckBox(id, parent, data, key, text, tooltip, w, h)
-    local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
-    control:SetMouseEnabled(true)
-    control:SetDimensions(w or 150, h or 35)
-
-    control.checkbox = WINDOW_MANAGER:CreateControl("$(parent)_cbx", control, CT_TEXTURE)
-    control.checkbox:SetDimensions(35, 35)
-    control.checkbox:SetAnchor(TOPLEFT, control, TOPLEFT)
-
-    control.label = MapRadarCommon.CreateLabel("$(parent)_label", control, text)
-    control.label:SetAnchor(LEFT, control.checkbox, RIGHT, 0, 1)
-
-    control.SetChecked = function(self, value)
-        data[key] = value
-        self.checkbox:SetTexture(value and "esoui/art/cadwell/checkboxicon_checked.dds" or "esoui/art/cadwell/checkboxicon_unchecked.dds")
-    end
-
-    control:SetHandler(
-        "OnMouseEnter", function(self)
-            if tooltip then
-                ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
-            end
-        end)
-    control:SetHandler(
-        "OnMouseExit", function(self)
-            if tooltip then
-                ZO_Tooltips_HideTextTooltip()
-            end
-        end)
-    control:SetHandler(
-        "OnMouseDown", function(self, button, ctrl, alt, shift)
-            self:SetChecked(not data[key])
-            CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
-        end)
-
-    -- Init state
-    control:SetChecked(data[key])
-    return control
-end
-
 local function CreatePinOptionStack(id, parent, config)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
 
@@ -119,7 +79,7 @@ end
 
 local function CreateModeSection(id, parent, title, config, w, h)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
-    control:SetDimensions(w or 500, h or 150)
+    control:SetDimensions(w or 500, h or 300)
 
     local title = MapRadarCommon.CreateLabel("$(parent)_title", control, title)
     title:SetAnchor(TOPLEFT, control, TOPLEFT)
@@ -140,13 +100,28 @@ local function CreateModeSection(id, parent, title, config, w, h)
         "showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds",
         "Show porals (originally those are Dolmens but MapPins can add more of portals)")
 
-    local showDistanceCbx = CreateCheckBox(
+    local showDistanceCbx = MapRadarCommon.CreateCheckBox(
         "$(parent)_distCbx", control, config, "showDistance", "Show distance", "Show distance in meters for each radar pin")
     showDistanceCbx:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT)
 
-    local showPointersCbx = CreateCheckBox(
+    local showPointersCbx = MapRadarCommon.CreateCheckBox(
         "$(parent)_pointerCbx", control, config, "showPointers", "Show poiners", "Show pointers from player pin towards all quest pins")
     showPointersCbx:SetAnchor(TOPLEFT, showDistanceCbx, TOPRIGHT)
+
+    local maxDistanceSlider = MapRadarCommon.CreateSlider(
+        "$(parent)_maxDistanceSlider", control, config, "maxDistance", "Max distance",
+        "Set maximum distance for pin to be displayed in radar (Quest and Group pins ingnore this)", 100, 30)
+    maxDistanceSlider:SetAnchor(TOPLEFT, showDistanceCbx, BOTTOMLEFT, 0, 10)
+    maxDistanceSlider:SetMinMaxStep(400, 2500, 50)
+
+    -- TODO: 
+    -- Check for custom pin types by names and show filter option
+    -- LostTreasure survey maps
+    -- LostTreasure treasure maps
+    -- MapPins Survey maps
+    -- MapPins Treasure maps
+    -- MapPins Skyshards
+    -- SkyShard skyshards
 
     return control
 end

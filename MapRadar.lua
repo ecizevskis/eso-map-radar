@@ -4,21 +4,12 @@
 -- Config page should be over overlay pins and text
 -- Config page close on ESC or Button with key E??
 -- Game default Skyshards
--- Show world boss config
--- InvokeCount to saved variables and switch by CMD
 -- calibrate dungeons
 -- calibrate delves
 -- calibrate elden root inner
 -- Create zoneData table with: meterCoef, isZone, isSubzone, isDungeon, isDelve, isTrial
 -- ===================================================================================================
--- Prepare pinData on addon load to include supported pinTypes (also calc all pinTypes for custom pins) (table data loads: texture, scale/size, visibility)
--- Create secondaryMethod (after pin type table) to fetch pinData by texture
--- Custom pin types read and saved to internal constants (QuestMap, TreasuremMap)
--- Convert get icon method to table data fetch (for better performance)
--- Create invoke analyzer
--- Debounce methods for key bindings
--- Survey/Treasure if you have map/item (load from LibTreasure) or juts rely on TreasureMap, Destinations or whatnot else??
--- Hide in combat option
+-- Hide in combat option??
 MapRadar = {
     -- Localize global objects for better performance
     worldMap = ZO_WorldMap,

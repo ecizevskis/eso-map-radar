@@ -15,6 +15,7 @@ local function SettingsInit()
             showDelves = true,
             showGroup = true,
             showPortals = true,
+            showWorldBosses = true,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -32,6 +33,7 @@ local function SettingsInit()
             showDelves = true,
             showGroup = true,
             showPortals = true,
+            showWorldBosses = true,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -113,6 +115,7 @@ local function CreateModeSection(id, parent, title, config, w, h)
     optionStack:addPinButton(
         "showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds",
         "Show porals (originally those are Dolmens but MapPins can add more of portals)")
+    optionStack:addPinButton("showWorldBosses", "/esoui/art/icons/poi/poi_groupboss_complete.dds", "Show world bosses")
 
     local showDistanceCbx = MapRadarCommon.CreateCheckBox(
         "$(parent)_distCbx", control, config, "showDistance", "Show distance", "Show distance in meters for each radar pin")

@@ -1,7 +1,5 @@
 -- TODO: 
--- on disabling showDistance need to close them all? or hide sonehow?
--- area pins / blobs
--- Texture apply removed from update, test that animation gets started? test on dragon!!!! - This works
+-- area pins / blobs - Is it worth trying to do?
 -- Texture might change for item (pin updated with some data but with same type so it is not filtered out, 
 --    need to check texture integrity but not reload it)
 -- Sky shards may load from different addons. Check each:

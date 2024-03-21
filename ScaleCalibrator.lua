@@ -1,6 +1,8 @@
 local scaleLabel = {}
 local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 local dataForm = {}
+local mgridTexture = {}
+local btnSaveScaleData = {}
 
 local ScaleData = {
     dx = 0,
@@ -72,7 +74,8 @@ local function CreateCalibrationDataForm()
             return ScaleData.unit1
         end)
 
-    local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", MapRadarContainer, "plusButtonTemplate")
+    btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", MapRadarContainer, "plusButtonTemplate")
+    btnSaveScaleData:SetDimensions(50, 50)
     btnSaveScaleData:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT)
     btnSaveScaleData:SetHandler(
         "OnClicked", function()
@@ -94,7 +97,7 @@ local function MapRadar_InitScaleCalibrator()
 
     CreateCalibrationDataForm()
 
-    local mgridTexture = CreateControl("$(parent)Mgrid", MapRadarContainer, CT_TEXTURE)
+    mgridTexture = CreateControl("$(parent)Mgrid", MapRadarContainer, CT_TEXTURE)
     mgridTexture:SetTexture("MapRadar/textures/mgrid.dds")
     mgridTexture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER)
     mgridTexture:SetDimensions(329, 329)
@@ -144,34 +147,55 @@ local function MapRadar_InitScaleCalibrator()
     end)
 ]]
 
-    -- ===================================================================================
-    -- Fetch party leader pin to use for calculation
-    EVENT_MANAGER:RegisterForUpdate(
-        "MapRadar_PinReader", 100, function()
-            local pins = MapRadar.pinManager:GetActiveObjects()
+end
 
-            for pinKey, pin in pairs(pins) do
-                -- MAP_PIN_TYPE_ACTIVE_COMPANION
-                -- MAP_PIN_TYPE_GROUP_LEADER
+local function EnableOrDisableCalibrator()
+    dataForm:SetHidden(not MapRadar.config.showCalibrate)
+    mgridTexture:SetHidden(not MapRadar.config.showCalibrate)
+    btnSaveScaleData:SetHidden(not MapRadar.config.showCalibrate)
 
-                if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER 
-                and pin.normalizedX and pin.normalizedY then
-                    showCalibrationData(pin)
-                    return
+    if MapRadar.config.showCalibrate then
+        -- ===================================================================================
+        -- Fetch party leader pin to use for calculation
+        EVENT_MANAGER:RegisterForUpdate(
+            "MapRadar_PinReader", 100, function()
+                local pins = MapRadar.pinManager:GetActiveObjects()
+
+                for pinKey, pin in pairs(pins) do
+                    -- MAP_PIN_TYPE_ACTIVE_COMPANION
+                    -- MAP_PIN_TYPE_GROUP_LEADER
+
+                    if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER 
+                    and pin.normalizedX and pin.normalizedY then
+                        showCalibrationData(pin)
+                        return
+                    end
                 end
-            end
 
-        end)
+            end)
+    else
+        EVENT_MANAGER:UnregisterForUpdate("MapRadar_PinReader")
+    end
 end
 
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitialized", function()
-
         if MapRadar.config.scaleData == nil then
             MapRadar.config.scaleData = {}
         end
 
-        if MapRadar.showCalibrate then
+        if MapRadar.config.showCalibrate then
             MapRadar_InitScaleCalibrator()
         end
+
+        EnableOrDisableCalibrator()
+    end)
+
+CALLBACK_MANAGER:RegisterCallback(
+    "OnMapRadarSlashCommand", function()
+        if MapRadar.config.showCalibrate and dataForm == nil then
+            MapRadar_InitScaleCalibrator()
+        end
+
+        EnableOrDisableCalibrator()
     end)

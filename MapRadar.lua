@@ -1,11 +1,11 @@
 -- TODO For release
--- Saved variable usage (save mode, save radar position)
+-- Saved variable usage (save radar position)
 -- Remove position calibration buttons, remove or hide Radar X button, relove position label (or hide with radar?)
 -- Config page should be over overlay pins and text
 -- Config page close on ESC or Button with key E??
 -- Game default Skyshards
--- Pointer showing to config and setup page
--- InvokeCount and Calibrator to saved variables and switch by CMD
+-- Show world boss config
+-- InvokeCount to saved variables and switch by CMD
 -- calibrate dungeons
 -- calibrate delves
 -- calibrate elden root inner
@@ -59,7 +59,6 @@ MapRadar = {
     end,
     -- ==================================================================================================
     -- Debug stuff
-    showCalibrate = true,
     showAllPins = false,
     showPinLoc = false,
     showPinNames = false,
@@ -346,29 +345,40 @@ local function slashCommands(args)
         MapRadar.showAllPins = not MapRadar.showAllPins
         local flagStr = MapRadar.showAllPins and "ON" or "OFF"
         MapRadar.debug("Show all pins: <<1>>", flagStr)
-        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
 
     if args == "names" then
         MapRadar.showPinNames = not MapRadar.showPinNames
         local flagStr = MapRadar.showPinNames and "ON" or "OFF"
         MapRadar.debug("Show names: <<1>>", flagStr)
-        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
 
     if args == "dist" then
         MapRadar.modeSettings.showDistance = not MapRadar.modeSettings.showDistance
         local flagStr = MapRadar.modeSettings.showDistance and "ON" or "OFF"
         MapRadar.debug("Show disatnce: <<1>>", flagStr)
-        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
 
     if args == "para" then
         MapRadar.showPinParams = not MapRadar.showPinParams
         local flagStr = MapRadar.showPinParams and "ON" or "OFF"
         MapRadar.debug("Show params: <<1>>", flagStr)
-        CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     end
+
+    if args == "calibrate" then
+        MapRadar.config.showCalibrate = not MapRadar.config.showCalibrate
+        local flagStr = MapRadar.config.showCalibrate and "ON" or "OFF"
+        MapRadar.debug("Show calibrate: <<1>>", flagStr)
+    end
+
+    if args == "analyzer" then
+        MapRadar.config.showAnalyzer = not MapRadar.config.showAnalyzer
+        local flagStr = MapRadar.config.showAnalyzer and "ON" or "OFF"
+        MapRadar.debug("Show analyzer: <<1>>", flagStr)
+    end
+
+    CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
+    CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
 end
 
 SLASH_COMMANDS["/mapradar"] = slashCommands
@@ -379,6 +389,7 @@ SLASH_COMMANDS["/mr"] = slashCommands
 
 function MapRadar_button()
     -- registerMapPins() -- reset all pins placement (for calibration)
+    --[[
     local pins = MapRadar.pinManager:GetActiveObjects()
     MapRadar.debug("Pins: <<1>>", table.maxn(pins))
     -- local oW, oH = MapRadar.orig_GetMapDimensions()
@@ -404,7 +415,7 @@ function MapRadar_button()
     MapRadar.debug("GetUnitWorldPosition: <<1>>  <<2>> <<3>>", pwx2, pwh2, pwy2)
 
     MapRadar.debug("ZO_WorldMapContainer: <<1>>  <<2>>", ZO_WorldMapContainer:GetDimensions())
-
+]]
     --[[
     MapRadar.debug("GetFilterValue: <<1>>", MapRadar.getStrVal(ZO_WorldMapManager:GetFilterValue(MAP_FILTER_WAYSHRINES)))
 
@@ -420,6 +431,11 @@ function MapRadar_button()
 
     -- MAP_MODE_LARGE_CUSTOM
     ]]
+
+    local x, y, h = GetMapPlayerPosition("player")
+    local pinTag = "sometag"
+    ZO_WorldMap_GetPinManager():CreatePin(2, pinTag, x, y, 0.06)
+
 end
 
 --[[

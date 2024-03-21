@@ -37,7 +37,11 @@ local function SettingsInit()
             maxAlpha = 100,
             minScale = 60,
             maxScale = 100
-        }
+        },
+
+        -- Debug 
+        showCalibrate = false,
+        showAnalyzer = false
     }
 
     MapRadar.config = ZO_SavedVars:NewCharacterIdSettings("MapRadar_Data", 1, nil, defaults)

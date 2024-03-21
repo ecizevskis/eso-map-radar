@@ -8,10 +8,6 @@ local AnalyzerData = {
     pointerRotateCount = 0
 }
 
-local function showAnalyzerData()
-    dataForm:Update()
-end
-
 local function CreateInvokeAnalyzerDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("InvokeAnalyzerDataForm", MapRadarContainer)
@@ -42,24 +38,6 @@ end
 local function MapRadar_InitInvokeAnalyzer()
     CreateInvokeAnalyzerDataForm()
 
-    EVENT_MANAGER:RegisterForUpdate(
-        "MapRadar_AnalyzerReader", 1000, function()
-            showAnalyzerData()
-
-            -- Rest counters
-            AnalyzerData.pinCreateCount = 0
-            AnalyzerData.pinRemoveCount = 0
-            AnalyzerData.pinUpdateCount = 0
-
-            --[[
-        local mapScrollHidden = MapRadar.getStrVal(ZO_WorldMapScroll:IsHidden())
-        local navOverlayShowing = MapRadar.getStrVal(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:IsShowing())
-        local worldmapShowing = MapRadar.getStrVal(SCENE_MANAGER:IsShowing("worldMap"))
-
-        MapRadar.debugDebounce("Scroll hidden: <<1>>,  NavOverlay: <<2>>,  WorldMap: <<3>>", mapScrollHidden, navOverlayShowing, worldmapShowing)
---]]
-        end)
-
     CALLBACK_MANAGER:RegisterCallback(
         "OnMapRadar_NewPin", function(radarPin)
             -- MapRadar.debug("New radar pin: <<1>>", radarPin.key)
@@ -81,7 +59,49 @@ local function MapRadar_InitInvokeAnalyzer()
     d("InvokeAnalyzer enabled")
 end
 
+local function EnableOrDisableAnalyzer()
+    dataForm:SetHidden(not MapRadar.config.showAnalyzer)
+
+    if MapRadar.config.showAnalyzer then
+        EVENT_MANAGER:RegisterForUpdate(
+            "MapRadar_AnalyzerReader", 1000, function()
+
+                if not MapRadar.config.showAnalyzer then
+                    return
+                end
+
+                dataForm:Update()
+
+                -- Rest counters
+                AnalyzerData.pinCreateCount = 0
+                AnalyzerData.pinRemoveCount = 0
+                AnalyzerData.pinUpdateCount = 0
+
+                --[[
+            local mapScrollHidden = MapRadar.getStrVal(ZO_WorldMapScroll:IsHidden())
+            local navOverlayShowing = MapRadar.getStrVal(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:IsShowing())
+            local worldmapShowing = MapRadar.getStrVal(SCENE_MANAGER:IsShowing("worldMap"))
+    
+            MapRadar.debugDebounce("Scroll hidden: <<1>>,  NavOverlay: <<2>>,  WorldMap: <<3>>", mapScrollHidden, navOverlayShowing, worldmapShowing)
+    --]]
+            end)
+    else
+        EVENT_MANAGER:UnregisterForUpdate("MapRadar_AnalyzerReader")
+    end
+end
+
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitializing", function()
         MapRadar_InitInvokeAnalyzer()
+        EnableOrDisableAnalyzer()
+    end)
+
+CALLBACK_MANAGER:RegisterCallback(
+    "OnMapRadarSlashCommand", function()
+
+        if MapRadar.config.showAnalyzer and dataForm == nil then
+            MapRadar_InitInvokeAnalyzer()
+        end
+
+        EnableOrDisableAnalyzer()
     end)

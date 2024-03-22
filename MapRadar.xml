@@ -12,19 +12,7 @@
 					<Anchor point="CENTER" relativeTo="$(parent)" relativePoint="CENTER" />
 				</Texture>
 
-				<Button name="$(parent)Button1" inherits="ZO_ButtonBehaviorClickSound">
-					<Dimensions x="40" y="40" />
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" />
-					<Textures normal="EsoUI/Art/Buttons/closebutton_up.dds"
-						pressed="EsoUI/Art/Buttons/closebutton_down.dds"
-						mouseOver="EsoUI/Art/Buttons/closebutton_mouseover.dds"
-						disabled="EsoUI/Art/Buttons/closebutton_disabled.dds"/>
-					<OnClicked>
-						MapRadar_button()
-					</OnClicked>
-				</Button>
-
-				<Control name="MapRadar_Settings" hidden="true">
+				<Control name="MapRadar_Settings" hidden="true" tier="MEDIUM">
 					<Dimensions x="700" y="600" />
 					<Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="CENTER" offsetX="" />
 					<Controls>

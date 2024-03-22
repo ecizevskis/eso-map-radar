@@ -1,7 +1,5 @@
 -- TODO For release
 -- Saved variable usage (save radar position)
--- Remove position calibration buttons, remove or hide Radar X button, relove position label (or hide with radar?)
--- Config page should be over overlay pins and text
 -- Config page close on ESC or Button with key E??
 -- Game default Skyshards
 -- calibrate dungeons
@@ -34,7 +32,7 @@ MapRadar = {
     maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
     pinSize = 0,
 
-    positionLabel = {},
+    -- positionLabel = {},
     activePins = {},
     modeSettings = {},
 
@@ -184,7 +182,7 @@ local function mapUpdate()
     playerX = px
     playerY = py
 
-    MapRadar.positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
+    -- MapRadar.positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
     MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- reposition pins
@@ -221,11 +219,13 @@ local function initialize(eventType, addonName)
     playerPinTexture:SetAlpha(0.5)
     MapRadar.playerPinTexture = playerPinTexture
 
+    --[[
     local positionLabel = CreateControl("$(parent)PositionLabel", MapRadarContainer, CT_LABEL)
     positionLabel:SetAnchor(TOPLEFT, MapRadarContainer, TOPRIGHT)
     positionLabel:SetFont("$(MEDIUM_FONT)|14|outline")
     positionLabel:SetColor(unpack({1, 1, 1, 1}))
     MapRadar.positionLabel = positionLabel
+    ]]
 
     -- Set mode to radar from start (should be saved to variables later)
     setOverlayMode(MapRadar.config.isOverlayMode);

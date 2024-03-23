@@ -1,11 +1,14 @@
 -- TODO For release
+-- Recheck texture to dispose pin (POI pins can be reused and not get filtered of but texture reloads)
 -- Saved variable usage (save radar position)
 -- Config page close on ESC or Button with key E??
+-- Load data from calibration to map data table if zone not present there
+-- Show distance labels in yellow if calibration for this zone is missing and common default is used
 -- Game default Skyshards
 -- calibrate dungeons
 -- calibrate delves
 -- calibrate elden root inner
--- Create zoneData table with: meterCoef, isZone, isSubzone, isDungeon, isDelve, isTrial
+-- Create zoneData table with: meterCoef, zoneType
 -- ===================================================================================================
 -- Hide in combat option??
 MapRadar = {
@@ -115,7 +118,7 @@ local function registerMapPins()
 
     -- Dispose invalid pins
     for k, radarPin in pairs(MapRadar.activePins) do
-        if not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin or radarPin.pinType ~= radarPin.pin:GetPinType() then
+        if radarPin.isCorrupted or not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
             MapRadar.activePins[k]:Dispose()
             MapRadar.activePins[k] = nil
         end
@@ -191,6 +194,15 @@ local function mapUpdate()
     end
 end
 
+local function mapPinIntegrityCheck()
+    for key, radarPin in pairs(MapRadar.activePins) do
+        if not radarPin:CheckIntegrity() then
+            radarPin.isCorrupted = true
+            CALLBACK_MANAGER:FireCallbacks("MapRadar_CorruptedPin")
+        end
+    end
+end
+
 local prevPinCount = 0
 local function mapPinCountCheck()
     local pins = MapRadar.pinManager:GetActiveObjects()
@@ -235,7 +247,8 @@ local function initialize(eventType, addonName)
     SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
 
     EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, mapUpdate)
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCount", 100, mapPinCountCheck)
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCount", 200, mapPinCountCheck)
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCheck", 1000, mapPinIntegrityCheck)
 
     CALLBACK_MANAGER:RegisterCallback(
         "MapRadar_Reset", function()
@@ -483,3 +496,4 @@ local w, h = ZO_WorldMapScroll:GetDimensions()
 -- Search on ESOUI Source Code WorldPositionToGuiRender3DPosition(integer worldX, integer worldY, integer worldZ)
 -- Returns: number renderX, number renderY, number renderZ 
 
+-- 	local subzone=string.match(string.gsub(GetMapTileTexture(),"_base[_%w]*",""),"([%w%-_]+).dds$")

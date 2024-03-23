@@ -4,6 +4,7 @@ local AnalyzerData = {
     pinCreateCount = 0,
     pinRemoveCount = 0,
     pinUpdateCount = 0,
+    pinCorruptedCount = 0,
     pointerCreatinCount = 0,
     pointerRotateCount = 0
 }
@@ -33,6 +34,10 @@ local function CreateInvokeAnalyzerDataForm()
         "Pin Update", function()
             return AnalyzerData.pinUpdateCount
         end)
+    dataForm:AddStack(
+        "Pin Corrupted", function()
+            return AnalyzerData.pinCorruptedCount
+        end)
 end
 
 local function MapRadar_InitInvokeAnalyzer()
@@ -40,20 +45,22 @@ local function MapRadar_InitInvokeAnalyzer()
 
     CALLBACK_MANAGER:RegisterCallback(
         "OnMapRadar_NewPin", function(radarPin)
-            -- MapRadar.debug("New radar pin: <<1>>", radarPin.key)
             AnalyzerData.pinCreateCount = AnalyzerData.pinCreateCount + 1
         end)
 
     CALLBACK_MANAGER:RegisterCallback(
         "OnMapRadar_RemovePin", function(radarPin)
-            -- MapRadar.debug("Removed radar pin: <<1>>", radarPin.key)
             AnalyzerData.pinRemoveCount = AnalyzerData.pinRemoveCount + 1
         end)
 
     CALLBACK_MANAGER:RegisterCallback(
         "OnMapRadar_UpdatePin", function(radarPin)
-            -- MapRadar.debug("Removed radar pin: <<1>>", radarPin.key)
             AnalyzerData.pinUpdateCount = AnalyzerData.pinUpdateCount + 1
+        end)
+
+    CALLBACK_MANAGER:RegisterCallback(
+        "MapRadar_CorruptedPin", function(radarPin)
+            AnalyzerData.pinCorruptedCount = AnalyzerData.pinCorruptedCount + 1
         end)
 
     d("InvokeAnalyzer enabled")
@@ -76,6 +83,7 @@ local function EnableOrDisableAnalyzer()
                 AnalyzerData.pinCreateCount = 0
                 AnalyzerData.pinRemoveCount = 0
                 AnalyzerData.pinUpdateCount = 0
+                AnalyzerData.pinCorruptedCount = 0
 
                 --[[
             local mapScrollHidden = MapRadar.getStrVal(ZO_WorldMapScroll:IsHidden())

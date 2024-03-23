@@ -57,6 +57,20 @@ local function CreateCalibrationDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("CalibrateDataForm", MapRadarContainer)
     dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 100, -100)
+
+    dataForm:AddLabel(
+        "GetCurrentMapId", function()
+            return GetCurrentMapId()
+        end)
+    dataForm:AddLabel(
+        "GetCurrentMapIndex", function()
+            return GetCurrentMapIndex()
+        end)
+    dataForm:AddLabel(
+        "GetCurrentMapZoneIndex", function()
+            return GetCurrentMapZoneIndex()
+        end)
+
     dataForm:AddLabel(
         "Zone", function()
             return MapRadar.worldMap.zoneName

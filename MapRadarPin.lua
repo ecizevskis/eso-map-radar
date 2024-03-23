@@ -170,6 +170,7 @@ end
 function MapRadarPin:ApplyTexture()
     local texture = "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" -- unknown pin
 
+    -- Just in case check
     if self.animationTimeline then
         self.animationTimeline:Stop()
     end
@@ -195,8 +196,8 @@ function MapRadarPin:ApplyTexture()
         end
     end
 
-    -- change texture only if it changed
     self.texture:SetTexture(texture)
+    self.texturePath = texture
 end
 
 function MapRadarPin:ApplyTint()
@@ -208,6 +209,36 @@ function MapRadarPin:ApplyTint()
     end
 
     self.texture:SetColor(unpack({1, 1, 1, 1}))
+end
+
+function MapRadarPin:CheckIntegrity()
+    local pinType = self.pin:GetPinType()
+    if pinType == nil then
+        return false
+    end
+
+    -- If pin type chnaged then not valid
+    if self.pinType ~= pinType then
+        return false
+    end
+
+    local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
+    if pinData == nil then
+        return false
+    end
+
+    -- If there is no texture pin is not valid
+    if pinData.texture == nil then
+        return false
+    end
+
+    -- Check if texture changed
+    local texture = MapRadar.value(pinData.texture, self.pin)
+    if texture ~= self.texturePath then
+        return false
+    end
+
+    return true
 end
 
 function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)

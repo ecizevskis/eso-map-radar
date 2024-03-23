@@ -130,7 +130,7 @@ function DataForm:New(id, parent)
 
     control.Update = function(self)
         for k, dataLabel in pairs(self.labels) do
-            dataLabel.control:SetText(dataLabel.fetch())
+            dataLabel.control:SetText(dataLabel.fetch() or " ")
         end
     end
 

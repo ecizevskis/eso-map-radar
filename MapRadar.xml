@@ -26,18 +26,5 @@
 		<Texture name="PointerTemplate" virtual="true" />
 
 		<Label name="LabelTemplate" virtual="true" font="$(BOLD_FONT)|13|outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
-
-		<Button name="plusButtonTemplate" inherits="ZO_ButtonBehaviorClickSound" virtual="true" >
-			<Dimensions x="30" y="30" />
-			<Textures normal="ESOUI/art/buttons/plus_up.dds"
-				pressed="ESOUI/art/buttons/plus_down.dds"
-				mouseOver="ESOUI/art/buttons/plus_over.dds" />
-		</Button>
-		<Button name="minusButtonTemplate" inherits="ZO_ButtonBehaviorClickSound" virtual="true" >
-			<Dimensions x="30" y="30" />
-			<Textures normal="ESOUI/art/buttons/minus_up.dds"
-				pressed="ESOUI/art/buttons/minus_down.dds"
-				mouseOver="ESOUI/art/buttons/minus_over.dds" />
-		</Button>
 	</Controls>
 </GuiXml>

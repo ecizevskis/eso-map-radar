@@ -161,7 +161,20 @@ local function CreateModeSection(id, parent, title, config, w, h)
     return control
 end
 
+function MapRadar_toggleSettings()
+    local isOpen = MapRadar_Settings:IsHidden()
+    MapRadar_Settings:SetHidden(not isOpen)
+    SetGameCameraUIMode(isOpen)
+    -- MapRadar.debug("This will open configuration")
+end
+
 local function CreateForm()
+    local closeButton = CreateControlFromVirtual("$(parent)closeButton", MapRadar_Settings, "ZO_DialogButton")
+    closeButton:SetAnchor(BOTTOMRIGHT, btnSavePosition2, BOTTOMRIGHT, -20, -20)
+    ZO_KeybindButtonTemplate_Setup(
+        closeButton, "TOGGLE_SYSTEM", function()
+            MapRadar_toggleSettings()
+        end, "Close")
 
     local radarModeSection = CreateModeSection("$(parent)_radarSection", MapRadar_Settings, "Radar mode settings", MapRadar.config.radarSettings)
     radarModeSection:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
@@ -169,6 +182,18 @@ local function CreateForm()
     local overlayModeSection = CreateModeSection(
         "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings)
     overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
+
+    -- Escape key handling
+    ZO_PreHook(
+        "ZO_SceneManager_ToggleGameMenuBinding", function()
+            local isOpen = not MapRadar_Settings:IsHidden()
+            if isOpen then
+                MapRadar_toggleSettings()
+                return true
+            end
+
+            return false
+        end)
 
     --[[
     if hasSkyShardAddon then

@@ -1,5 +1,5 @@
 -- TODO For release
--- Check if localization changes zoneName property and could it be used for list or better use some index?
+-- zoneName gets localized (what a shiity!!!) need to switch to use index instead. MapId - use this (MapIndex points to parent map zone)???
 -- Saved variable usage (save radar position)
 -- Config page close on ESC or Button with key E??
 -- Load data from calibration to map data table if zone not present there
@@ -321,15 +321,12 @@ EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 
 -- ==================================================================================================
 -- Key binding
+
 local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
     function(count)
 
         if count == 2 then
-            local openConfig = MapRadar_Settings:IsHidden()
-            MapRadar_Settings:SetHidden(not openConfig)
-            SetGameCameraUIMode(openConfig)
-            -- MapRadar.debug("This will open configuration")
-            return
+            return MapRadar_toggleSettings()
         end
 
         setOverlayMode(not MapRadar.config.isOverlayMode)

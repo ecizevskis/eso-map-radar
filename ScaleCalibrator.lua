@@ -2,13 +2,17 @@ local scaleLabel = {}
 local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 local dataForm = {}
 local mgridTexture = {}
-local btnSaveScaleData = {}
+-- local btnSaveScaleData = {}
 
 local ScaleData = {
     dx = 0,
     dy = 0,
+    px = 0,
+    py = 0,
     unit1 = 0
 }
+
+local storedPos1 = {}
 
 -- TODO: 
 -- Data save button to saved variables
@@ -34,17 +38,31 @@ local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     return label;
 end
 
+local function calc1meter(x1, y1, x2, y2)
+    local measuredMeters = 40
+
+    local dx = x1 - x2
+    local dy = y1 - y2
+
+    local distance = math.sqrt(dx ^ 2 + dy ^ 2) -- distance in percentage
+
+    return distance / measuredMeters -- calculate map part for 1 meter
+end
+
 local function showCalibrationData(pin)
 
-    local measuredMeters = 40
+    -- local measuredMeters = 40
     local playerX, playerY = MapRadar.getMapPlayerPosition("player")
+
+    ScaleData.px = playerX
+    ScaleData.py = playerY
 
     ScaleData.dx = pin.normalizedX - playerX
     ScaleData.dy = pin.normalizedY - playerY
 
-    local distance = math.sqrt(ScaleData.dx ^ 2 + ScaleData.dy ^ 2) -- distance in percentage
+    -- local distance = math.sqrt(ScaleData.dx ^ 2 + ScaleData.dy ^ 2) -- distance in percentage
 
-    ScaleData.unit1 = distance / measuredMeters -- calculate map part for 1 meter
+    ScaleData.unit1 = calc1meter(pin.normalizedX, pin.normalizedY, playerX, playerY) -- distance / measuredMeters -- calculate map part for 1 meter
 
     dataForm:Update()
 
@@ -77,18 +95,26 @@ local function CreateCalibrationDataForm()
         end)
     dataForm:AddLabel(
         "Rel DX", function()
-            return zo_strformat("<<1>>", ScaleData.dx * displayMultiplier)
+            return ScaleData.dx
         end)
     dataForm:AddLabel(
         "Rel DY", function()
-            return zo_strformat("<<1>>", ScaleData.dy * displayMultiplier)
+            return ScaleData.dy
+        end)
+    dataForm:AddLabel(
+        "Rel PX", function()
+            return ScaleData.px
+        end)
+    dataForm:AddLabel(
+        "Rel PY", function()
+            return ScaleData.py
         end)
     dataForm:AddLabel(
         "Unit1", function()
             return ScaleData.unit1
         end)
 
-    btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", MapRadarContainer, "plusButtonTemplate")
+    local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", dataForm, "plusButtonTemplate")
     btnSaveScaleData:SetDimensions(50, 50)
     btnSaveScaleData:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT)
     btnSaveScaleData:SetHandler(
@@ -99,12 +125,46 @@ local function CreateCalibrationDataForm()
             local data = {
                 dx = ScaleData.dx,
                 dy = ScaleData.dy,
-                unit1 = ScaleData.unit1
+                unit1 = ScaleData.unit1,
+                mapId = GetCurrentMapId(),
+                zoneIndex = GetCurrentMapZoneIndex()
             }
 
             MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
             MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
         end)
+
+    local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "plusButtonTemplate")
+    btnSavePosition1:SetDimensions(50, 50)
+    btnSavePosition1:SetAnchor(TOPLEFT, btnSaveScaleData, BOTTOMLEFT, 0, 30)
+    btnSavePosition1:SetHandler(
+        "OnClicked", function()
+            storedPos1.px = ScaleData.px
+            storedPos1.py = ScaleData.py
+
+            MapRadar.debug("Saved position one")
+        end)
+
+    local btnSavePosition2 = CreateControlFromVirtual("$(parent)btnSavePosition2", dataForm, "plusButtonTemplate")
+    btnSavePosition2:SetDimensions(50, 50)
+    btnSavePosition2:SetAnchor(TOPLEFT, btnSavePosition1, TOPRIGHT)
+    btnSavePosition2:SetHandler(
+        "OnClicked", function()
+            local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
+            local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
+
+            local data = {
+                dx = ScaleData.px - storedPos1.px,
+                dy = ScaleData.py - storedPos1.py,
+                unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py)
+            }
+
+            storedPos1 = {}
+
+            MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
+            MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
+        end)
+
 end
 
 local function MapRadar_InitScaleCalibrator()
@@ -166,7 +226,7 @@ end
 local function EnableOrDisableCalibrator()
     dataForm:SetHidden(not MapRadar.config.showCalibrate)
     mgridTexture:SetHidden(not MapRadar.config.showCalibrate)
-    btnSaveScaleData:SetHidden(not MapRadar.config.showCalibrate)
+    -- btnSaveScaleData:SetHidden(not MapRadar.config.showCalibrate)
 
     if MapRadar.config.showCalibrate then
         -- ===================================================================================

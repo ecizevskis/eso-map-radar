@@ -1,5 +1,5 @@
 -- TODO For release
--- Recheck texture to dispose pin (POI pins can be reused and not get filtered of but texture reloads)
+-- Check if localization changes zoneName property and could it be used for list or better use some index?
 -- Saved variable usage (save radar position)
 -- Config page close on ESC or Button with key E??
 -- Load data from calibration to map data table if zone not present there

@@ -19,23 +19,19 @@ local pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Dis
 
 local function getMeterCoefficient()
 
-    --[[
-    local mapToMeterCoefficients = {
-        [3156] = 0.0003, -- Standard zone
-        [1554] = 0.00145 -- Standard subzone
-    }
-    ]]
-
-    -- TODO: All should come from zone data table. Use only defaults if not found in zoene table
-
-    -- using defaults for zone types
-    if MapRadar.getMapType() == MAPTYPE_SUBZONE then
-        -- MapRadar.debugDebounce("Assuming subzone meter: <<1>>", MapRadar.worldMap.zoneName)
-        return 0.00145
+    local zoneData = MapRadar.config.scaleData[MapRadar.worldMap.zoneName]
+    if zoneData ~= nil and zoneData.unit1 ~= nil then
+        MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zoneData.unit1))
+        return zoneData.unit1, true
     end
 
-    -- MapRadar.debugDebounce("Assuming zone meter: <<1>>", MapRadar.worldMap.zoneName)
-    return 0.0003
+    if MapRadar.getMapType() == MAPTYPE_SUBZONE then
+        -- Default sub-zone coefficient
+        return 0.00145, false
+    end
+
+    -- Default main zone coefficient
+    return 0.0003, false
 end
 
 local function customPinName(pinType)
@@ -111,17 +107,14 @@ function MapRadarPin:SetHidden(flag)
     end
 end
 
-function MapRadarPin:SetVisibility()
+function MapRadarPin:SetVisibility(isCalibrated)
     -- Most pin types they should be visible only in certain range
-    -- TODO: Range is too low for Radar mode!!!!!
     if not self.isRangeUnlimited and self.distance > MapRadar.modeSettings.maxDistance then
         self:SetHidden(true)
         return false
     end
 
     self:SetHidden(false)
-
-    -- Maybe grouop should not fade that much??!
 
     local minAlpha = MapRadar.modeSettings.minAlpha / 100
     local maxAlpha = MapRadar.modeSettings.maxAlpha / 100
@@ -138,7 +131,7 @@ function MapRadarPin:SetVisibility()
     end
 
     if self.label ~= nil then
-        self.label:SetAlpha(alpha)
+        self.label:SetColor(1, 1, isCalibrated and 1 or 0, alpha)
     end
     return true
 end
@@ -263,10 +256,12 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     local dx = pinX - playerX
     local dy = pinY - playerY
 
-    self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / getMeterCoefficient()
+    local coefficient, isCalibrated = getMeterCoefficient()
+
+    self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / coefficient
 
     -- Set visibility (hidden or transparency) and if not vissible then stop processing further 
-    if not self:SetVisibility() then
+    if not self:SetVisibility(isCalibrated) then
         return
     end
 

@@ -1,7 +1,5 @@
 -- TODO: 
 -- area pins / blobs - Is it worth trying to do?
--- Texture might change for item (pin updated with some data but with same type so it is not filtered out, 
---    need to check texture integrity but not reload it)
 -- Sky shards may load from different addons. Check each:
 -- SkyShards
 -- MapPins

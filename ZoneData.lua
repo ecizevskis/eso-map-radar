@@ -193,6 +193,91 @@ MapRadarZoneData = {
     },
 
     -- ==============================================================================
+    -- Grahtwood
+    [9] = {
+        type = ZT_ZONE,
+        d1m = 0.0002828988,
+        zoneIndex = 181
+    },
+
+    -- Elden Root inner
+    [450] = {
+        type = ZT_SUBZONE,
+        d1m = 0.0044588132,
+        zoneIndex = 181
+    },
+
+    -- Elden Root
+    [445] = {
+        type = ZT_SUBZONE,
+        d1m = 0.0012880952,
+        zoneIndex = 181
+    },
+
+    -- Redfur Trading Post
+    [536] = {
+        type = ZT_SUBZONE,
+        d1m = 0.0027440101,
+        zoneIndex = 181
+    },
+
+    -- Haven
+    [512] = {
+        type = ZT_SUBZONE,
+        d1m = 0.0013775114,
+        zoneIndex = 181
+    },
+
+    -- Wormroot Depths
+    [414] = {
+        type = ZT_DELVE,
+        d1m = 0.0041934484,
+        zoneIndex = 262
+    },
+
+    -- Vinedeath Cave
+    [393] = {
+        type = ZT_DELVE,
+        d1m = 0.0039592054,
+        zoneIndex = 261
+    },
+
+    -- Burroot Kwama Mine
+    [396] = {
+        type = ZT_DELVE,
+        d1m = 0.0034181370,
+        zoneIndex = 234
+    },
+
+    -- Mobar Mine
+    [395] = {
+        type = ZT_DELVE,
+        d1m = 0.0033485392,
+        zoneIndex = 235
+    },
+
+    -- The Scuttle Pit
+    [394] = {
+        type = ZT_DELVE,
+        d1m = 0.0033866176,
+        zoneIndex = 260
+    },
+
+    -- Ne Salas
+    [404] = {
+        type = ZT_DELVE,
+        d1m = 0.0042121438,
+        zoneIndex = 233
+    },
+
+    -- Root Sunder Ruins
+    [283] = {
+        type = ZT_DUNGEON,
+        d1m = 0.0027290363,
+        zoneIndex = 20
+    },
+
+    -- ==============================================================================
     -- xxxxxxx
     [0] = {
         type = ZT_ZONE,

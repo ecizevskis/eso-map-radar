@@ -78,7 +78,7 @@ local function CreateCalibrationDataForm()
 
     dataForm:AddLabel(
         "GetCurrentMapId", function()
-            return GetCurrentMapId()
+            return MapRadar.getCurrentMapId()
         end)
     dataForm:AddLabel(
         "GetCurrentMapIndex", function()
@@ -126,12 +126,13 @@ local function CreateCalibrationDataForm()
                 dx = ScaleData.dx,
                 dy = ScaleData.dy,
                 unit1 = ScaleData.unit1,
-                mapId = GetCurrentMapId(),
-                zoneIndex = GetCurrentMapZoneIndex()
+                mapId = MapRadar.getCurrentMapId(),
+                zoneIndex = GetCurrentMapZoneIndex(),
+                name = MapRadar.worldMap.zoneName
             }
 
-            MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
-            MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
+            MapRadar.config.scaleData[data.mapId] = data
+            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
         end)
 
     local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "ZO_PlusButton")
@@ -156,13 +157,16 @@ local function CreateCalibrationDataForm()
             local data = {
                 dx = ScaleData.px - storedPos1.px,
                 dy = ScaleData.py - storedPos1.py,
-                unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py)
+                unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py),
+                mapId = MapRadar.getCurrentMapId(),
+                zoneIndex = GetCurrentMapZoneIndex(),
+                name = MapRadar.worldMap.zoneName
             }
 
             storedPos1 = {}
 
-            MapRadar.config.scaleData[MapRadar.worldMap.zoneName] = data
-            MapRadar.debug("Saved scale data for zone: <<1>>", MapRadar.worldMap.zoneName)
+            MapRadar.config.scaleData[data.mapId] = data
+            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
         end)
 
 end

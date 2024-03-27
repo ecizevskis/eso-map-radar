@@ -13,16 +13,24 @@ local pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
 local pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
 
+local zoneData = MapRadarZoneData
+
 -- ========================================================================================
 -- helper methods
 -- TODO: convert to table with zone name and data params + defaultsm
 
 local function getMeterCoefficient()
 
-    local zoneData = MapRadar.config.scaleData[MapRadar.worldMap.zoneName]
-    if zoneData ~= nil and zoneData.unit1 ~= nil then
-        MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zoneData.unit1))
-        return zoneData.unit1, true
+    local zData = zoneData[MapRadar.getCurrentMapId()]
+    if zData ~= nil then
+        MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData.d1m))
+        return zData.d1m, true
+    end
+
+    local calibratedData = MapRadar.config.scaleData[MapRadar.getCurrentMapId()]
+    if calibratedData ~= nil and calibratedData.unit1 ~= nil then
+        MapRadar.debugDebounce("Get calibrated zone unit1: <<1>>", MapRadar.getStrVal(calibratedData.unit1))
+        return calibratedData.unit1, true
     end
 
     if MapRadar.getMapType() == MAPTYPE_SUBZONE then

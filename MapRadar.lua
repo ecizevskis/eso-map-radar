@@ -1,9 +1,5 @@
 -- TODO For release
--- zoneName gets localized (what a shiity!!!) need to switch to use index instead. MapId - use this (MapIndex points to parent map zone)???
 -- Saved variable usage (save radar position)
--- Config page close on ESC or Button with key E??
--- Load data from calibration to map data table if zone not present there
--- Show distance labels in yellow if calibration for this zone is missing and common default is used
 -- Game default Skyshards
 -- calibrate dungeons
 -- calibrate delves
@@ -27,10 +23,7 @@ MapRadar = {
     sceneManager = SCENE_MANAGER,
 
     getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
-
-    -- flags
-    showPointer = true,
-    showDistance = true,
+    getCurrentMapId = GetCurrentMapId,
 
     maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
     pinSize = 0,

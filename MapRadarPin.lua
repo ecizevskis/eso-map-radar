@@ -207,7 +207,7 @@ function MapRadarPin:ApplyTint()
         return
     end
 
-    self.texture:SetColor(unpack({1, 1, 1, 1}))
+    self.texture:SetColor(unpack({ 1, 1, 1, 1 }))
 end
 
 function MapRadarPin:CheckIntegrity()

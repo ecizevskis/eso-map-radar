@@ -7,81 +7,47 @@
 -- calibrate delves
 -- calibrate elden root inner
 -- Hide in combat option??
-MapRadar = {
-    -- Localize global objects for better performance
-    worldMap = ZO_WorldMap,
-    getPanAndZoom = ZO_WorldMap_GetPanAndZoom,
+MapRadar = {  -- Localize global objects for better performance
+worldMap = ZO_WorldMap, getPanAndZoom = ZO_WorldMap_GetPanAndZoom, getMapDimensions = ZO_WorldMap_GetMapDimensions,
+orig_GetMapDimensions = orgZO_WorldMap_GetMapDimensions, getPlayerCameraHeading = GetPlayerCameraHeading, getMapPlayerPosition = GetMapPlayerPosition,
 
-    getMapDimensions = ZO_WorldMap_GetMapDimensions,
-    orig_GetMapDimensions = orgZO_WorldMap_GetMapDimensions,
+pinManager = ZO_WorldMap_GetPinManager(), sceneManager = SCENE_MANAGER, getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
+getCurrentMapId = GetCurrentMapId, maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
+pinSize = 0, -- positionLabel = {},
+activePins = {}, modeSettings = {}, scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
+value = function(valueOrMethod, ...)
+    if type(valueOrMethod) == "function" then
+        -- MapRadar.debugDebounce("Execute method with params: <<1>>", MapRadar.getStrVal(...))
+        return valueOrMethod(...)
+    else
+        return valueOrMethod
+    end
+end, -- ==================================================================================================
+-- Debug stuff
+showAllPins = false, showPinLoc = false, showPinNames = false, showPinParams = false, debug = function(formatString, ...)
+    d(zo_strformat(formatString, ...))
+end, lastdebugMsg = "", debugDebounce = function(formatString, ...)
+    local msg = zo_strformat(formatString, ...)
 
-    getPlayerCameraHeading = GetPlayerCameraHeading,
-    getMapPlayerPosition = GetMapPlayerPosition,
-
-    pinManager = ZO_WorldMap_GetPinManager(),
-
-    sceneManager = SCENE_MANAGER,
-
-    getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
-    getCurrentMapId = GetCurrentMapId,
-
-    maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
-    pinSize = 0,
-
-    -- positionLabel = {},
-    activePins = {},
-    modeSettings = {},
-
-    scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
-
-    value = function(valueOrMethod, ...)
-        if type(valueOrMethod) == "function" then
-            -- MapRadar.debugDebounce("Execute method with params: <<1>>", MapRadar.getStrVal(...))
-            return valueOrMethod(...)
-        else
-            return valueOrMethod
-        end
-    end,
-    -- ==================================================================================================
-    -- Debug stuff
-    showAllPins = false,
-    showPinLoc = false,
-    showPinNames = false,
-    showPinParams = false,
-
-    debug = function(formatString, ...)
-        d(zo_strformat(formatString, ...))
-    end,
-
-    lastdebugMsg = "",
-    debugDebounce = function(formatString, ...)
-        local msg = zo_strformat(formatString, ...)
-
-        if MapRadar.lastdebugMsg == msg then
-            return
-        end
-
-        d(msg)
-
-        MapRadar.lastdebugMsg = msg
-    end,
-
-    getStrVal = function(obj)
-        if obj == nil then
-            return "nil"
-        end
-        return tostring(obj)
-    end,
-
-    tablelength = function(T)
-        local count = 0
-        for _ in pairs(T) do
-            count = count + 1
-        end
-        return count
+    if MapRadar.lastdebugMsg == msg then
+        return
     end
 
-}
+    d(msg)
+
+    MapRadar.lastdebugMsg = msg
+end, getStrVal = function(obj)
+    if obj == nil then
+        return "nil"
+    end
+    return tostring(obj)
+end, tablelength = function(T)
+    local count = 0
+    for _ in pairs(T) do
+        count = count + 1
+    end
+    return count
+end }
 
 local UIWidth, UIHeight = GuiRoot:GetDimensions()
 local playerPin = MapRadar.pinManager:GetPlayerPin()

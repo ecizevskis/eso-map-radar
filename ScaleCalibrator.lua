@@ -4,13 +4,7 @@ local dataForm = {}
 local mgridTexture = {}
 -- local btnSaveScaleData = {}
 
-local ScaleData = {
-    dx = 0,
-    dy = 0,
-    px = 0,
-    py = 0,
-    unit1 = 0
-}
+local ScaleData = { dx = 0, dy = 0, px = 0, py = 0, unit1 = 0 }
 
 local storedPos1 = {}
 
@@ -28,7 +22,7 @@ end
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     local label, labelKey = labelPool:AcquireObject()
     label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(unpack({1, 1, 1, 1}))
+    label:SetColor(unpack({ 1, 1, 1, 1 }))
     label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
 
     if text ~= nil then
@@ -122,14 +116,8 @@ local function CreateCalibrationDataForm()
             local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
             local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
-            local data = {
-                dx = ScaleData.dx,
-                dy = ScaleData.dy,
-                unit1 = ScaleData.unit1,
-                mapId = MapRadar.getCurrentMapId(),
-                zoneIndex = GetCurrentMapZoneIndex(),
-                name = MapRadar.worldMap.zoneName
-            }
+            local data = { dx = ScaleData.dx, dy = ScaleData.dy, unit1 = ScaleData.unit1, mapId = MapRadar.getCurrentMapId(),
+                           zoneIndex = GetCurrentMapZoneIndex(), name = MapRadar.worldMap.zoneName }
 
             MapRadar.config.scaleData[data.mapId] = data
             MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
@@ -154,14 +142,9 @@ local function CreateCalibrationDataForm()
             local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
             local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
-            local data = {
-                dx = ScaleData.px - storedPos1.px,
-                dy = ScaleData.py - storedPos1.py,
-                unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py),
-                mapId = MapRadar.getCurrentMapId(),
-                zoneIndex = GetCurrentMapZoneIndex(),
-                name = MapRadar.worldMap.zoneName
-            }
+            local data = { dx = ScaleData.px - storedPos1.px, dy = ScaleData.py - storedPos1.py,
+                           unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py), mapId = MapRadar.getCurrentMapId(),
+                           zoneIndex = GetCurrentMapZoneIndex(), name = MapRadar.worldMap.zoneName }
 
             storedPos1 = {}
 

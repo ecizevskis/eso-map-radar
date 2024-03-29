@@ -1,4 +1,5 @@
 -- TODO For release
+-- Check elden root each floor map calibration
 -- Find a way of easy way of processing community calibrated data(check it and automatic load to some excel for comparings? )
 -- Could create JSON on some command?
 -- Saved variable usage (save radar position)
@@ -8,13 +9,20 @@
 -- calibrate elden root inner
 -- Hide in combat option??
 MapRadar = {  -- Localize global objects for better performance
-worldMap = ZO_WorldMap, getPanAndZoom = ZO_WorldMap_GetPanAndZoom, getMapDimensions = ZO_WorldMap_GetMapDimensions,
-orig_GetMapDimensions = orgZO_WorldMap_GetMapDimensions, getPlayerCameraHeading = GetPlayerCameraHeading, getMapPlayerPosition = GetMapPlayerPosition,
-
-pinManager = ZO_WorldMap_GetPinManager(), sceneManager = SCENE_MANAGER, getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
-getCurrentMapId = GetCurrentMapId, maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
+worldMap = ZO_WorldMap, --
+getPanAndZoom = ZO_WorldMap_GetPanAndZoom, --
+getMapDimensions = ZO_WorldMap_GetMapDimensions, --
+orig_GetMapDimensions = orgZO_WorldMap_GetMapDimensions, --
+getPlayerCameraHeading = GetPlayerCameraHeading, --
+getMapPlayerPosition = GetMapPlayerPosition, --
+pinManager = ZO_WorldMap_GetPinManager(), --
+sceneManager = SCENE_MANAGER, getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
+getCurrentMapId = GetCurrentMapId, --
+maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
 pinSize = 0, -- positionLabel = {},
-activePins = {}, modeSettings = {}, scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
+activePins = {}, --
+modeSettings = {}, --
+scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
 value = function(valueOrMethod, ...)
     if type(valueOrMethod) == "function" then
         -- MapRadar.debugDebounce("Execute method with params: <<1>>", MapRadar.getStrVal(...))

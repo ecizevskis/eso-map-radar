@@ -5,7 +5,9 @@ local ZT_TRIAL = 4
 local ZT_DELVE = 5
 local ZT_CAVE = 6
 local ZT_INDOOR = 7
-
+local ZT_MINE = 8
+local ZT_CRYPT = 9
+local ZT_RUIN = 10
 -- quest isolated areas? instances?
 -- ZT_SOLOINSTANCE ????
 -- ZT_INDOOR?
@@ -42,8 +44,12 @@ MapRadarZoneData = {  -- Based on MapId
 -- ============================================================================== 
 [26] = { type = ZT_ZONE, d1m = 0.0003289615, zoneIndex = 19 }, -- Shadowfen
 [217] = { type = ZT_SUBZONE, d1m = 0.0020928362, zoneIndex = 19 }, -- Stormhold
+[544] = { type = ZT_SUBZONE, d1m = 0.0016061114, zoneIndex = 19 }, -- Alten Corimont
+-- ============================================================================== 
 [30] = { type = ZT_ZONE, d1m = 0.0002559392, zoneIndex = 17 }, -- Alik'r Desert
+-- ============================================================================== 
 [256] = { type = ZT_ZONE, d1m = 0.0003053667, zoneIndex = 180 }, -- Reaper's March
+-- ============================================================================== 
 [125] = { type = ZT_ZONE, d1m = 0.0002638825, zoneIndex = 16 }, -- The Rift
 --  ============================================================================== 
 [1555] = { type = ZT_ZONE, d1m = 0.0002062994, zoneIndex = 682 }, -- Northern Elsweyr
@@ -54,6 +60,9 @@ MapRadarZoneData = {  -- Based on MapId
 [1673] = { type = ZT_DELVE, d1m = 0.0015927010, zoneIndex = 711 }, -- Desert Wind Caverns
 [1595] = { type = ZT_DELVE, d1m = 0.0018650693, zoneIndex = 686 }, -- Abode of Ignominy
 [1616] = { type = ZT_DELVE, d1m = 0.0022569323, zoneIndex = 687 }, -- Predator Mesa
+[1590] = { type = ZT_DELVE, d1m = 0.0022419495, zoneIndex = 688 }, -- Tomb of the Serpents
+[1626] = { type = ZT_DELVE, d1m = 0.0019957223, zoneIndex = 690 }, -- The Tangle
+[1608] = { type = ZT_DELVE, d1m = 0.0019909050, zoneIndex = 689 }, -- Darkpool Mine
 [1628] = { type = ZT_CAVE, d1m = 0.0044595195, zoneIndex = 682 }, -- Merryvale Sugar Farm Caves
 --  ============================================================================== 
 [9] = { type = ZT_ZONE, d1m = 0.0002828988, zoneIndex = 181 }, -- Grahtwood
@@ -79,6 +88,23 @@ MapRadarZoneData = {  -- Based on MapId
 [24] = { type = ZT_SUBZONE, d1m = 0.0013623396, zoneIndex = 9 }, -- Davon's Watch
 [510] = { type = ZT_SUBZONE, d1m = 0.0016319819, zoneIndex = 9 }, -- Kragenmoor
 [511] = { type = ZT_SUBZONE, d1m = 0.0012971857, zoneIndex = 9 }, -- Ebonheart
+--  ============================================================================== 
+[143] = { type = ZT_ZONE, d1m = 0.0002456598, zoneIndex = 179 }, -- Auridon
+[243] = { type = ZT_SUBZONE, d1m = 0.0012199237, zoneIndex = 179 }, -- Vulkhel Guard
+[545] = { type = ZT_SUBZONE, d1m = 0.0014369003, zoneIndex = 179 }, -- Skywatch
+[540] = { type = ZT_SUBZONE, d1m = 0.0014832046, zoneIndex = 179 }, -- Firsthold
+[181] = { type = ZT_DELVE, d1m = 0.0029342177, zoneIndex = 195 }, -- Wansalen
+[179] = { type = ZT_DELVE, d1m = 0.0037825837, zoneIndex = 192 }, -- Ondil
+[182] = { type = ZT_DELVE, d1m = 0.0038365942, zoneIndex = 196 }, -- Mehrunes' Spite
+[186] = { type = ZT_DELVE, d1m = 0.0025004844, zoneIndex = 194 }, -- Entila's Folly
+[178] = { type = ZT_DELVE, d1m = 0.0029775446, zoneIndex = 193 }, -- Del's Claim
+[180] = { type = ZT_DELVE, d1m = 0.0031039448, zoneIndex = 197 }, -- Bewan
+[268] = { type = ZT_DUNGEON, d1m = 0.0018180335, zoneIndex = 268 }, -- Toothmaul Gully
+--  ============================================================================== 
+[13] = { type = ZT_ZONE, d1m = 0.0002437870, zoneIndex = 10 }, -- Deshaan
+[205] = { type = ZT_SUBZONE, d1m = 0.0011725358, zoneIndex = 10 }, -- Mournhold
+[537] = { type = ZT_SUBZONE, d1m = 0.0020445189, zoneIndex = 10 }, -- Narsis
+[126] = { type = ZT_CAVE, d1m = 0.0029097984, zoneIndex = 87 }, -- Deepcrag Den
 --  ============================================================================== 
 [0] = { type = ZT_ZONE, d1m = 11111111, zoneIndex = 0 }  -- xxxxxxx
 }

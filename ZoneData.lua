@@ -1,3 +1,4 @@
+local ZT_NONE = 0
 local ZT_ZONE = 1
 local ZT_SUBZONE = 2
 local ZT_DUNGEON = 3
@@ -10,7 +11,6 @@ local ZT_CRYPT = 9
 local ZT_RUIN = 10
 -- quest isolated areas? instances?
 -- ZT_SOLOINSTANCE ????
--- ZT_INDOOR?
 
 -- https://wiki.esoui.com/Zones
 
@@ -46,11 +46,18 @@ MapRadarZoneData = {  -- Based on MapId
 [217] = { type = ZT_SUBZONE, d1m = 0.0020928362, zoneIndex = 19 }, -- Stormhold
 [544] = { type = ZT_SUBZONE, d1m = 0.0016061114, zoneIndex = 19 }, -- Alten Corimont
 -- ============================================================================== 
-[30] = { type = ZT_ZONE, d1m = 0.0002559392, zoneIndex = 17 }, -- Alik'r Desert
+[30] = { type = ZT_ZONE, d1m = 0.0002428292, zoneIndex = 17 }, -- Alik'r Desert
+[83] = { type = ZT_SUBZONE, d1m = 0.0011790012, zoneIndex = 17 }, -- Sentinel
+[538] = { type = ZT_SUBZONE, d1m = 0.0019356809, zoneIndex = 17 }, -- Kozanset
+[539] = { type = ZT_SUBZONE, d1m = 0.0018257869, zoneIndex = 17 }, -- Bergama
+[246] = { type = ZT_DELVE, d1m = 0.0029204309, zoneIndex = 140 }, -- Santaki
 -- ============================================================================== 
 [256] = { type = ZT_ZONE, d1m = 0.0003053667, zoneIndex = 180 }, -- Reaper's March
 -- ============================================================================== 
-[125] = { type = ZT_ZONE, d1m = 0.0002638825, zoneIndex = 16 }, -- The Rift
+[125] = { type = ZT_ZONE, d1m = 0.0002482005, zoneIndex = 16 }, -- The Rift
+[542] = { type = ZT_SUBZONE, d1m = 0.0017322909, zoneIndex = 16 }, -- Shor's Stone
+[543] = { type = ZT_SUBZONE, d1m = 0.0013857898, zoneIndex = 16 }, -- Nimalten
+[198] = { type = ZT_SUBZONE, d1m = 0.0017220367, zoneIndex = 16 }, -- Riften
 --  ============================================================================== 
 [1555] = { type = ZT_ZONE, d1m = 0.0002062994, zoneIndex = 682 }, -- Northern Elsweyr
 [1576] = { type = ZT_SUBZONE, d1m = 0.0015244612, zoneIndex = 682 }, -- Rimmen
@@ -105,6 +112,17 @@ MapRadarZoneData = {  -- Based on MapId
 [205] = { type = ZT_SUBZONE, d1m = 0.0011725358, zoneIndex = 10 }, -- Mournhold
 [537] = { type = ZT_SUBZONE, d1m = 0.0020445189, zoneIndex = 10 }, -- Narsis
 [126] = { type = ZT_CAVE, d1m = 0.0029097984, zoneIndex = 87 }, -- Deepcrag Den
+--  ============================================================================== 
+[61] = { type = ZT_ZONE, d1m = 0.0002429406, zoneIndex = 15 }, -- Eastmarch
+[160] = { type = ZT_SUBZONE, d1m = 0.001828079, zoneIndex = 15 }, -- Windhelm
+[578] = { type = ZT_SUBZONE, d1m = 0.0019801475, zoneIndex = 15 }, -- Fort Amol
+[163] = { type = ZT_DELVE, d1m = 0.0037132925, zoneIndex = 158 }, -- The Chill Hollow
+[166] = { type = ZT_DELVE, d1m = 0.004134479, zoneIndex = 161 }, -- The Frigid Grotto
+--  ============================================================================== 
+[1887] = { type = ZT_ZONE, d1m = 0.0001989522, zoneIndex = 835 }, -- Blackwood
+[2018] = { type = ZT_SUBZONE, d1m = 0.0024283691, zoneIndex = 835 }, -- Gideon
+[1940] = { type = ZT_SUBZONE, d1m = 0.0020021955, zoneIndex = 835 }, -- Leyawiin
+[2000] = { type = ZT_DUNGEON, d1m = 0.000729305, zoneIndex = 835 }, -- Atoll of Immolation
 --  ============================================================================== 
 [0] = { type = ZT_ZONE, d1m = 11111111, zoneIndex = 0 }  -- xxxxxxx
 }

@@ -4,7 +4,13 @@ local dataForm = {}
 local mgridTexture = {}
 -- local btnSaveScaleData = {}
 
-local ScaleData = { dx = 0, dy = 0, px = 0, py = 0, unit1 = 0 }
+local ScaleData = {
+    dx = 0,
+    dy = 0,
+    px = 0,
+    py = 0,
+    unit1 = 0
+ }
 
 local storedPos1 = {}
 
@@ -22,7 +28,14 @@ end
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     local label, labelKey = labelPool:AcquireObject()
     label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(unpack({ 1, 1, 1, 1 }))
+    label:SetColor(
+        unpack(
+            {
+                1,
+                1,
+                1,
+                1
+             }))
     label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
 
     if text ~= nil then
@@ -43,25 +56,21 @@ local function calc1meter(x1, y1, x2, y2)
     return distance / measuredMeters -- calculate map part for 1 meter
 end
 
-local function showCalibrationData(pin)
-
-    -- local measuredMeters = 40
+local function selfData()
     local playerX, playerY = MapRadar.getMapPlayerPosition("player")
 
     ScaleData.px = playerX
     ScaleData.py = playerY
+end
+
+local function targetPinData(pin)
+
+    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
 
     ScaleData.dx = pin.normalizedX - playerX
     ScaleData.dy = pin.normalizedY - playerY
 
-    -- local distance = math.sqrt(ScaleData.dx ^ 2 + ScaleData.dy ^ 2) -- distance in percentage
-
     ScaleData.unit1 = calc1meter(pin.normalizedX, pin.normalizedY, playerX, playerY) -- distance / measuredMeters -- calculate map part for 1 meter
-
-    dataForm:Update()
-
-    -- just show actual scale value if it changed
-    setScaleLabel(0)
 end
 
 local displayMultiplier = 10000000
@@ -88,20 +97,20 @@ local function CreateCalibrationDataForm()
             return MapRadar.worldMap.zoneName
         end)
     dataForm:AddLabel(
-        "Rel DX", function()
-            return ScaleData.dx
-        end)
-    dataForm:AddLabel(
-        "Rel DY", function()
-            return ScaleData.dy
-        end)
-    dataForm:AddLabel(
         "Rel PX", function()
             return ScaleData.px
         end)
     dataForm:AddLabel(
         "Rel PY", function()
             return ScaleData.py
+        end)
+    dataForm:AddLabel(
+        "Rel DX", function()
+            return ScaleData.dx
+        end)
+    dataForm:AddLabel(
+        "Rel DY", function()
+            return ScaleData.dy
         end)
     dataForm:AddLabel(
         "Unit1", function()
@@ -116,8 +125,14 @@ local function CreateCalibrationDataForm()
             local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
             local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
-            local data = { dx = ScaleData.dx, dy = ScaleData.dy, unit1 = ScaleData.unit1, mapId = MapRadar.getCurrentMapId(),
-                           zoneIndex = GetCurrentMapZoneIndex(), name = MapRadar.worldMap.zoneName }
+            local data = {
+                dx = ScaleData.dx,
+                dy = ScaleData.dy,
+                unit1 = ScaleData.unit1,
+                mapId = MapRadar.getCurrentMapId(),
+                zoneIndex = GetCurrentMapZoneIndex(),
+                name = MapRadar.worldMap.zoneName
+             }
 
             MapRadar.config.scaleData[data.mapId] = data
             MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
@@ -142,9 +157,14 @@ local function CreateCalibrationDataForm()
             local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
             local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
 
-            local data = { dx = ScaleData.px - storedPos1.px, dy = ScaleData.py - storedPos1.py,
-                           unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py), mapId = MapRadar.getCurrentMapId(),
-                           zoneIndex = GetCurrentMapZoneIndex(), name = MapRadar.worldMap.zoneName }
+            local data = {
+                dx = ScaleData.px - storedPos1.px,
+                dy = ScaleData.py - storedPos1.py,
+                unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py),
+                mapId = MapRadar.getCurrentMapId(),
+                zoneIndex = GetCurrentMapZoneIndex(),
+                name = MapRadar.worldMap.zoneName
+             }
 
             storedPos1 = {}
 
@@ -228,11 +248,12 @@ local function EnableOrDisableCalibrator()
 
                     if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER 
                     and pin.normalizedX and pin.normalizedY then
-                        showCalibrationData(pin)
-                        return
+                        targetPinData(pin)
                     end
                 end
 
+                selfData()
+                dataForm:Update()
             end)
     else
         EVENT_MANAGER:UnregisterForUpdate("MapRadar_PinReader")

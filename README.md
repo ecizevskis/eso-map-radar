@@ -54,6 +54,12 @@ Plan is to calibrate all possible maps (caves, crypts, mansion and so on) so any
 On Windows PC ESO addon data is stored in "%userprofile%\Documents\Elder Scrolls Online\live\SavedVariables", you can find MapRadar.lua there and post its content in **Issues** section of this repository
 
 
+**Calibration data analysis **
+
+I will try to combine all received data to some google sheet and calculate results from there, so more measurmenets from different people the better and less need for checking each zone to validate.
+
+
+
 **Outro**
 
 If you would help on calibrating the world that would be huuuge help and make this addon functional much faster 

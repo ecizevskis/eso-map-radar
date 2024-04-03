@@ -34,6 +34,15 @@ Bow skill **Snipe** with **Focused Aim** morph was chosen (and code is using 40 
    - Press the arrow button near "Solo calibration" label and notification in chat window should appear that position one was saved.
    - Now need to kill this NPC and make sure it does not move and stand on exact place where it was standing. (I use stampede 2H skill to jump on target and trying remember where exactly it is standing, because when they fall they are not centered on place where they were standing)
 
+**Checking calibration**
+
+For smaller maps like Delves, crypts, dungeons etc it is not so much important to have it extra precise because zone is quite small.
+For main zone maps and subzone maps calibration needs to be checked after calibrating zones and subzones that those values are in accepted error range. 
+- Go near town go in and out of subzone
+- Find common pin that exists in both maps (usually wayshrines and world bosses)
+- Move slowly in/out subzone and check distance and how much it is changing when you enter/exit subzone (sometimes you can get close to point where subzone usually switches and open and close map may trigger zone chanage - easier to spot distance differences)
+- Distance diffecences shoul be lower than 1% for seamless transition from zone to subzone distances.
+- If it is bigger then need to ckeck other subzone and terermine is some measured imprecise or subzone and recalibrate
 
 **What places to calibrate**
 

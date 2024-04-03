@@ -28,14 +28,7 @@ end
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     local label, labelKey = labelPool:AcquireObject()
     label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(
-        unpack(
-            {
-                1,
-                1,
-                1,
-                1
-             }))
+    label:SetColor(1, 1, 1, 1)
     label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
 
     if text ~= nil then
@@ -77,7 +70,7 @@ local displayMultiplier = 10000000
 local function CreateCalibrationDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("CalibrateDataForm", MapRadarContainer)
-    dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 100, -100)
+    dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 150, -100)
 
     dataForm:AddLabel(
         "GetCurrentMapId", function()
@@ -117,7 +110,7 @@ local function CreateCalibrationDataForm()
             return ScaleData.unit1
         end)
 
-    local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveScaleData", dataForm, "ZO_PlusButton")
+    local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveGroupScaleData", dataForm, "ZO_PlusButton")
     btnSaveScaleData:SetDimensions(40, 40)
     btnSaveScaleData:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT)
     btnSaveScaleData:SetHandler(
@@ -137,16 +130,37 @@ local function CreateCalibrationDataForm()
             MapRadar.config.scaleData[data.mapId] = data
             MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
         end)
+    btnSaveScaleData:SetHandler(
+        "OnMouseEnter", function(self)
+            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save group duel calibration data")
+        end)
+    btnSaveScaleData:SetHandler(
+        "OnMouseExit", function(self)
+            ZO_Tooltips_HideTextTooltip()
+        end)
 
-    local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "ZO_PlusButton")
+    local labelGroupCalibration = MapRadarCommon.CreateLabel("$(parent)labelGroupCalibration", dataForm, "Group Calibration")
+    labelGroupCalibration:SetAnchor(RIGHT, btnSaveScaleData, LEFT)
+
+    -- ==========================================================================================
+    -- Solo calibration
+    local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "ZO_NextArrowButton")
     btnSavePosition1:SetDimensions(40, 40)
-    btnSavePosition1:SetAnchor(TOPLEFT, btnSaveScaleData, BOTTOMLEFT, 0, 30)
+    btnSavePosition1:SetAnchor(TOPLEFT, btnSaveScaleData, BOTTOMLEFT, 0, 10)
     btnSavePosition1:SetHandler(
         "OnClicked", function()
             storedPos1.px = ScaleData.px
             storedPos1.py = ScaleData.py
 
             MapRadar.debug("Saved position one")
+        end)
+    btnSavePosition1:SetHandler(
+        "OnMouseEnter", function(self)
+            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Save current player position for solo calculation")
+        end)
+    btnSavePosition1:SetHandler(
+        "OnMouseExit", function(self)
+            ZO_Tooltips_HideTextTooltip()
         end)
 
     local btnSavePosition2 = CreateControlFromVirtual("$(parent)btnSavePosition2", dataForm, "ZO_PlusButton")
@@ -166,11 +180,20 @@ local function CreateCalibrationDataForm()
                 name = MapRadar.worldMap.zoneName
              }
 
-            storedPos1 = {}
-
             MapRadar.config.scaleData[data.mapId] = data
             MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
         end)
+    btnSavePosition2:SetHandler(
+        "OnMouseEnter", function(self)
+            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save solo calibration data")
+        end)
+    btnSavePosition2:SetHandler(
+        "OnMouseExit", function(self)
+            ZO_Tooltips_HideTextTooltip()
+        end)
+
+    local labelSoloCalibration = MapRadarCommon.CreateLabel("$(parent)labelSoloCalibration", dataForm, "Solo Calibration")
+    labelSoloCalibration:SetAnchor(RIGHT, btnSavePosition1, LEFT)
 
 end
 

@@ -1,5 +1,4 @@
 -- TODO For release
--- Fix calibration work without party or any unit
 -- Find a way of easy way of processing community calibrated data(check it and automatic load to some excel for comparings? )
 -- Could create JSON on some command?
 -- Saved variable usage (save radar position)

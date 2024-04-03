@@ -10,6 +10,7 @@ When showing distance labels in enabled then if they are yellow(ish) that means 
 **How to calibrate**
 
 To toggle calibration UI need to run command line:  /mapradar calibrate or /mr calibrate
+
 ![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/40325187-42c2-4aa6-bee0-11ec173b6d29)
 
 

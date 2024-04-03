@@ -35,6 +35,16 @@ Bow skill **Snipe** with **Focused Aim** morph was chosen (and code is using 40 
    - Now need to kill this NPC and make sure it does not move and stand on exact place where it was standing. (I use stampede 2H skill to jump on target and trying remember where exactly it is standing, because when they fall they are not centered on place where they were standing)
 
 
+**What places to calibrate**
+
+Plan is to calibrate all possible maps (caves, crypts, mansion and so on) so anywhere you see distance is not calibrated (yellow(ish) distance labels) then this place should be measured. If there is no way of doing that as mentioned before, then can just mention this place and how to get to it in Issues. For referencing places English would be desired or finding it on https://gamemap.uesp.net/eso/ and posting link to map or wiki would be very helpful.
+
+
 **Sending calibration data**
 
 On Windows PC ESO addon data is stored in "%userprofile%\Documents\Elder Scrolls Online\live\SavedVariables", you can find MapRadar.lua there and post its content in **Issues** section of this repository
+
+
+**Outro**
+
+If you would help on calibrating the world that would be huuuge help and make this addon functional much faster 

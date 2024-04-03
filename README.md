@@ -1,4 +1,4 @@
-
+**About distance calculation**
 
 All of the zones does not provide positions in any convertable units but in relative positions for whole map (all coords are relative position from 0 to 1 with decimal precision of 10).
 They are somewhat close from wiever perspective but are a bit different for each zone if you aim for percission. As fart as I seen most addons just use some common coeficient for type of zone.
@@ -33,3 +33,8 @@ Bow skill **Snipe** with **Focused Aim** morph was chosen (and code is using 40 
    - Aim hostile NPC but this time find spot where **Focused Aim** skill will become available
    - Press the arrow button near "Solo calibration" label and notification in chat window should appear that position one was saved.
    - Now need to kill this NPC and make sure it does not move and stand on exact place where it was standing. (I use stampede 2H skill to jump on target and trying remember where exactly it is standing, because when they fall they are not centered on place where they were standing)
+
+
+**Sending calibration data**
+
+On Windows PC ESO addon data is stored in "%userprofile%\Documents\Elder Scrolls Online\live\SavedVariables", you can find MapRadar.lua there and post its content in **Issues** section of this repository

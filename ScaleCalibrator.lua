@@ -1,8 +1,6 @@
 local scaleLabel = {}
 local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 local dataForm = {}
-local mgridTexture = {}
--- local btnSaveScaleData = {}
 
 local ScaleData = {
     dx = 0,
@@ -201,12 +199,6 @@ local function MapRadar_InitScaleCalibrator()
 
     CreateCalibrationDataForm()
 
-    mgridTexture = CreateControl("$(parent)Mgrid", MapRadarContainer, CT_TEXTURE)
-    mgridTexture:SetTexture("MapRadar/textures/mgrid.dds")
-    mgridTexture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER)
-    mgridTexture:SetDimensions(329, 329)
-    -- mgridTexture:SetAlpha(0.5)
-
     --[[
     scaleLabel = CreateControl("$(parent)ScaleLabel", MapRadarContainer, CT_LABEL)
     scaleLabel:SetAnchor(TOPLEFT, MapRadarContainer, TOPRIGHT, 20, 40)
@@ -255,8 +247,6 @@ end
 
 local function EnableOrDisableCalibrator()
     dataForm:SetHidden(not MapRadar.config.showCalibrate)
-    mgridTexture:SetHidden(not MapRadar.config.showCalibrate)
-    -- btnSaveScaleData:SetHidden(not MapRadar.config.showCalibrate)
 
     if MapRadar.config.showCalibrate then
         -- ===================================================================================

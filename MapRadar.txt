@@ -1,5 +1,5 @@
 ## Title: MapRadar
-## APIVersion: 101039 101040
+## APIVersion: 101040 101041
 ## Version: 1.0.0
 ## Author: Dude
 ## SavedVariables: MapRadar_Data

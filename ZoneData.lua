@@ -9,6 +9,8 @@ local ZT_INDOOR = 7
 local ZT_MINE = 8
 local ZT_CRYPT = 9
 local ZT_RUIN = 10
+local ZT_SEWERS = 11
+local ZT_COSMIC = 12
 -- quest isolated areas? instances?
 -- ZT_SOLOINSTANCE ????
 
@@ -70,8 +72,11 @@ MapRadarZoneData = {  -- Based on MapId
 [1555] = { type = ZT_ZONE, d1m = 0.0002062994, zoneIndex = 682 }, -- Northern Elsweyr
 [1576] = { type = ZT_SUBZONE, d1m = 0.0015244612, zoneIndex = 682 }, -- Rimmen
 [1591] = { type = ZT_SUBZONE, d1m = 0.0023562885, zoneIndex = 682 }, -- Riverhold
+[1594] = { type = ZT_SUBZONE, d1m = 0.0023562885, zoneIndex = 682 }, -- Riverhold - Battle
 [1663] = { type = ZT_SUBZONE, d1m = 0.0022089556, zoneIndex = 682 }, -- The Stitches
 [1673] = { type = ZT_DELVE, d1m = 0.0015927010, zoneIndex = 711 }, -- Desert Wind Caverns
+[1640] = { type = ZT_NONE, d1m = 0.0015828039 }, -- Desert Wind Caverns 2
+[1662] = { type = ZT_NONE, d1m = 0.0015960654 }, -- Desert Wind Caverns 3
 [1595] = { type = ZT_DELVE, d1m = 0.0018650693, zoneIndex = 686 }, -- Abode of Ignominy
 [1616] = { type = ZT_DELVE, d1m = 0.0022569323, zoneIndex = 687 }, -- Predator Mesa
 [1590] = { type = ZT_DELVE, d1m = 0.0022419495, zoneIndex = 688 }, -- Tomb of the Serpents
@@ -86,6 +91,19 @@ MapRadarZoneData = {  -- Based on MapId
 [1577] = { type = ZT_CRYPT, d1m = 0.0032897486 }, -- Tenarr Zalviit Ossuary
 [1627] = { type = ZT_CRYPT, d1m = 0.0032953164 }, -- Tenarr Zalviit Warrens
 [1586] = { type = ZT_CRYPT, d1m = 0.0027149487 }, -- Hakoshae Tombs
+[1641] = { type = ZT_CRYPT, d1m = 0.0135 }, -- Desert Wind Caverns - Grand Adept Chambers
+[1656] = { type = ZT_CRYPT, d1m = 0.009 }, -- Desert Wind Temple - Tunnel
+[1642] = { type = ZT_CRYPT, d1m = 0.009 }, -- Desert Wind Temple
+[1585] = { type = ZT_NONE, d1m = 0.00515 }, -- Rimmen Palace Courtyard
+[1570] = { type = ZT_SEWERS, d1m = 0.0030699783 }, -- Rimmen Palace Recesses
+[1571] = { type = ZT_CRYPT, d1m = 0.0046104343 }, -- Rimmen Palace Crypts
+[1584] = { type = ZT_NONE, d1m = 0.0059270981 }, -- Rimmen Palace
+[1632] = { type = ZT_CAVE, d1m = 0.0033866511 }, -- Sugar-Slinger's Den Upper
+[837] = { type = ZT_CAVE, d1m = 0.0032998854 }, -- Sugar-Slinger's Den Lower
+[1617] = { type = ZT_MINE, d1m = 0.0020049762 }, -- Sleepy Senche Mine
+[1625] = { type = ZT_COSMIC, d1m = 0.0030382262 }, -- Arum-Khal's Realm
+[1624] = { type = ZT_CRYPT, d1m = 0.002594012 }, -- Hidden Moon Crypts
+
 
 --  ============================================================================== 
 [9] = { type = ZT_ZONE, d1m = 0.0002828988, zoneIndex = 181 }, -- Grahtwood

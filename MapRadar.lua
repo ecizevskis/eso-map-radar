@@ -1,5 +1,5 @@
 -- TODO For release
--- Radar position save!!!!
+-- Enabled registerMapPins block when map is opened. Check if there is no arising issues!
 -- Fill in some short description
 -- Find a way of easy way of processing community calibrated data(check it and automatic load to some excel for comparings? )
 -- Hide in combat option??
@@ -83,7 +83,7 @@ local function registerMapPins()
             MapRadar.activePins[k] = nil
         end
         ]]
-        -- return -- Block further execution while map is opened
+        return -- Block further execution while map is opened
     end
 
     local pins = MapRadar.pinManager:GetActiveObjects()

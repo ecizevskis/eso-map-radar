@@ -3,6 +3,12 @@ local function SettingsInit()
     -- MapRadar.aData = ZO_SavedVars:NewAccountWide("MapRadar_Data", 1, nil, accountDefaults)
 
     local defaults = {
+        radarPosition = {
+            point = BOTTOMRIGHT,
+            relativePoint = BOTTOMRIGHT,
+            offsetX = -300,
+            offsetY = -40
+         },
         isOverlayMode = false,
         radarSettings = {
             maxDistance = 800,
@@ -21,7 +27,7 @@ local function SettingsInit()
             maxAlpha = 100,
             minScale = 60,
             maxScale = 100
-        },
+         },
         overlaySettings = {
             maxDistance = 1200,
             showDistance = false,
@@ -39,14 +45,27 @@ local function SettingsInit()
             maxAlpha = 100,
             minScale = 60,
             maxScale = 100
-        },
+         },
 
         -- Debug 
         showCalibrate = false,
         showAnalyzer = false
-    }
+     }
 
     MapRadar.config = ZO_SavedVars:NewCharacterIdSettings("MapRadar_Data", 1, nil, defaults)
+
+    local radarPos = MapRadar.config.radarPosition
+    MapRadarContainer:SetAnchor(radarPos.point, GuiRoot, radarPos.relativePoint, radarPos.offsetX, radarPos.offsetY)
+    MapRadarContainer:SetHandler(
+        "OnMoveStop", function()
+            local _, point, _, relativePoint, offsetX, offsetY = MapRadarContainer:GetAnchor(0)
+            MapRadar.config.radarPosition = {
+                point = point,
+                relativePoint = relativePoint,
+                offsetX = offsetX,
+                offsetY = offsetY
+             }
+        end)
 end
 
 local function CreatePinOptionStack(id, parent, config)

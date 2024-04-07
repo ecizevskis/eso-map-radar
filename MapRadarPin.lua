@@ -82,7 +82,7 @@ local function IsValidPOI(pin)
 
     if texturePath:find("poi_wayshrine") and MapRadar.modeSettings.showWayshrines -- Wayshrine
     or texturePath:find("poi_dungeon") and MapRadar.modeSettings.showDungeons --
-    or texturePath:find("poi_delve") and MapRadar.modeSettings.showDelves --
+    or (texturePath:find("poi_delve") or texturePath:find("poi_groupdelve")) and MapRadar.modeSettings.showDelves --
     or texturePath:find("poi_portal") and MapRadar.modeSettings.showPortals -- dolmen but also other portals :/
     or texturePath:find("poi_groupboss") and MapRadar.modeSettings.showWorldBosses -- 
     then

@@ -11,6 +11,9 @@ local ZT_CRYPT = 9
 local ZT_RUIN = 10
 local ZT_SEWERS = 11
 local ZT_COSMIC = 12
+local ZT_TEMPLE = 13
+local ZT_CASTLE = 14
+local ZT_UNDERWORLD = 15
 -- quest isolated areas? instances?
 -- ZT_SOLOINSTANCE ????
 
@@ -103,7 +106,18 @@ MapRadarZoneData = {  -- Based on MapId
 [1617] = { type = ZT_MINE, d1m = 0.0020049762 }, -- Sleepy Senche Mine
 [1625] = { type = ZT_COSMIC, d1m = 0.0030382262 }, -- Arum-Khal's Realm
 [1624] = { type = ZT_CRYPT, d1m = 0.002594012 }, -- Hidden Moon Crypts
-
+[1587] = { type = ZT_TEMPLE, d1m = 0.0016733064 }, -- Dov-Vahl Shrine
+[1644] = { type = ZT_CRYPT, d1m = 0.0057 }, -- Sepulcher of Mischance Upper
+[1645] = { type = ZT_CRYPT, d1m = 0.0082651379 }, -- Sepulcher of Mischance 1
+[1646] = { type = ZT_CRYPT, d1m = 0.0085895719 }, -- Sepulcher of Mischance 2
+[1647] = { type = ZT_CRYPT, d1m = 0.0083943279 }, -- Sepulcher of Mischance 3
+[1648] = { type = ZT_CRYPT, d1m = 0.0082902827 }, -- Sepulcher of Mischance 4
+[1671] = { type = ZT_CRYPT, d1m = 0.0058244348 }, -- Sepulcher of Mischance 5
+[1592] = { type = ZT_TEMPLE, d1m = 0.00305 }, -- Shadow Dance Temple Entrance
+[1593] = { type = ZT_TEMPLE, d1m = 0.0022676817 }, -- Shadow Dance Temple
+[1659] = { type = ZT_TEMPLE, d1m = 0.010851484 }, -- Vault of Heavenly Scourge
+[1667] = { type = ZT_TEMPLE, d1m = 0.0021108554 }, -- Moon Gate of Anequina
+[1668] = { type = ZT_TEMPLE, d1m = 0.0015900327 }, -- Jode's Core
 
 --  ============================================================================== 
 [9] = { type = ZT_ZONE, d1m = 0.0002828988, zoneIndex = 181 }, -- Grahtwood
@@ -163,6 +177,62 @@ MapRadarZoneData = {  -- Based on MapId
 [2018] = { type = ZT_SUBZONE, d1m = 0.0024283691, zoneIndex = 835 }, -- Gideon
 [1940] = { type = ZT_SUBZONE, d1m = 0.0020021955, zoneIndex = 835 }, -- Leyawiin
 [2000] = { type = ZT_DUNGEON, d1m = 0.000729305, zoneIndex = 835 }, -- Atoll of Immolation
+
+-- ===============================================================================
+[10] = { type = ZT_ZONE, d1m = 0.0003210387 }, -- Rivenspire
+[85] = { type = ZT_SUBZONE, d1m = 0.002072414 }, -- Shornhelm
+[812] = { type = ZT_SEWERS, d1m = 0.0086449157 }, -- Shornhelm Outlaws Refuge
+[513] = { type = ZT_SUBZONE, d1m = 0.0020501388 }, -- Northpoint
+[528] = { type = ZT_SUBZONE, d1m = 0.0033063168 }, -- Hoarfrost Downs
+
+-- ===============================================================================
+[667] = { type = ZT_ZONE, d1m = 0.0002783857 }, -- Wrothgar
+[895] = { type = ZT_SUBZONE, d1m = 0.0014479954 }, -- Orsinium
+[954] = { type = ZT_SUBZONE, d1m = 0.0027146756 }, -- Morkul Stronghold
+
+-- ===============================================================================
+[1864] = { type = ZT_ZONE, d1m = 0.0010983753 }, -- Grayhome
+[1866] = { type = ZT_CASTLE, d1m = 0.0036039109 }, -- Castle Grayhome
+[1868] = { type = ZT_CASTLE, d1m = 0.0036449523 }, -- Castle Grayhome Upper
+
+-- ===============================================================================
+[20] = { type = ZT_ZONE, d1m = 0.0002999195 }, -- Bangkorai
+[360] = { type = ZT_SUBZONE, d1m = 0.0013780177 }, -- Hallin's Stand
+[84] = { type = ZT_SUBZONE, d1m = 0.00173892 }, -- Evermore
+
+-- ===============================================================================
+[1126] = { type = ZT_ZONE, d1m = 0.000278673 }, -- Craglorn
+[1131] = { type = ZT_SUBZONE, d1m = 0.0019815171 }, -- Belkarth
+[1132] = { type = ZT_SUBZONE, d1m = 0.0028417065 }, -- Dragonstar
+
+-- ===============================================================================
+[1814] = { type = ZT_ZONE, d1m = 0.0003335912 }, -- The Reach
+[1858] = { type = ZT_SUBZONE, d1m = 0.0027057942 }, -- Markarth
+
+-- ===============================================================================
+-- Cannot sync distances with subzone
+[1719] = { type = ZT_ZONE, d1m = 0.0002388837 }, -- Western Skyrim
+[1773] = { type = ZT_SUBZONE, d1m = 0.0016817282 }, -- Solitude
+
+-- ===============================================================================
+[74] = { type = ZT_ZONE, d1m = 0.0006736522 }, -- Bleakrock Isle
+[8] = { type = ZT_SUBZONE, d1m = 0.0022367409 }, -- Bleakrock Village
+[88] = { type = ZT_MINE, d1m = 0.0037461546 }, -- Hozzin's Folly
+[87] = { type = ZT_CAVE, d1m = 0.0031875867 }, -- Orkey's Hollow
+
+-- ===============================================================================
+[1747] = { type = ZT_UNDERWORLD, d1m = 0.0003791088 }, -- Blackreach: Greymoor Caverns
+[1850] = { type = ZT_UNDERWORLD, d1m = 0.0007311898 }, -- Blackreach: Arkthzand Cavern
+
+-- ===============================================================================
+-- ===============================================================================
+-- TODO: Need to sort 
+
+
+
+
+
+
 
 --  ============================================================================== 
 [0] = { type = ZT_ZONE, d1m = 11111111, zoneIndex = 0 }  -- xxxxxxx

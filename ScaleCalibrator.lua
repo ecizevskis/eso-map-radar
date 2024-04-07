@@ -166,15 +166,11 @@ local function CreateCalibrationDataForm()
     btnSavePosition2:SetAnchor(TOPLEFT, btnSavePosition1, TOPRIGHT)
     btnSavePosition2:SetHandler(
         "OnClicked", function()
-            local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
-            local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
-
             local data = {
                 dx = ScaleData.px - storedPos1.px,
                 dy = ScaleData.py - storedPos1.py,
                 unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py),
                 mapId = MapRadar.getCurrentMapId(),
-                zoneIndex = GetCurrentMapZoneIndex(),
                 name = MapRadar.worldMap.zoneName
              }
 
@@ -186,6 +182,37 @@ local function CreateCalibrationDataForm()
             ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save solo calibration data")
         end)
     btnSavePosition2:SetHandler(
+        "OnMouseExit", function(self)
+            ZO_Tooltips_HideTextTooltip()
+        end)
+
+    local btnSavePosition12m = CreateControlFromVirtual("$(parent)btnSavePosition12m", dataForm, "ZO_PlusButton")
+    btnSavePosition12m:SetDimensions(40, 40)
+    btnSavePosition12m:SetAnchor(TOPLEFT, btnSavePosition2, TOPRIGHT)
+    btnSavePosition12m:SetHandler(
+        "OnClicked", function()
+            local dx = ScaleData.px - storedPos1.px
+            local dy = ScaleData.py - storedPos1.py
+
+            local distance = math.sqrt(dx ^ 2 + dy ^ 2) -- distance in percentage
+
+            local data = {
+                -- add zeros in dx, dy or parser fails
+                dx = 0,
+                dy = 0,
+                unit1 = distance / 12,
+                mapId = MapRadar.getCurrentMapId(),
+                name = MapRadar.worldMap.zoneName
+             }
+
+            MapRadar.config.scaleData[data.mapId] = data
+            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
+        end)
+    btnSavePosition12m:SetHandler(
+        "OnMouseEnter", function(self)
+            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save solo calibration data 12m")
+        end)
+    btnSavePosition12m:SetHandler(
         "OnMouseExit", function(self)
             ZO_Tooltips_HideTextTooltip()
         end)

@@ -1,4 +1,5 @@
 -- TODO For release
+-- Group delve own settings option
 -- Enabled registerMapPins block when map is opened. Check if there is no arising issues!
 -- Fill in some short description
 -- Find a way of easy way of processing community calibrated data(check it and automatic load to some excel for comparings? )

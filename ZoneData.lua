@@ -240,6 +240,14 @@ MapRadarZoneData = {  -- Based on MapId
 [56] = { type = ZT_SUBZONE, d1m = 0.0032823159 }, -- Dhalmora
 
 -- ===============================================================================
+[1997] = { type = ZT_ZONE, d1m = 0.0020926431 }, -- Isle of Balfiera
+[2041] = { type = ZT_INDOOR, d1m = 0.0042058361 }, -- Balfiera Ruins
+[1996] = { type = ZT_INDOOR, d1m = 0.004100072 }, -- Keywright's Gallery
+[1995] = { type = ZT_INDOOR, d1m = 0.0038598567 }, -- Balfiera Ruins
+[2036] = { type = ZT_INDOOR, d1m = 0.0036817104 }, -- Balfiera Ruins
+[2037] = { type = ZT_INDOOR, d1m = 0.0035823956 }, -- Balfiera Ruins
+[2039] = { type = ZT_INDOOR, d1m = 0.0036014839 }, -- Balfiera Ruins
+
 -- ===============================================================================
 
 -- ===============================================================================

@@ -1,6 +1,6 @@
 local scaleLabel = {}
 local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
-local dataForm = {}
+local dataForm = nil
 
 local ScaleData = {
     dx = 0,
@@ -273,7 +273,9 @@ local function MapRadar_InitScaleCalibrator()
 end
 
 local function EnableOrDisableCalibrator()
-    dataForm:SetHidden(not MapRadar.config.showCalibrate)
+    if (dataForm ~= nil and dataForm.SetHidden ~= nil) then
+        dataForm:SetHidden(not MapRadar.config.showCalibrate)
+    end
 
     if MapRadar.config.showCalibrate then
         -- ===================================================================================

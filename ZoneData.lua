@@ -54,6 +54,8 @@ MapRadarZoneData = {  -- Based on MapId
 [26] = { type = ZT_ZONE, d1m = 0.0003289615 }, -- Shadowfen
 [217] = { type = ZT_SUBZONE, d1m = 0.0020928362 }, -- Stormhold
 [544] = { type = ZT_SUBZONE, d1m = 0.0016061114 }, -- Alten Corimont
+[836] = { type = ZT_RUIN, d1m = 0.00269393 }, -- Cold-Blood Cavern
+[875] = { type = ZT_COSMIC, d1m = 0.0037631993 }, -- Dyzera's Realm
 
 -- ============================================================================== 
 [30] = { type = ZT_ZONE, d1m = 0.0002428292 }, -- Alik'r Desert
@@ -70,6 +72,10 @@ MapRadarZoneData = {  -- Based on MapId
 [542] = { type = ZT_SUBZONE, d1m = 0.0017322909 }, -- Shor's Stone
 [543] = { type = ZT_SUBZONE, d1m = 0.0013857898 }, -- Nimalten
 [198] = { type = ZT_SUBZONE, d1m = 0.0017220367 }, -- Riften
+[815] = { type = ZT_SEWERS, d1m = 0.0052393002 }, -- Riften Outlaws Refuge
+[1784] = { type = ZT_SEWERS, d1m = 0.0037908691 }, -- Riften Ratway Lower
+[1753] = { type = ZT_SEWERS, d1m = 0.0037930828 }, -- Riften Ratway
+[214] = { type = ZT_DELVE, d1m = 0.0032323222 }, -- Faldar's Tooth
 
 --  ============================================================================== 
 [1555] = { type = ZT_ZONE, d1m = 0.0002062994 }, -- Northern Elsweyr
@@ -169,8 +175,14 @@ MapRadarZoneData = {  -- Based on MapId
 [61] = { type = ZT_ZONE, d1m = 0.0002429406 }, -- Eastmarch
 [160] = { type = ZT_SUBZONE, d1m = 0.001828079 }, -- Windhelm
 [578] = { type = ZT_SUBZONE, d1m = 0.0019801475 }, -- Fort Amol
+[1781] = { type = ZT_INDOOR, d1m = 0.0083289884 }, -- Palace Of Kings
+[1788] = { type = ZT_INDOOR, d1m = 0.0083866702 }, -- Palace Of Kings Dungeon
+[1789] = { type = ZT_INDOOR, d1m = 0.0065098086 }, -- Palace of Kings Inner Chamber
+[1794] = { type = ZT_INDOOR, d1m = 0.008328403 }, -- Palace Of Kings
+
 [163] = { type = ZT_DELVE, d1m = 0.0037132925 }, -- The Chill Hollow
 [166] = { type = ZT_DELVE, d1m = 0.004134479 }, -- The Frigid Grotto
+[140] = { type = ZT_DUNGEON, d1m = 0.0019804589 }, -- Hall of the Dead
 
 --  ============================================================================== 
 [1887] = { type = ZT_ZONE, d1m = 0.0001989522 }, -- Blackwood
@@ -199,6 +211,7 @@ MapRadarZoneData = {  -- Based on MapId
 [20] = { type = ZT_ZONE, d1m = 0.0002999195 }, -- Bangkorai
 [360] = { type = ZT_SUBZONE, d1m = 0.0013780177 }, -- Hallin's Stand
 [84] = { type = ZT_SUBZONE, d1m = 0.00173892 }, -- Evermore
+[245] = { type = ZT_DELVE, d1m = 0.0031308847 }, -- Rubble Butte
 
 -- ===============================================================================
 [1126] = { type = ZT_ZONE, d1m = 0.000278673 }, -- Craglorn
@@ -223,6 +236,8 @@ MapRadarZoneData = {  -- Based on MapId
 -- ===============================================================================
 [1747] = { type = ZT_UNDERWORLD, d1m = 0.0003791088 }, -- Blackreach: Greymoor Caverns
 [1850] = { type = ZT_UNDERWORLD, d1m = 0.0007311898 }, -- Blackreach: Arkthzand Cavern
+[1748] = { type = ZT_UNDERWORLD, d1m = 0.001600429 }, -- Blackreach: Mzark Cavern
+[2469] = { type = ZT_RUIN, d1m = 0.0067424687 }, -- Blackreach: Mzark Cavern - Kagalthar Ruins
 
 -- ===============================================================================
 [1060] = { type = ZT_ZONE, d1m = 0.0002169291 }, -- Vvardenfell
@@ -272,6 +287,24 @@ MapRadarZoneData = {  -- Based on MapId
 [300] = { type = ZT_ZONE, d1m = 0.00033289 }, -- Greenshade
 [529] = { type = ZT_SUBZONE, d1m = 0.0012729857 }, -- Woodhearth
 [387] = { type = ZT_SUBZONE, d1m = 0.0021939696 }, -- Marbruk
+
+-- ===============================================================================
+[2212] = { type = ZT_ZONE, d1m = 0.0003024001 }, -- Galen and Y'ffelon
+[2227] = { type = ZT_SUBZONE, d1m = 0.00112 }, -- Vastyr
+
+-- ===============================================================================
+[1006] = { type = ZT_ZONE, d1m = 0.0003903606 }, -- Gold Coast
+[1074] = { type = ZT_SUBZONE, d1m = 0.0017236623 }, -- Anvil
+[1009] = { type = ZT_SEWERS, d1m = 0.0053765306 }, -- Anvil Outlaws Refuge
+[1064] = { type = ZT_SUBZONE, d1m = 0.0022356462 }, -- Kvatch
+
+-- ===============================================================================
+[994] = { type = ZT_ZONE, d1m = 0.0003885012 }, -- Hew's Bane
+[993] = { type = ZT_SUBZONE, d1m = 0.0010983781 }, -- Abah's Landing
+
+-- ===============================================================================
+
+-- ===============================================================================
 
 -- ===============================================================================
 

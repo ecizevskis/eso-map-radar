@@ -244,6 +244,11 @@ MapRadarZoneData = {  -- Based on MapId
 [1287] = { type = ZT_SUBZONE, d1m = 0.0012296628 }, -- Vivec City
 [1290] = { type = ZT_SUBZONE, d1m = 0.0022589554 }, -- Balmora
 [1288] = { type = ZT_SUBZONE, d1m = 0.0021236292 }, -- Sadrith Mora
+[1276] = { type = ZT_DUNGEON, d1m = 0.0016598261 }, -- The Forgotten Wastes
+[1279] = { type = ZT_DUNGEON, d1m = 0.0052680142 }, -- Kora Dur
+[1277] = { type = ZT_DUNGEON, d1m = 0.0028944653 }, -- Caverns of Kogoruhn
+[1278] = { type = ZT_DUNGEON, d1m = 0.003716386 }, -- Forgotten Depths
+[1280] = { type = ZT_DUNGEON, d1m = 0.0070284756 }, -- Drinith Ancestral Tomb
 
 -- ===============================================================================
 [2274] = { type = ZT_ZONE, d1m = 0.0003372194 }, -- Telvanni Peninsula
@@ -268,6 +273,8 @@ MapRadarZoneData = {  -- Based on MapId
 [1560] = { type = ZT_SUBZONE, d1m = 0.001440769 }, -- Lilmoth
 [1561] = { type = ZT_SUBZONE, d1m = 0.0036284458 }, -- Bright-Throat Village
 [1562] = { type = ZT_SUBZONE, d1m = 0.0023736927 }, -- Dead-Water Village
+[1563] = { type = ZT_SUBZONE, d1m = 0.0024724285 }, -- Root-Whisper Village - empty
+
 
 -- ===============================================================================
 [1654] = { type = ZT_ZONE, d1m = 0.0002713487 }, -- Southern Elsweyr
@@ -303,8 +310,17 @@ MapRadarZoneData = {  -- Based on MapId
 [993] = { type = ZT_SUBZONE, d1m = 0.0010983781 }, -- Abah's Landing
 
 -- ===============================================================================
+[1349] = { type = ZT_ZONE, d1m = 0.0001762655 }, -- Summerset
+[1431] = { type = ZT_SUBZONE, d1m = 0.0011896607 }, -- Shimmerene
+[1430] = { type = ZT_SUBZONE, d1m = 0.0017004198 }, -- Alinor
+[1455] = { type = ZT_SUBZONE, d1m = 0.0019638236 }, -- Lillandril
+[1438] = { type = ZT_DUNGEON, d1m = 0.0011481346 }, -- Sunhold
 
 -- ===============================================================================
+[255] = { type = ZT_ZONE, d1m = 0.0002321149 }, -- Coldharbour
+[565] = { type = ZT_CAVE, d1m = 0.003700362 }, -- Tower of Lies - Liars Passage
+[741] = { type = ZT_NONE, d1m = 0.0074329711 }, -- Library of Dusk
+[350] = { type = ZT_NONE, d1m = 0.0039654534 }, -- Library of Dusk
 
 -- ===============================================================================
 

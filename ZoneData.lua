@@ -358,6 +358,45 @@ MapRadarZoneData = {  -- Based on MapId
 [339] = { type = ZT_DUNGEON, d1m = 0.0008478392 }, -- Village of the Lost
 
 -- ===============================================================================
+[2275] = { type = ZT_ZONE, d1m = 0.0002437765 }, -- Apocrypha
+[2384] = { type = ZT_SUBZONE, d1m = 0.0038110488 }, -- Cipher's Midden
+[2391] = { type = ZT_CAVE, d1m = 0.002476771 }, -- Central Orphic Tunnels
+
+-- ===============================================================================
+[1429] = { type = ZT_ZONE, d1m = 0.0006685503 }, -- Artaeum
+[1503] = { type = ZT_RUIN, d1m = 0.0056992395 }, -- College of Psijics Ruins
+[1493] = { type = ZT_RUIN, d1m = 0.0057857578 }, -- College of Psijics Ruins
+[1470] = { type = ZT_CAVE, d1m = 0.0122416255 }, -- The Dreaming Cave
+[1476] = { type = ZT_INDOOR, d1m = 0.0055373652 }, -- Ceporah Tower
+[1488] = { type = ZT_INDOOR, d1m = 0.0092728526 }, -- Ceporah Tower - Valsirenn's Study
+[1489] = { type = ZT_INDOOR, d1m = 0.0090905429 }, -- Ceporah Tower - Ritemaster Study
+[1490] = { type = ZT_INDOOR, d1m = 0.0091401959 }, -- Ceporah Tower - Sotha Sil's Study
+[1471] = { type = ZT_DELVE, d1m = 0.0031010005 }, -- Traitor's Vault
+[1473] = { type = ZT_DELVE, d1m = 0.0030088954 }, -- Traitor's Vault
+[1474] = { type = ZT_DELVE, d1m = 0.0030954662 }, -- Traitor's Vault
+[1475] = { type = ZT_DELVE, d1m = 0.0030378679 }, -- Traitor's Vault
+
+-- ===============================================================================
+[2035] = { type = ZT_SUBZONE, d1m = 0.00169538 }, -- Fargrave City District
+[2082] = { type = ZT_SUBZONE, d1m = 0.00132534 }, -- The Shambles
+[2099] = { type = ZT_SEWERS, d1m = 0.0043935064 }, -- Fargrave Outlaws Refuge
+[2100] = { type = ZT_SEWERS, d1m = 0.004417668 }, -- Fargrave Outlaws Refuge
+[2136] = { type = ZT_INDOOR, d1m = 0.0065733515 }, -- The Bazaar
+
+-- ===============================================================================
+[2021] = { type = ZT_ZONE, d1m = 0.0002991617 }, -- The Deadlands
+
+-- ===============================================================================
+[2114] = { type = ZT_ZONE, d1m = 0.000202333 }, -- High Isle and Amenos
+[2163] = { type = ZT_SUBZONE, d1m = 0.001435772 }, -- Gonfalon Bay
+[2214] = { type = ZT_SUBZONE, d1m = 0.0022311999 }, -- Amenos Station
+
+-- ===============================================================================
+[1313] = { type = ZT_ZONE, d1m = 0.0003883737 }, -- Clockwork City
+[1348] = { type = ZT_SUBZONE, d1m = 0.0010899191 }, -- Brass Fortress
+[1362] = { type = ZT_INDOOR, d1m = 0.0019707225 }, -- Mechanical Fundament
+[1335] = { type = ZT_INDOOR, d1m = 0.0020565569 }, -- Mechanical Fundament
+[1385] = { type = ZT_INDOOR, d1m = 0.0059019841 }, -- Clockwork Basilica
 
 -- ===============================================================================
 

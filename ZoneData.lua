@@ -14,6 +14,8 @@ local ZT_COSMIC = 12
 local ZT_TEMPLE = 13
 local ZT_CASTLE = 14
 local ZT_UNDERWORLD = 15
+local ZT_POCKET = 16
+local ZT_CELLAR = 17
 -- quest isolated areas? instances?
 -- ZT_SOLOINSTANCE ????
 
@@ -318,9 +320,42 @@ MapRadarZoneData = {  -- Based on MapId
 
 -- ===============================================================================
 [255] = { type = ZT_ZONE, d1m = 0.0002321149 }, -- Coldharbour
+[422] = { type = ZT_SUBZONE, d1m = 0.0019871879 }, -- The Hollow City
 [565] = { type = ZT_CAVE, d1m = 0.003700362 }, -- Tower of Lies - Liars Passage
-[741] = { type = ZT_NONE, d1m = 0.0074329711 }, -- Library of Dusk
-[350] = { type = ZT_NONE, d1m = 0.0039654534 }, -- Library of Dusk
+[741] = { type = ZT_RUIN, d1m = 0.0074329711 }, -- Library of Dusk
+[350] = { type = ZT_RUIN, d1m = 0.0039654534 }, -- Library of Dusk
+[354] = { type = ZT_RUIN, d1m = 0.0022173017 }, -- Lightless Oubliette
+[355] = { type = ZT_RUIN, d1m = 0.0022615527 }, -- Lightless Oubliette
+[368] = { type = ZT_RUIN, d1m = 0.0018019564 }, -- Lightless Cell
+[351] = { type = ZT_RUIN, d1m = 0.0031791224 }, -- Haj Uxith
+[358] = { type = ZT_POCKET, d1m = 0.0018888335 }, -- The Manor of Revelry
+[751] = { type = ZT_POCKET, d1m = 0.0099568385 }, -- The Manor of Revelry
+[752] = { type = ZT_POCKET, d1m = 0.0103072703 }, -- The Manor of Revelry
+[753] = { type = ZT_POCKET, d1m = 0.0102595532 }, -- The Manor of Revelry
+[754] = { type = ZT_POCKET, d1m = 0.010037896 }, -- The Manor of Revelry
+[755] = { type = ZT_POCKET, d1m = 0.0176000581 }, -- The Manor of Revelry
+[787] = { type = ZT_POCKET, d1m = 0.0045042073 }, -- The Manor of Revelry Cave
+[742] = { type = ZT_CAVE, d1m = 0.0073590345 }, -- The Lost Fleet - Coral Tower Tunnel
+[738] = { type = ZT_CAVE, d1m = 0.0088415739 }, -- Holding Cells
+[739] = { type = ZT_CELLAR, d1m = 0.0083318269 }, -- Thane's Lair
+[371] = { type = ZT_CAVE, d1m = 0.001187542 }, -- The Black Forge
+[372] = { type = ZT_CAVE, d1m = 0.0011735667 }, -- The Black Forge - Fabrication Chamber
+[373] = { type = ZT_CAVE, d1m = 0.0011951698 }, -- The Black Forge - Boiler
+[585] = { type = ZT_CAVE, d1m = 0.0014137048 }, -- The Great Shackle - Bridge
+[586] = { type = ZT_CAVE, d1m = 0.0013003281 }, -- The Great Shackle
+[587] = { type = ZT_CAVE, d1m = 0.0050235075 }, -- The Mooring
+[353] = { type = ZT_RUIN, d1m = 0.0025648143 }, -- The Vile Laboratory
+[356] = { type = ZT_RUIN, d1m = 0.0028100125 }, -- Grunda's Gatehouse
+[357] = { type = ZT_RUIN, d1m = 0.0028878335 }, -- Grunda's Gatehouse
+[740] = { type = ZT_RUIN, d1m = 0.0074695 }, -- Reaver Citadel Pyramid
+[361] = { type = ZT_POCKET, d1m = 0.0024197419 }, -- The Endless Stair
+[261] = { type = ZT_DELVE, d1m = 0.0023386714 }, -- The Grotto of Depravity
+[322] = { type = ZT_DELVE, d1m = 0.0029316934 }, -- Mal Sorra's Tomb
+[266] = { type = ZT_DELVE, d1m = 0.0034967929 }, -- Aba-Loria
+[263] = { type = ZT_DELVE, d1m = 0.0029437384 }, -- The Wailing Maw
+[352] = { type = ZT_DELVE, d1m = 0.0040001992 }, -- The Vault of Haman Forgefire
+[593] = { type = ZT_DELVE, d1m = 0.0028908699 }, -- The Cave of Trophies
+[339] = { type = ZT_DUNGEON, d1m = 0.0008478392 }, -- Village of the Lost
 
 -- ===============================================================================
 
@@ -330,8 +365,6 @@ MapRadarZoneData = {  -- Based on MapId
 
 -- ===============================================================================
 -- TODO: Need to sort 
-
-
 
 
 --  ============================================================================== 

@@ -1,4 +1,5 @@
 -- TODO For release
+-- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
 -- Group delve own settings option
 -- Enabled registerMapPins block when map is opened. Check if there is no arising issues!
 -- Fill in some short description

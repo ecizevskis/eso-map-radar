@@ -3,14 +3,10 @@ local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 local dataForm = nil
 local worldMap = ZO_WorldMap
 local getMapPlayerPosition = GetMapPlayerPosition
-local pinManager = ZO_WorldMap_GetPinManager()
 
 local ScaleData = {
-    dx = 0,
-    dy = 0,
     px = 0,
-    py = 0,
-    unit1 = 0
+    py = 0
  }
 
 local storedPos1 = {}
@@ -34,9 +30,7 @@ local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     return label;
 end
 
-local function calc1meter(x1, y1, x2, y2)
-    local measuredMeters = 40
-
+local function calc1meter(x1, y1, x2, y2, measuredMeters)
     local dx = x1 - x2
     local dy = y1 - y2
 
@@ -45,21 +39,25 @@ local function calc1meter(x1, y1, x2, y2)
     return distance / measuredMeters -- calculate map part for 1 meter
 end
 
+local function saveMeasuredDistance(measuredMeters)
+    local data = {
+        dx = ScaleData.px - storedPos1.px,
+        dy = ScaleData.py - storedPos1.py,
+        unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py, measuredMeters),
+        mapId = GetCurrentMapId(),
+        name = worldMap.zoneName,
+        distance = measuredMeters
+     }
+
+    MapRadar.config.scaleData[data.mapId] = data
+    MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
+end
+
 local function selfData()
     local playerX, playerY = getMapPlayerPosition("player")
 
     ScaleData.px = playerX
     ScaleData.py = playerY
-end
-
-local function targetPinData(pin)
-
-    local playerX, playerY = getMapPlayerPosition("player")
-
-    ScaleData.dx = pin.normalizedX - playerX
-    ScaleData.dy = pin.normalizedY - playerY
-
-    ScaleData.unit1 = calc1meter(pin.normalizedX, pin.normalizedY, playerX, playerY) -- distance / measuredMeters -- calculate map part for 1 meter
 end
 
 local displayMultiplier = 10000000
@@ -72,13 +70,10 @@ local function CreateCalibrationDataForm()
         "GetCurrentMapId", function()
             return GetCurrentMapId()
         end)
+
     dataForm:AddLabel(
-        "GetCurrentMapIndex", function()
-            return GetCurrentMapIndex()
-        end)
-    dataForm:AddLabel(
-        "GetCurrentMapZoneIndex", function()
-            return GetCurrentMapZoneIndex()
+        "Active zone", function()
+            return GetPlayerActiveZoneName()
         end)
 
     dataForm:AddLabel(
@@ -93,56 +88,10 @@ local function CreateCalibrationDataForm()
         "Rel PY", function()
             return ScaleData.py
         end)
-    dataForm:AddLabel(
-        "Rel DX", function()
-            return ScaleData.dx
-        end)
-    dataForm:AddLabel(
-        "Rel DY", function()
-            return ScaleData.dy
-        end)
-    dataForm:AddLabel(
-        "Unit1", function()
-            return ScaleData.unit1
-        end)
 
-    local btnSaveScaleData = CreateControlFromVirtual("$(parent)btnSaveGroupScaleData", dataForm, "ZO_PlusButton")
-    btnSaveScaleData:SetDimensions(40, 40)
-    btnSaveScaleData:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT)
-    btnSaveScaleData:SetHandler(
-        "OnClicked", function()
-            local curvedZoom = MapRadar.getPanAndZoom():GetCurrentCurvedZoom()
-            local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
-
-            local data = {
-                dx = ScaleData.dx,
-                dy = ScaleData.dy,
-                unit1 = ScaleData.unit1,
-                mapId = GetCurrentMapId(),
-                zoneIndex = GetCurrentMapZoneIndex(),
-                name = worldMap.zoneName
-             }
-
-            MapRadar.config.scaleData[data.mapId] = data
-            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
-        end)
-    btnSaveScaleData:SetHandler(
-        "OnMouseEnter", function(self)
-            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save group duel calibration data")
-        end)
-    btnSaveScaleData:SetHandler(
-        "OnMouseExit", function(self)
-            ZO_Tooltips_HideTextTooltip()
-        end)
-
-    local labelGroupCalibration = MapRadarCommon.CreateLabel("$(parent)labelGroupCalibration", dataForm, "Group Calibration")
-    labelGroupCalibration:SetAnchor(RIGHT, btnSaveScaleData, LEFT)
-
-    -- ==========================================================================================
-    -- Solo calibration
     local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "ZO_NextArrowButton")
     btnSavePosition1:SetDimensions(40, 40)
-    btnSavePosition1:SetAnchor(TOPLEFT, btnSaveScaleData, BOTTOMLEFT, 0, 10)
+    btnSavePosition1:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT, 0, 10)
     btnSavePosition1:SetHandler(
         "OnClicked", function()
             storedPos1.px = ScaleData.px
@@ -152,65 +101,41 @@ local function CreateCalibrationDataForm()
         end)
     btnSavePosition1:SetHandler(
         "OnMouseEnter", function(self)
-            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Save current player position for solo calculation")
+            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Save current player position")
         end)
     btnSavePosition1:SetHandler(
         "OnMouseExit", function(self)
             ZO_Tooltips_HideTextTooltip()
         end)
 
-    local btnSavePosition2 = CreateControlFromVirtual("$(parent)btnSavePosition2", dataForm, "ZO_PlusButton")
-    btnSavePosition2:SetDimensions(40, 40)
-    btnSavePosition2:SetAnchor(TOPLEFT, btnSavePosition1, TOPRIGHT)
-    btnSavePosition2:SetHandler(
+    local btnCalculate1 = CreateControlFromVirtual("$(parent)btnCalculate1", dataForm, "ZO_PlusButton")
+    btnCalculate1:SetDimensions(40, 40)
+    btnCalculate1:SetAnchor(TOPLEFT, btnSavePosition1, TOPRIGHT)
+    btnCalculate1:SetHandler(
         "OnClicked", function()
-            local data = {
-                dx = ScaleData.px - storedPos1.px,
-                dy = ScaleData.py - storedPos1.py,
-                unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py),
-                mapId = GetCurrentMapId(),
-                name = worldMap.zoneName
-             }
-
-            MapRadar.config.scaleData[data.mapId] = data
-            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
+            saveMeasuredDistance(40);
         end)
-    btnSavePosition2:SetHandler(
+    btnCalculate1:SetHandler(
         "OnMouseEnter", function(self)
-            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save solo calibration data")
+            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save calibration data")
         end)
-    btnSavePosition2:SetHandler(
+    btnCalculate1:SetHandler(
         "OnMouseExit", function(self)
             ZO_Tooltips_HideTextTooltip()
         end)
 
-    local btnSavePosition12m = CreateControlFromVirtual("$(parent)btnSavePosition12m", dataForm, "ZO_PlusButton")
-    btnSavePosition12m:SetDimensions(40, 40)
-    btnSavePosition12m:SetAnchor(TOPLEFT, btnSavePosition2, TOPRIGHT)
-    btnSavePosition12m:SetHandler(
+    local btnCalculate2 = CreateControlFromVirtual("$(parent)btnCalculate2", dataForm, "ZO_PlusButton")
+    btnCalculate2:SetDimensions(40, 40)
+    btnCalculate2:SetAnchor(TOPLEFT, btnCalculate1, TOPRIGHT)
+    btnCalculate2:SetHandler(
         "OnClicked", function()
-            local dx = ScaleData.px - storedPos1.px
-            local dy = ScaleData.py - storedPos1.py
-
-            local distance = math.sqrt(dx ^ 2 + dy ^ 2) -- distance in percentage
-
-            local data = {
-                -- add zeros in dx, dy or parser fails
-                dx = 0,
-                dy = 0,
-                unit1 = distance / 12,
-                mapId = GetCurrentMapId(),
-                name = worldMap.zoneName
-             }
-
-            MapRadar.config.scaleData[data.mapId] = data
-            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
+            saveMeasuredDistance(12);
         end)
-    btnSavePosition12m:SetHandler(
+    btnCalculate2:SetHandler(
         "OnMouseEnter", function(self)
-            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save solo calibration data 12m")
+            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save calibration data 12m")
         end)
-    btnSavePosition12m:SetHandler(
+    btnCalculate2:SetHandler(
         "OnMouseExit", function(self)
             ZO_Tooltips_HideTextTooltip()
         end)
@@ -235,18 +160,6 @@ local function EnableOrDisableCalibrator()
         -- Fetch party leader pin to use for calculation
         EVENT_MANAGER:RegisterForUpdate(
             "MapRadar_PinReader", 100, function()
-                local pins = pinManager:GetActiveObjects()
-
-                for pinKey, pin in pairs(pins) do
-                    -- MAP_PIN_TYPE_ACTIVE_COMPANION
-                    -- MAP_PIN_TYPE_GROUP_LEADER
-
-                    if pin:IsCompanion() -- pin:GetPinType() == MAP_PIN_TYPE_GROUP_LEADER 
-                    and pin.normalizedX and pin.normalizedY then
-                        targetPinData(pin)
-                    end
-                end
-
                 selfData()
                 dataForm:Update()
             end)

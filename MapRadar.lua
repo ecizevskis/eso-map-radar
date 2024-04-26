@@ -57,6 +57,7 @@ MapRadar = {
 
 local MR = MapRadar
 local MRPin = MapRadarPin
+local radarTexture = MapRadarContainerRadarTexture
 
 -- Localize global objects for better performance
 local sceneManager = SCENE_MANAGER
@@ -105,7 +106,7 @@ end
 -- Mode change
 local function setOverlayMode(flag)
     MR.playerPinTexture:ClearAnchors()
-    MapRadarContainerRadarTexture:SetHidden(flag)
+    radarTexture:SetHidden(flag)
 
     if flag then
         MR.playerPinTexture:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)
@@ -149,8 +150,7 @@ local function mapUpdate()
     playerX = px
     playerY = py
 
-    -- MapRadar.positionLabel:SetText(zo_strformat("Pos:  <<1>> <<2>>", playerX * 100, playerY * 100))
-    MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
+    radarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- reposition pins
     for key, radarPin in pairs(MR.activePins) do
@@ -165,21 +165,6 @@ local function mapPinIntegrityCheck()
             CALLBACK_MANAGER:FireCallbacks("MapRadar_CorruptedPin")
         end
     end
-end
-
-local prevPinCount = 0
-local function mapPinCountCheck()
-    local pins = pinManager:GetActiveObjects()
-    local maxn = table.maxn(pins)
-
-    if prevPinCount == maxn then
-        -- return
-    end
-
-    -- MR.debugDebounce("Pin count changed: <<1>>", maxn)
-
-    prevPinCount = maxn
-    registerMapPins()
 end
 
 local function initialize(eventType, addonName)
@@ -211,22 +196,13 @@ local function initialize(eventType, addonName)
     SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
 
     EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, mapUpdate)
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCount", 200, mapPinCountCheck)
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCheck", 1000, mapPinIntegrityCheck)
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinRefresh", 200, registerMapPins)
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCheck", 300, mapPinIntegrityCheck)
 
     CALLBACK_MANAGER:RegisterCallback(
         "MapRadar_Reset", function()
             playerHeading = 0
         end)
-
-    --[[
-    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
-        zo_callLater(function()
-            MR.scale = getMapScale()
-        end, 200)
-
-    end)
-    --]]
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarInitialized")
 end

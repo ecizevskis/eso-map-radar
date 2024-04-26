@@ -21,11 +21,6 @@ local storedPos1 = {}
 -- Create data stack component
 -- Add data label/datastack to form component
 
-local function setScaleLabel(val)
-    -- MapRadar.scale = MapRadar.scale + val
-    -- scaleLabel:SetText(MapRadar.scale)
-end
-
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     local label, labelKey = labelPool:AcquireObject()
     label:SetFont("$(BOLD_FONT)|16|outline")
@@ -226,52 +221,7 @@ local function CreateCalibrationDataForm()
 end
 
 local function MapRadar_InitScaleCalibrator()
-
     CreateCalibrationDataForm()
-
-    --[[
-    scaleLabel = CreateControl("$(parent)ScaleLabel", MapRadarContainer, CT_LABEL)
-    scaleLabel:SetAnchor(TOPLEFT, MapRadarContainer, TOPRIGHT, 20, 40)
-    scaleLabel:SetFont("$(MEDIUM_FONT)|14|outline")
-    scaleLabel:SetColor(unpack({1, 1, 1, 1}))
-    setScaleLabel(0)
-
-    local btnAdd01 = CreateControlFromVirtual("$(parent)btnAdd01", MapRadarContainer, "ZO_PlusButton")
-    btnAdd01:SetAnchor(TOPLEFT, scaleLabel, BOTTOMLEFT)
-    btnAdd01:SetHandler("OnClicked", function()
-        setScaleLabel(0.1)
-    end)
-
-    local btnSub01 = CreateControlFromVirtual("$(parent)btnSub01", MapRadarContainer, "ZO_MinusButton")
-    btnSub01:SetAnchor(TOPLEFT, btnAdd01, BOTTOMLEFT)
-    btnSub01:SetHandler("OnClicked", function()
-        setScaleLabel(-0.1)
-    end)
-
-    local btnAdd001 = CreateControlFromVirtual("$(parent)btnAdd001", MapRadarContainer, "ZO_PlusButton")
-    btnAdd001:SetAnchor(TOPLEFT, btnAdd01, TOPRIGHT)
-    btnAdd001:SetHandler("OnClicked", function()
-        setScaleLabel(0.01)
-    end)
-
-    local btnSub001 = CreateControlFromVirtual("$(parent)btnSub001", MapRadarContainer, "ZO_MinusButton")
-    btnSub001:SetAnchor(TOPLEFT, btnAdd001, BOTTOMLEFT)
-    btnSub001:SetHandler("OnClicked", function()
-        setScaleLabel(-0.01)
-    end)
-
-    local btnAdd0001 = CreateControlFromVirtual("$(parent)btnAdd0001", MapRadarContainer, "ZO_PlusButton")
-    btnAdd0001:SetAnchor(TOPLEFT, btnAdd001, TOPRIGHT)
-    btnAdd0001:SetHandler("OnClicked", function()
-        setScaleLabel(0.001)
-    end)
-
-    local btnSub0001 = CreateControlFromVirtual("$(parent)btnSub0001", MapRadarContainer, "ZO_MinusButton")
-    btnSub0001:SetAnchor(TOPLEFT, btnAdd0001, BOTTOMLEFT)
-    btnSub0001:SetHandler("OnClicked", function()
-        setScaleLabel(-0.001)
-    end)
-]]
 
 end
 

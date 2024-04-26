@@ -78,6 +78,8 @@ MapRadarZoneData = {  -- Based on MapId
 [1784] = { type = ZT_SEWERS, d1m = 0.0037908691 }, -- Riften Ratway Lower
 [1753] = { type = ZT_SEWERS, d1m = 0.0037930828 }, -- Riften Ratway
 [214] = { type = ZT_DELVE, d1m = 0.0032323222 }, -- Faldar's Tooth
+[103] = { type = ZT_POCKET, d1m = 0.0017372258 }, -- The Earth Forge
+[583] = { type = ZT_POCKET, d1m = 0.0085430814 }, -- The Earth Forge - Pressure Room III
 
 --  ============================================================================== 
 [1555] = { type = ZT_ZONE, d1m = 0.0002062994 }, -- Northern Elsweyr
@@ -251,6 +253,8 @@ MapRadarZoneData = {  -- Based on MapId
 [1277] = { type = ZT_DUNGEON, d1m = 0.0028944653 }, -- Caverns of Kogoruhn
 [1278] = { type = ZT_DUNGEON, d1m = 0.003716386 }, -- Forgotten Depths
 [1280] = { type = ZT_DUNGEON, d1m = 0.0070284756 }, -- Drinith Ancestral Tomb
+[1300] = { type = ZT_DELVE, d1m = 0.0030112466 }, -- Pulk
+[1161] = { type = ZT_DELVE, d1m = 0.0030347234 }, -- Pulk
 
 -- ===============================================================================
 [2274] = { type = ZT_ZONE, d1m = 0.0003372194 }, -- Telvanni Peninsula
@@ -404,6 +408,8 @@ MapRadarZoneData = {  -- Based on MapId
 
 -- ===============================================================================
 -- TODO: Need to sort 
+
+
 
 
 --  ============================================================================== 

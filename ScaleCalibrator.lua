@@ -156,15 +156,13 @@ local function EnableOrDisableCalibrator()
     end
 
     if MapRadar.config.showCalibrate then
-        -- ===================================================================================
-        -- Fetch party leader pin to use for calculation
         EVENT_MANAGER:RegisterForUpdate(
-            "MapRadar_PinReader", 100, function()
+            "MapRadar_CalibrationData", 100, function()
                 selfData()
                 dataForm:Update()
             end)
     else
-        EVENT_MANAGER:UnregisterForUpdate("MapRadar_PinReader")
+        EVENT_MANAGER:UnregisterForUpdate("MapRadar_CalibrationData")
     end
 end
 

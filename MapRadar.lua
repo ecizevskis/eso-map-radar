@@ -1,7 +1,6 @@
 -- TODO For release
 -- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
 -- Group delve own settings option
--- Enabled registerMapPins block when map is opened. Check if there is no arising issues!
 -- Fill in some short description
 -- Find a way of easy way of processing community calibrated data(check it and automatic load to some excel for comparings? )
 -- Hide in combat option??
@@ -78,13 +77,6 @@ local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer,
 local function registerMapPins()
 
     if MapRadar.sceneManager:IsShowing("worldMap") then
-        -- Dispose all pins because they are removed from pool and will get different keys
-        --[[
-        for k in pairs(MapRadar.activePins) do
-            MapRadar.activePins[k]:Dispose()
-            MapRadar.activePins[k] = nil
-        end
-        ]]
         return -- Block further execution while map is opened
     end
 

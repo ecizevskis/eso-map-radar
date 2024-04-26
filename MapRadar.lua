@@ -1,17 +1,12 @@
--- TODO For release
--- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
+-- TODO
 -- Group delve own settings option
-MapRadar = { -- Localize global objects for better performance
-    worldMap = ZO_WorldMap, --
-    getPanAndZoom = ZO_WorldMap_GetPanAndZoom, --
-    getMapDimensions = ZO_WorldMap_GetMapDimensions, --
-    orig_GetMapDimensions = orgZO_WorldMap_GetMapDimensions, --
-    getPlayerCameraHeading = GetPlayerCameraHeading, --
-    getMapPlayerPosition = GetMapPlayerPosition, --
-    pinManager = ZO_WorldMap_GetPinManager(), --
-    sceneManager = SCENE_MANAGER,
-    getMapType = GetMapType, -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType
-    getCurrentMapId = GetCurrentMapId, --
+-- Calibration interface changes 
+--    Add two sections with changable distance and saving to saved variables
+--    Remove party leader lookup
+--    Remove party leader distance coords calculation from forms
+--    Add main zone name to saved calibration data  GetPlayerActiveZoneName()
+-- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
+MapRadar = {
     maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
     pinSize = 0, -- positionLabel = {},
     activePins = {}, --
@@ -60,24 +55,27 @@ MapRadar = { -- Localize global objects for better performance
     end
  }
 
+-- Localize global objects for better performance
+local sceneManager = SCENE_MANAGER
+local getPlayerCameraHeading = GetPlayerCameraHeading
+local getMapPlayerPosition = GetMapPlayerPosition
+local pinManager = ZO_WorldMap_GetPinManager()
+
 local UIWidth, UIHeight = GuiRoot:GetDimensions()
-local playerPin = MapRadar.pinManager:GetPlayerPin()
+local playerPin = pinManager:GetPlayerPin()
 local pinsPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
 local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
-
--- This is to track if player moved to reduce update actions on pins
--- https://www.codecademy.com/resources/docs/lua/tables
 
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
 -- https://esodata.uesp.net/100025/src/ingame/map/worldmap.lua.html
 local function registerMapPins()
 
-    if MapRadar.sceneManager:IsShowing("worldMap") then
+    if sceneManager:IsShowing("worldMap") then
         return -- Block further execution while map is opened
     end
 
-    local pins = MapRadar.pinManager:GetActiveObjects()
+    local pins = pinManager:GetActiveObjects()
 
     -- Dispose invalid pins
     for k, radarPin in pairs(MapRadar.activePins) do
@@ -87,8 +85,8 @@ local function registerMapPins()
         end
     end
 
-    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
-    local heading = MapRadar.getPlayerCameraHeading()
+    local playerX, playerY = getMapPlayerPosition("player")
+    local heading = getPlayerCameraHeading()
 
     -- Add new pins that did not exist
     for key, pin in pairs(pins) do
@@ -136,12 +134,12 @@ end
 -- Event handlers
 local playerHeading, playerX, playerY = 0, 0, 0
 local function mapUpdate()
-    if MapRadar.sceneManager:IsShowing("worldMap") then
+    if sceneManager:IsShowing("worldMap") then
         return -- Block further execution while map is opened
     end
 
-    local px, py = MapRadar.getMapPlayerPosition("player")
-    local heading = MapRadar.getPlayerCameraHeading()
+    local px, py = getMapPlayerPosition("player")
+    local heading = getPlayerCameraHeading()
 
     local hasPlayerMoved = playerHeading ~= heading or playerX ~= px or playerY ~= py
     playerHeading = heading
@@ -168,7 +166,7 @@ end
 
 local prevPinCount = 0
 local function mapPinCountCheck()
-    local pins = MapRadar.pinManager:GetActiveObjects()
+    local pins = pinManager:GetActiveObjects()
     local maxn = table.maxn(pins)
 
     if prevPinCount == maxn then
@@ -351,67 +349,6 @@ SLASH_COMMANDS["/mr"] = slashCommands
 -- ==================================================================================================
 -- Test stuff 
 
-function MapRadar_button()
-    -- registerMapPins() -- reset all pins placement (for calibration)
-    --[[
-    local pins = MapRadar.pinManager:GetActiveObjects()
-    MapRadar.debug("Pins: <<1>>", table.maxn(pins))
-    -- local oW, oH = MapRadar.orig_GetMapDimensions()
-    local currentMapWidth, currentMapHeight = MapRadar.getMapDimensions()
-
-    local mapTexture = GetMapTileTexture()
-    MapRadar.debug("Map texture: <<1>>", mapTexture)
-    MapRadarContainerRadarTexture:SetTexture(mapTexture)
-
-    MapRadar.debug("Map dimension: <<1>> <<2>>", currentMapWidth, currentMapHeight)
-    -- MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
-    MapRadar.debug("Map curvedZoom: <<1>>", MapRadar.getPanAndZoom():GetCurrentCurvedZoom() * 1000)
-    MapRadar.debug("UI -  W: <<1>>  H: <<2>>", UIWidth, UIHeight)
-    MapRadar.debug("MR max distance: <<1>>", MapRadar.maxRadarDistance)
-
-    local x, y, h = GetMapPlayerPosition("player")
-    MapRadar.debug("GetMapPlayerPosition: <<1>>  <<2>>  <<3>>", x, y, h)
-
-    local zoneId, pwx1, pwh1, pwy1 = GetUnitRawWorldPosition("player")
-    MapRadar.debug("GetUnitRawWorldPosition: <<1>>  <<2>>  <<3>>", pwx1, pwh1, pwy1)
-
-    local _, pwx2, pwh2, pwy2 = GetUnitWorldPosition("player")
-    MapRadar.debug("GetUnitWorldPosition: <<1>>  <<2>> <<3>>", pwx2, pwh2, pwy2)
-
-    MapRadar.debug("ZO_WorldMapContainer: <<1>>  <<2>>", ZO_WorldMapContainer:GetDimensions())
-]]
-    --[[
-    MapRadar.debug("GetFilterValue: <<1>>", MapRadar.getStrVal(ZO_WorldMapManager:GetFilterValue(MAP_FILTER_WAYSHRINES)))
-
-    local modeData = ZO_WorldMapManager:GetModeData()
-    MapRadar.debug("Mode data: <<1>>", MapRadar.getStrVal(modeData))
-    local mapFilterType = GetMapFilterType()
-    local filters = modeData.filters[mapFilterType]
-    if filters then
-        for k, filter in pairs(filters) do
-            MapRadar.debug("<<1>> <<2>>", k, filter)
-        end
-    end
-
-    -- MAP_MODE_LARGE_CUSTOM
-    ]]
-
-    local x, y, h = GetMapPlayerPosition("player")
-    local pinTag = "sometag"
-    ZO_WorldMap_GetPinManager():CreatePin(2, pinTag, x, y, 0.06)
-
-end
-
---[[
-CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
-    local oW, oH = orgZO_WorldMap_GetMapDimensions()
-    local currentMapWidth, currentMapHeight = ZO_WorldMap_GetMapDimensions()
-
-    MapRadar.debug("Map dimension: <<1>> <<2>>", currentMapWidth, currentMapHeight)
-    MapRadar.debug("Orig Map dimension: <<1>> <<2>>", oW, oH)
-end)
---]]
-
 -- GetCurrentMapIndex() 
 -- GetPlayerActiveSubzoneName() -> Returns: string subzoneName 
 -- GetPlayerActiveZoneName() -> Returns: string zoneName 
@@ -457,3 +394,5 @@ local w, h = ZO_WorldMapScroll:GetDimensions()
 -- Returns: number renderX, number renderY, number renderZ 
 
 -- 	local subzone=string.match(string.gsub(GetMapTileTexture(),"_base[_%w]*",""),"([%w%-_]+).dds$")
+
+-- GetMapType(), -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType

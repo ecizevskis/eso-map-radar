@@ -1,6 +1,9 @@
 local scaleLabel = {}
 local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 local dataForm = nil
+local worldMap = ZO_WorldMap
+local getMapPlayerPosition = GetMapPlayerPosition
+local pinManager = ZO_WorldMap_GetPinManager()
 
 local ScaleData = {
     dx = 0,
@@ -48,7 +51,7 @@ local function calc1meter(x1, y1, x2, y2)
 end
 
 local function selfData()
-    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
+    local playerX, playerY = getMapPlayerPosition("player")
 
     ScaleData.px = playerX
     ScaleData.py = playerY
@@ -56,7 +59,7 @@ end
 
 local function targetPinData(pin)
 
-    local playerX, playerY = MapRadar.getMapPlayerPosition("player")
+    local playerX, playerY = getMapPlayerPosition("player")
 
     ScaleData.dx = pin.normalizedX - playerX
     ScaleData.dy = pin.normalizedY - playerY
@@ -72,7 +75,7 @@ local function CreateCalibrationDataForm()
 
     dataForm:AddLabel(
         "GetCurrentMapId", function()
-            return MapRadar.getCurrentMapId()
+            return GetCurrentMapId()
         end)
     dataForm:AddLabel(
         "GetCurrentMapIndex", function()
@@ -85,7 +88,7 @@ local function CreateCalibrationDataForm()
 
     dataForm:AddLabel(
         "Zone", function()
-            return MapRadar.worldMap.zoneName
+            return worldMap.zoneName
         end)
     dataForm:AddLabel(
         "Rel PX", function()
@@ -120,13 +123,13 @@ local function CreateCalibrationDataForm()
                 dx = ScaleData.dx,
                 dy = ScaleData.dy,
                 unit1 = ScaleData.unit1,
-                mapId = MapRadar.getCurrentMapId(),
+                mapId = GetCurrentMapId(),
                 zoneIndex = GetCurrentMapZoneIndex(),
-                name = MapRadar.worldMap.zoneName
+                name = worldMap.zoneName
              }
 
             MapRadar.config.scaleData[data.mapId] = data
-            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
+            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
         end)
     btnSaveScaleData:SetHandler(
         "OnMouseEnter", function(self)
@@ -170,12 +173,12 @@ local function CreateCalibrationDataForm()
                 dx = ScaleData.px - storedPos1.px,
                 dy = ScaleData.py - storedPos1.py,
                 unit1 = calc1meter(ScaleData.px, ScaleData.py, storedPos1.px, storedPos1.py),
-                mapId = MapRadar.getCurrentMapId(),
-                name = MapRadar.worldMap.zoneName
+                mapId = GetCurrentMapId(),
+                name = worldMap.zoneName
              }
 
             MapRadar.config.scaleData[data.mapId] = data
-            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
+            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
         end)
     btnSavePosition2:SetHandler(
         "OnMouseEnter", function(self)
@@ -201,12 +204,12 @@ local function CreateCalibrationDataForm()
                 dx = 0,
                 dy = 0,
                 unit1 = distance / 12,
-                mapId = MapRadar.getCurrentMapId(),
-                name = MapRadar.worldMap.zoneName
+                mapId = GetCurrentMapId(),
+                name = worldMap.zoneName
              }
 
             MapRadar.config.scaleData[data.mapId] = data
-            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), MapRadar.worldMap.zoneName)
+            MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
         end)
     btnSavePosition12m:SetHandler(
         "OnMouseEnter", function(self)
@@ -282,7 +285,7 @@ local function EnableOrDisableCalibrator()
         -- Fetch party leader pin to use for calculation
         EVENT_MANAGER:RegisterForUpdate(
             "MapRadar_PinReader", 100, function()
-                local pins = MapRadar.pinManager:GetActiveObjects()
+                local pins = pinManager:GetActiveObjects()
 
                 for pinKey, pin in pairs(pins) do
                     -- MAP_PIN_TYPE_ACTIVE_COMPANION

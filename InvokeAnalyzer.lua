@@ -1,4 +1,5 @@
 local dataForm = {}
+local pinManager = ZO_WorldMap_GetPinManager()
 
 local AnalyzerData = {
     pinCreateCount = 0,
@@ -7,7 +8,7 @@ local AnalyzerData = {
     pinCorruptedCount = 0,
     pointerCreatinCount = 0,
     pointerRotateCount = 0
-}
+ }
 
 local function CreateInvokeAnalyzerDataForm()
 
@@ -16,7 +17,7 @@ local function CreateInvokeAnalyzerDataForm()
 
     dataForm:AddStack(
         "Pins", function()
-            return MapRadar.tablelength(MapRadar.pinManager:GetActiveObjects())
+            return MapRadar.tablelength(pinManager:GetActiveObjects())
         end)
     dataForm:AddStack(
         "ActivePins", function()

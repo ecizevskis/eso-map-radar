@@ -11,7 +11,9 @@ local pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
 local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
 local pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
 
+local getCurrentMapId = GetCurrentMapId
 local zoneData = MapRadarZoneData
+local pinManager = ZO_WorldMap_GetPinManager()
 
 -- ========================================================================================
 -- helper methods
@@ -19,13 +21,13 @@ local zoneData = MapRadarZoneData
 
 local function getMeterCoefficient()
 
-    local zData = zoneData[MapRadar.getCurrentMapId()]
+    local zData = zoneData[getCurrentMapId()]
     if zData ~= nil then
         MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData.d1m))
         return zData.d1m, true
     end
 
-    local calibratedData = MapRadar.config.scaleData[MapRadar.getCurrentMapId()]
+    local calibratedData = MapRadar.config.scaleData[getCurrentMapId()]
     if calibratedData ~= nil and calibratedData.unit1 ~= nil then
         MapRadar.debugDebounce("Get calibrated zone unit1: <<1>>", MapRadar.getStrVal(calibratedData.unit1))
         return calibratedData.unit1, true
@@ -41,7 +43,7 @@ local function getMeterCoefficient()
 end
 
 local function customPinName(pinType)
-    local cpin = MapRadar.pinManager.customPins[pinType]
+    local cpin = pinManager.customPins[pinType]
     if (cpin ~= nil) then
         return cpin.pinTypeString
     end

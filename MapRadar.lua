@@ -56,6 +56,7 @@ MapRadar = {
  }
 
 local MR = MapRadar
+local MRPin = MapRadarPin
 
 -- Localize global objects for better performance
 local sceneManager = SCENE_MANAGER
@@ -81,7 +82,7 @@ local function registerMapPins()
 
     -- Dispose invalid pins
     for k, radarPin in pairs(MR.activePins) do
-        if radarPin.isCorrupted or not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
+        if radarPin.isCorrupted or not MRPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
             MR.activePins[k]:Dispose()
             MR.activePins[k] = nil
         end
@@ -92,8 +93,8 @@ local function registerMapPins()
 
     -- Add new pins that did not exist
     for key, pin in pairs(pins) do
-        if MR.activePins[key] == nil and MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
-            local radarPin = MapRadarPin:New(pin, key)
+        if MR.activePins[key] == nil and MRPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
+            local radarPin = MRPin:New(pin, key)
             radarPin:UpdatePin(playerX, playerY, heading, true)
             MR.activePins[key] = radarPin
         end

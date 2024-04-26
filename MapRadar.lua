@@ -55,6 +55,8 @@ MapRadar = {
     end
  }
 
+local MR = MapRadar
+
 -- Localize global objects for better performance
 local sceneManager = SCENE_MANAGER
 local getPlayerCameraHeading = GetPlayerCameraHeading
@@ -78,10 +80,10 @@ local function registerMapPins()
     local pins = pinManager:GetActiveObjects()
 
     -- Dispose invalid pins
-    for k, radarPin in pairs(MapRadar.activePins) do
+    for k, radarPin in pairs(MR.activePins) do
         if radarPin.isCorrupted or not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
-            MapRadar.activePins[k]:Dispose()
-            MapRadar.activePins[k] = nil
+            MR.activePins[k]:Dispose()
+            MR.activePins[k] = nil
         end
     end
 
@@ -90,10 +92,10 @@ local function registerMapPins()
 
     -- Add new pins that did not exist
     for key, pin in pairs(pins) do
-        if MapRadar.activePins[key] == nil and MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
+        if MR.activePins[key] == nil and MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
             local radarPin = MapRadarPin:New(pin, key)
             radarPin:UpdatePin(playerX, playerY, heading, true)
-            MapRadar.activePins[key] = radarPin
+            MR.activePins[key] = radarPin
         end
     end
 end
@@ -101,31 +103,31 @@ end
 -- ==================================================================================================
 -- Mode change
 local function setOverlayMode(flag)
-    MapRadar.playerPinTexture:ClearAnchors()
+    MR.playerPinTexture:ClearAnchors()
     MapRadarContainerRadarTexture:SetHidden(flag)
 
     if flag then
-        MapRadar.playerPinTexture:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)
-        MapRadar.maxRadarDistance = UIHeight * 0.5
-        MapRadar.pinSize = 25
+        MR.playerPinTexture:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)
+        MR.maxRadarDistance = UIHeight * 0.5
+        MR.pinSize = 25
     else
-        MapRadar.playerPinTexture:SetAnchor(CENTER, MapRadarContainer, CENTER)
-        MapRadar.maxRadarDistance = 110
-        MapRadar.pinSize = 20
+        MR.playerPinTexture:SetAnchor(CENTER, MapRadarContainer, CENTER)
+        MR.maxRadarDistance = 110
+        MR.pinSize = 20
     end
 
-    MapRadar.config.isOverlayMode = flag
+    MR.config.isOverlayMode = flag
 
     if flag then
-        MapRadar.modeSettings = MapRadar.config.overlaySettings
+        MR.modeSettings = MR.config.overlaySettings
     else
-        MapRadar.modeSettings = MapRadar.config.radarSettings
+        MR.modeSettings = MR.config.radarSettings
     end
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
 end
 
 local function updateOverlay()
-    if MapRadar.config.isOverlayMode then
+    if MR.config.isOverlayMode then
         setOverlayMode(true)
     end
 end
@@ -150,13 +152,13 @@ local function mapUpdate()
     MapRadarContainerRadarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
     -- reposition pins
-    for key, radarPin in pairs(MapRadar.activePins) do
+    for key, radarPin in pairs(MR.activePins) do
         radarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     end
 end
 
 local function mapPinIntegrityCheck()
-    for key, radarPin in pairs(MapRadar.activePins) do
+    for key, radarPin in pairs(MR.activePins) do
         if not radarPin:CheckIntegrity() then
             radarPin.isCorrupted = true
             CALLBACK_MANAGER:FireCallbacks("MapRadar_CorruptedPin")
@@ -173,7 +175,7 @@ local function mapPinCountCheck()
         -- return
     end
 
-    -- MapRadar.debugDebounce("Pin count changed: <<1>>", maxn)
+    -- MR.debugDebounce("Pin count changed: <<1>>", maxn)
 
     prevPinCount = maxn
     registerMapPins()
@@ -190,18 +192,18 @@ local function initialize(eventType, addonName)
     playerPinTexture:SetTexture("EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds")
     playerPinTexture:SetDimensions(20, 20)
     playerPinTexture:SetAlpha(0.5)
-    MapRadar.playerPinTexture = playerPinTexture
+    MR.playerPinTexture = playerPinTexture
 
     --[[
     local positionLabel = CreateControl("$(parent)PositionLabel", MapRadarContainer, CT_LABEL)
     positionLabel:SetAnchor(TOPLEFT, MapRadarContainer, TOPRIGHT)
     positionLabel:SetFont("$(MEDIUM_FONT)|14|outline")
     positionLabel:SetColor(unpack({1, 1, 1, 1}))
-    MapRadar.positionLabel = positionLabel
+    MR.positionLabel = positionLabel
     ]]
 
     -- Set mode to radar from start (should be saved to variables later)
-    setOverlayMode(MapRadar.config.isOverlayMode);
+    setOverlayMode(MR.config.isOverlayMode);
 
     local fragment = ZO_SimpleSceneFragment:New(MapRadarContainer)
     SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
@@ -219,7 +221,7 @@ local function initialize(eventType, addonName)
     --[[
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
         zo_callLater(function()
-            MapRadar.scale = getMapScale()
+            MR.scale = getMapScale()
         end, 200)
 
     end)
@@ -231,44 +233,29 @@ end
 -- ==================================================================================================
 -- Event subscribtion
 
-EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_PLAYER_IN_PIN_AREA_CHANGED, function()
-        -- MapRadar.debug("EVENT_PLAYER_IN_PIN_AREA_CHANGED")
-    end)
-
-EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_OBJECTIVE_CONTROL_STATE, function()
-        MapRadar.debug("EVENT_OBJECTIVE_CONTROL_STATE")
-    end)
-
 -- This is good to trigger pin reset (if quest chnages 1 marker then pin count check does not see difference)
 EVENT_MANAGER:RegisterForEvent(
     "MapRadar", EVENT_QUEST_ADVANCED, function()
-        -- MapRadar.debug("EVENT_QUEST_ADVANCED")
         zo_callLater(registerMapPins, 200)
     end)
 
 EVENT_MANAGER:RegisterForEvent(
     "MapRadar", EVENT_QUEST_COMPLETE, function()
-        -- MapRadar.debug("EVENT_QUEST_COMPLETE")
         zo_callLater(registerMapPins, 200)
     end)
 
 EVENT_MANAGER:RegisterForEvent(
     "MapRadar", EVENT_QUEST_ADDED, function()
-        -- MapRadar.debug("EVENT_QUEST_ADDED ")
         zo_callLater(registerMapPins, 200)
     end)
 
 EVENT_MANAGER:RegisterForEvent(
     "MapRadar", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function()
-        -- MapRadar.debug("EVENT_QUEST_POSITION_REQUEST_COMPLETE ")
         zo_callLater(registerMapPins, 200)
     end)
 
 EVENT_MANAGER:RegisterForEvent(
     "MapRadar", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function()
-        -- MapRadar.debug("EVENT_QUEST_CONDITION_COUNTER_CHANGED ")
         zo_callLater(registerMapPins, 200)
     end)
 
@@ -290,7 +277,7 @@ local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
             return MapRadar_toggleSettings()
         end
 
-        setOverlayMode(not MapRadar.config.isOverlayMode)
+        setOverlayMode(not MR.config.isOverlayMode)
     end)
 
 ZO_CreateStringId("SI_BINDING_NAME_MAPRADAR_HOTKEY", "Hotkey")
@@ -304,39 +291,39 @@ end
 -- Slash commands
 local function slashCommands(args)
     if args == "all" then
-        MapRadar.showAllPins = not MapRadar.showAllPins
-        local flagStr = MapRadar.showAllPins and "ON" or "OFF"
-        MapRadar.debug("Show all pins: <<1>>", flagStr)
+        MR.showAllPins = not MR.showAllPins
+        local flagStr = MR.showAllPins and "ON" or "OFF"
+        MR.debug("Show all pins: <<1>>", flagStr)
     end
 
     if args == "names" then
-        MapRadar.showPinNames = not MapRadar.showPinNames
-        local flagStr = MapRadar.showPinNames and "ON" or "OFF"
-        MapRadar.debug("Show names: <<1>>", flagStr)
+        MR.showPinNames = not MR.showPinNames
+        local flagStr = MR.showPinNames and "ON" or "OFF"
+        MR.debug("Show names: <<1>>", flagStr)
     end
 
     if args == "dist" then
-        MapRadar.modeSettings.showDistance = not MapRadar.modeSettings.showDistance
-        local flagStr = MapRadar.modeSettings.showDistance and "ON" or "OFF"
-        MapRadar.debug("Show disatnce: <<1>>", flagStr)
+        MR.modeSettings.showDistance = not MR.modeSettings.showDistance
+        local flagStr = MR.modeSettings.showDistance and "ON" or "OFF"
+        MR.debug("Show disatnce: <<1>>", flagStr)
     end
 
     if args == "para" then
-        MapRadar.showPinParams = not MapRadar.showPinParams
-        local flagStr = MapRadar.showPinParams and "ON" or "OFF"
-        MapRadar.debug("Show params: <<1>>", flagStr)
+        MR.showPinParams = not MR.showPinParams
+        local flagStr = MR.showPinParams and "ON" or "OFF"
+        MR.debug("Show params: <<1>>", flagStr)
     end
 
     if args == "calibrate" then
-        MapRadar.config.showCalibrate = not MapRadar.config.showCalibrate
-        local flagStr = MapRadar.config.showCalibrate and "ON" or "OFF"
-        MapRadar.debug("Show calibrate: <<1>>", flagStr)
+        MR.config.showCalibrate = not MR.config.showCalibrate
+        local flagStr = MR.config.showCalibrate and "ON" or "OFF"
+        MR.debug("Show calibrate: <<1>>", flagStr)
     end
 
     if args == "analyzer" then
-        MapRadar.config.showAnalyzer = not MapRadar.config.showAnalyzer
-        local flagStr = MapRadar.config.showAnalyzer and "ON" or "OFF"
-        MapRadar.debug("Show analyzer: <<1>>", flagStr)
+        MR.config.showAnalyzer = not MR.config.showAnalyzer
+        local flagStr = MR.config.showAnalyzer and "ON" or "OFF"
+        MR.debug("Show analyzer: <<1>>", flagStr)
     end
 
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")

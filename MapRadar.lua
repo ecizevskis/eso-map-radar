@@ -1,9 +1,6 @@
 -- TODO For release
 -- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
 -- Group delve own settings option
--- Fill in some short description
--- Find a way of easy way of processing community calibrated data(check it and automatic load to some excel for comparings? )
--- Hide in combat option??
 MapRadar = { -- Localize global objects for better performance
     worldMap = ZO_WorldMap, --
     getPanAndZoom = ZO_WorldMap_GetPanAndZoom, --

@@ -3,7 +3,7 @@
 ## Version: 1.0.0
 ## Author: Dude
 ## SavedVariables: MapRadar_Data
-## Description: Need to come up with something
+## Description: Configurable map pin display in radar or screen overlay mode for easier map navigation.
 ## IsLibrary: False
 
 MapRadar.xml

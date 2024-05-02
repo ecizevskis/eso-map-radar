@@ -16,6 +16,7 @@ local ZT_CASTLE = 14
 local ZT_UNDERWORLD = 15
 local ZT_POCKET = 16
 local ZT_CELLAR = 17
+local ZT_MINIZONE = 18
 -- quest isolated areas? instances?
 -- ZT_SOLOINSTANCE ????
 
@@ -70,16 +71,37 @@ MapRadarZoneData = {  -- Based on MapId
 [256] = { type = ZT_ZONE, d1m = 0.0003053667 }, -- Reaper's March
 
 -- ============================================================================== 
-[125] = { type = ZT_ZONE, d1m = 0.0002482005 }, -- The Rift
+[125] = { type = ZT_ZONE, d1m = 0.0002438741 }, -- The Rift
 [542] = { type = ZT_SUBZONE, d1m = 0.0017322909 }, -- Shor's Stone
 [543] = { type = ZT_SUBZONE, d1m = 0.0013857898 }, -- Nimalten
 [198] = { type = ZT_SUBZONE, d1m = 0.0017220367 }, -- Riften
 [815] = { type = ZT_SEWERS, d1m = 0.0052393002 }, -- Riften Outlaws Refuge
 [1784] = { type = ZT_SEWERS, d1m = 0.0037908691 }, -- Riften Ratway Lower
 [1753] = { type = ZT_SEWERS, d1m = 0.0037930828 }, -- Riften Ratway
-[214] = { type = ZT_DELVE, d1m = 0.0032323222 }, -- Faldar's Tooth
 [103] = { type = ZT_POCKET, d1m = 0.0017372258 }, -- The Earth Forge
 [583] = { type = ZT_POCKET, d1m = 0.0085430814 }, -- The Earth Forge - Pressure Room III
+[81] = { type = ZT_MINE, d1m = 0.0057099136 }, -- Lost Prospect
+[580] = { type = ZT_MINE, d1m = 0.0042756113 }, -- Lost Prospect
+[463] = { type = ZT_CRYPT, d1m = 0.0065409461 }, -- Dragon Cult Temple
+[176] = { type = ZT_CAVE, d1m = 0.0025181105 }, -- Trolhetta Cave
+[655] = { type = ZT_MINIZONE, d1m = 0.0035982009 }, -- Trolhetta Summit
+[460] = { type = ZT_CRYPT, d1m = 0.0047608476 }, -- Fallowstone Vault
+[177] = { type = ZT_MINE, d1m = 0.003307916 }, -- Northwind Mine
+[325] = { type = ZT_CRYPT, d1m = 0.0057723171 }, -- Vaults of Vernim
+[1847] = { type = ZT_CRYPT, d1m = 0.0038340822 }, -- Nimalten Barrow
+[464] = { type = ZT_CRYPT, d1m = 0.0039115836 }, -- Nimalten Barrow
+[465] = { type = ZT_CRYPT, d1m = 0.0082549394 }, -- Nimalten Barrow
+[509] = { type = ZT_CRYPT, d1m = 0.0036732281 }, -- Taarengrav Barrow
+[218] = { type = ZT_CAVE, d1m = 0.0026364788 }, -- Pinepeak Caverns
+[590] = { type = ZT_MINIZONE, d1m = 0.0025836334 }, -- Arcwind Point
+
+[214] = { type = ZT_DELVE, d1m = 0.0032323222 }, -- Faldar's Tooth
+[703] = { type = ZT_DELVE, d1m = 0.0036234237 }, -- Broken Helm Hollow
+[169] = { type = ZT_DELVE, d1m = 0.0047350886 }, -- Avanchnzel
+[254] = { type = ZT_DELVE, d1m = 0.0052515599 }, -- Fort Greenwall
+[265] = { type = ZT_DELVE, d1m = 0.0031962331 }, -- Snapleg Cave
+[211] = { type = ZT_DELVE, d1m = 0.0043196203 }, -- Shroud Hearth Barrow
+[142] = { type = ZT_DUNGEON, d1m = 0.001013521 }, -- The Lion's Den
 
 --  ============================================================================== 
 [1555] = { type = ZT_ZONE, d1m = 0.0002062994 }, -- Northern Elsweyr
@@ -408,6 +430,9 @@ MapRadarZoneData = {  -- Based on MapId
 
 -- ===============================================================================
 -- TODO: Need to sort 
+
+
+
 
 
 

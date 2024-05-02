@@ -49,6 +49,9 @@ local function SettingsInit()
 
         -- Debug 
         showCalibrate = false,
+        calibrationDistance1 = 40,
+        calibrationDistance2 = 0,
+
         showAnalyzer = false
      }
 
@@ -214,11 +217,6 @@ local function CreateForm()
             return false
         end)
 
-    --[[
-    if hasSkyShardAddon then
-        overlayOptionStack:addPinButton("showSkyshards", "/esoui/art/mappins/skyshard_seen.dds")
-    end
-    ]]
 end
 
 CALLBACK_MANAGER:RegisterCallback(

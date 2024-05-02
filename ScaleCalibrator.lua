@@ -40,6 +40,11 @@ local function calc1meter(x1, y1, x2, y2, measuredMeters)
 end
 
 local function saveMeasuredDistance(measuredMeters)
+
+    if storedPos1.px == nil or storedPos1.py == nil then
+        return
+    end
+
     local data = {
         dx = ScaleData.px - storedPos1.px,
         dy = ScaleData.py - storedPos1.py,
@@ -60,7 +65,55 @@ local function selfData()
     ScaleData.py = playerY
 end
 
-local displayMultiplier = 10000000
+local function CreateCalibrationDistanceSection(id, parent, configKey)
+    local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
+    control:SetDimensions(70, 20)
+
+    local btnMinus = CreateControlFromVirtual("$(parent)btnMinus", control, "ZO_MinusButton")
+    btnMinus:SetAnchor(TOPLEFT, control, TOPLEFT)
+    btnMinus:SetHandler(
+        "OnClicked", function()
+            local value = MapRadar.config[configKey] - 1;
+            if value < 5 then
+                value = 5
+            end
+
+            MapRadar.config[configKey] = value
+            control:refreshLabel()
+        end)
+
+    control.label = MapRadarCommon.CreateLabel("$(parent)label", control, MapRadar.config[configKey])
+    control.label:SetDimensions(15, 20)
+    control.label:SetAnchor(LEFT, btnMinus, RIGHT, 5)
+
+    local btnPlus = CreateControlFromVirtual("$(parent)btnPlus", control, "ZO_PlusButton")
+    btnPlus:SetAnchor(LEFT, control.label, RIGHT)
+    btnPlus:SetHandler(
+        "OnClicked", function()
+            local value = MapRadar.config[configKey] + 1;
+            if value > 40 then
+                value = 40
+            end
+
+            MapRadar.config[configKey] = value
+            control:refreshLabel()
+        end)
+
+    local btnSave = CreateControlFromVirtual("$(parent)btnSave", control, "SavingEditBoxSaveButton")
+    btnSave:SetDimensions(40, 40)
+    btnSave:SetAnchor(LEFT, btnPlus, RIGHT, 10)
+    btnSave:SetHandler(
+        "OnClicked", function()
+            saveMeasuredDistance(MapRadar.config[configKey]);
+        end)
+
+    control.refreshLabel = function(self)
+        control.label:SetText(MapRadar.config[configKey])
+    end
+
+    return control
+end
+
 local function CreateCalibrationDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("CalibrateDataForm", MapRadarContainer)
@@ -108,41 +161,49 @@ local function CreateCalibrationDataForm()
             ZO_Tooltips_HideTextTooltip()
         end)
 
-    local btnCalculate1 = CreateControlFromVirtual("$(parent)btnCalculate1", dataForm, "ZO_PlusButton")
-    btnCalculate1:SetDimensions(40, 40)
-    btnCalculate1:SetAnchor(TOPLEFT, btnSavePosition1, TOPRIGHT)
-    btnCalculate1:SetHandler(
-        "OnClicked", function()
-            saveMeasuredDistance(40);
-        end)
-    btnCalculate1:SetHandler(
-        "OnMouseEnter", function(self)
-            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save calibration data")
-        end)
-    btnCalculate1:SetHandler(
-        "OnMouseExit", function(self)
-            ZO_Tooltips_HideTextTooltip()
-        end)
+    local labelPosition1 = MapRadarCommon.CreateLabel("$(parent)labelPosition1", dataForm, "Mark position")
+    labelPosition1:SetAnchor(RIGHT, btnSavePosition1, LEFT)
 
-    local btnCalculate2 = CreateControlFromVirtual("$(parent)btnCalculate2", dataForm, "ZO_PlusButton")
-    btnCalculate2:SetDimensions(40, 40)
-    btnCalculate2:SetAnchor(TOPLEFT, btnCalculate1, TOPRIGHT)
-    btnCalculate2:SetHandler(
-        "OnClicked", function()
-            saveMeasuredDistance(12);
-        end)
-    btnCalculate2:SetHandler(
-        "OnMouseEnter", function(self)
-            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save calibration data 12m")
-        end)
-    btnCalculate2:SetHandler(
-        "OnMouseExit", function(self)
-            ZO_Tooltips_HideTextTooltip()
-        end)
+    -- local btnCalculate1 = CreateControlFromVirtual("$(parent)btnCalculate1", dataForm, "ZO_PlusButton")
+    -- btnCalculate1:SetDimensions(40, 40)
+    -- btnCalculate1:SetAnchor(TOPLEFT, btnSavePosition1, TOPRIGHT)
+    -- btnCalculate1:SetHandler(
+    --     "OnClicked", function()
+    --         saveMeasuredDistance(40);
+    --     end)
+    -- btnCalculate1:SetHandler(
+    --     "OnMouseEnter", function(self)
+    --         ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save calibration data")
+    --     end)
+    -- btnCalculate1:SetHandler(
+    --     "OnMouseExit", function(self)
+    --         ZO_Tooltips_HideTextTooltip()
+    --     end)
 
-    local labelSoloCalibration = MapRadarCommon.CreateLabel("$(parent)labelSoloCalibration", dataForm, "Solo Calibration")
-    labelSoloCalibration:SetAnchor(RIGHT, btnSavePosition1, LEFT)
+    -- local btnCalculate2 = CreateControlFromVirtual("$(parent)btnCalculate2", dataForm, "ZO_PlusButton")
+    -- btnCalculate2:SetDimensions(40, 40)
+    -- btnCalculate2:SetAnchor(TOPLEFT, btnCalculate1, TOPRIGHT)
+    -- btnCalculate2:SetHandler(
+    --     "OnClicked", function()
+    --         saveMeasuredDistance(12);
+    --     end)
+    -- btnCalculate2:SetHandler(
+    --     "OnMouseEnter", function(self)
+    --         ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Calculate and save calibration data 12m")
+    --     end)
+    -- btnCalculate2:SetHandler(
+    --     "OnMouseExit", function(self)
+    --         ZO_Tooltips_HideTextTooltip()
+    --     end)
 
+    local labelSave = MapRadarCommon.CreateLabel("$(parent)labelSave", dataForm, "Save calibration")
+    labelSave:SetAnchor(TOPRIGHT, labelPosition1, BOTTOMRIGHT, 0, 10)
+
+    local calSect1 = CreateCalibrationDistanceSection("$(parent)calibrateSection1", dataForm, "calibrationDistance1")
+    calSect1:SetAnchor(TOPRIGHT, btnSavePosition1, BOTTOMLEFT, 0, 25)
+
+    local calSect2 = CreateCalibrationDistanceSection("$(parent)calibrateSection2", dataForm, "calibrationDistance2")
+    calSect2:SetAnchor(TOPLEFT, calSect1, BOTTOMLEFT, 0, 20)
 end
 
 local function MapRadar_InitScaleCalibrator()

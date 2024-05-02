@@ -14,6 +14,7 @@ local pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Dis
 local getCurrentMapId = GetCurrentMapId
 local zoneData = MapRadarZoneData
 local pinManager = ZO_WorldMap_GetPinManager()
+local getMapType = GetMapType
 
 -- ========================================================================================
 -- helper methods
@@ -33,13 +34,18 @@ local function getMeterCoefficient()
         return calibratedData.unit1, true
     end
 
-    if MapRadar.getMapType() == MAPTYPE_SUBZONE then
+    if getMapType() == MAPTYPE_SUBZONE then
         -- Default sub-zone coefficient
         return 0.00145, false
     end
 
-    -- Default main zone coefficient
-    return 0.0003, false
+    if getMapType() == MAPTYPE_ZONE then
+        -- Default main zone coefficient
+        return 0.0003, false
+    end
+
+    -- Default for any other smaller map (very imprecise as they usually are between 0.001 and 0.009)
+    return 0.005, false
 end
 
 local function customPinName(pinType)

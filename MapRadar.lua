@@ -1,10 +1,11 @@
 -- TODO
+-- Scale slider to config for each mode
 -- Group delve own settings option
 -- Calibration interface changes 
 --    Add two sections with changable distance and saving to saved variables
 --    Remove party leader lookup
 --    Remove party leader distance coords calculation from forms
---    Add main zone name to saved calibration data  GetPlayerActiveZoneName()
+--    Add main zone name to saved calibration data  GetPlayerActiveZoneName()  (Test delves and some quest places, sewers ... etc)
 -- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
 MapRadar = {
     maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())

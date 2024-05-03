@@ -39,6 +39,8 @@ MapRadarZoneData = {  -- Based on MapId
 
 -- ============================================================================== 
 [12] = { type = ZT_ZONE, d1m = 0.0002785960 }, -- Stormheaven
+[34] = { type = ZT_SUBZONE, d1m = 0.0022362059 }, -- Alcaire Castle
+[33] = { type = ZT_SUBZONE, d1m = 0.0014053201 }, -- Wayrest
 [532] = { type = ZT_SUBZONE, d1m = 0.0023558550 }, -- Koeglin Village
 [238] = { type = ZT_DELVE, d1m = 0.0051053457 }, -- Portdun Watch
 [202] = { type = ZT_DELVE, d1m = 0.0033984871 }, -- Koeglin Mine

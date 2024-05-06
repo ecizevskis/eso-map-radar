@@ -70,7 +70,10 @@ MapRadarZoneData = {  -- Based on MapId
 [246] = { type = ZT_DELVE, d1m = 0.0029204309 }, -- Santaki
 
 -- ============================================================================== 
-[256] = { type = ZT_ZONE, d1m = 0.0003053667 }, -- Reaper's March
+[256] = { type = ZT_ZONE, d1m = 0.000294604 }, -- Reaper's March
+[312] = { type = ZT_SUBZONE, d1m = 0.0023366842 }, -- Rawl'kha
+[533] = { type = ZT_SUBZONE, d1m = 0.0014817404 }, -- Dune
+[535] = { type = ZT_SUBZONE, d1m = 0.0015664403 }, -- Arenthia
 
 -- ============================================================================== 
 [125] = { type = ZT_ZONE, d1m = 0.0002438741 }, -- The Rift
@@ -252,8 +255,9 @@ MapRadarZoneData = {  -- Based on MapId
 
 -- ===============================================================================
 -- Cannot sync distances with subzone
-[1719] = { type = ZT_ZONE, d1m = 0.0002388837 }, -- Western Skyrim
-[1773] = { type = ZT_SUBZONE, d1m = 0.0016817282 }, -- Solitude
+[1719] = { type = ZT_ZONE, d1m = 0.0002401136 }, -- Western Skyrim
+[1773] = { type = ZT_SUBZONE, d1m = 0.0021761623 }, -- Solitude
+
 
 -- ===============================================================================
 [74] = { type = ZT_ZONE, d1m = 0.0006736522 }, -- Bleakrock Isle

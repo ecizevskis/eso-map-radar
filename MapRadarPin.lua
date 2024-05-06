@@ -159,7 +159,7 @@ function MapRadarPin:SetPinDimensions()
     local pinType = self.pin:GetPinType()
     local pinData = zoMapPin.PIN_DATA[pinType]
 
-    if (pinData ~= nil or pinData.size ~= nil) then
+    if (pinData ~= nil and pinData.size ~= nil) then
         self.size = pinData.size
     else
         self.size = MapRadar.pinSize

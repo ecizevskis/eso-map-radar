@@ -33,6 +33,12 @@ For smaller maps like Delves, crypts, dungeons etc it is not so much important t
 Sometimes there is no way to use Bow skill (No one is around or no straight lines long range)
 For that secondary calibration range might be used for you area skill of choice. I have chosen templar skill "Cleansing Ritual" with area of 12 meters with self cast.
 Skill of choice should have clear area visual where you can clearly see the range of it.
+You could check in some bigger already calibrated map where is more precise where is real range: Find some wayshrine where you can position yourself to distance "0" or "0.1" and cast your area skill of choice and them move to edge to see where you stand when getting distance label show skill range.
+Example:
+![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/5f030f63-d437-4f1b-bc76-d0bc954c8305)
+![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/5dc97a7b-ff2f-4a35-a1f8-eb6bfbb07073)
+
+
 So to calibrate just find any even surface and press "Mark position", cast your area skill centered on you and move to the outer edge of area effect and press "Save" near your short range section
 
 

@@ -9,40 +9,31 @@ When showing distance labels in enabled then if they are yellow(ish) that means 
 
 **How to calibrate**
 
-To toggle calibration UI need to run command line:  /mapradar calibrate or /mr calibrate
+To toggle calibration UI need to run command line:  /mapradar calibrate or /mr calibrate. Following form should appear on left side of screen.
+![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/d1ca62ef-6632-411f-8079-e7989f570f62)
 
-![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/40325187-42c2-4aa6-bee0-11ec173b6d29)
+"Mark position" button saves your curent player position for later use.
+"Save calibration" have two configurable ranges that could be set to ranges you want to use and "Save" buttons at the end that would calculate marked position and current position differences and save calibration.
 
+For calculation 1 meter value in relative units some distance is measured in world with some skill and then divided by skill range.
+Bow skill **Snipe** with **Focused Aim** morph is suggested for this role because its range is 40 meters and it is relatively easy to level up. 
 
-For calculation 1 meter value in relative units  some distance is measured in world with some skill and then divided by skill range.
-Bow skill **Snipe** with **Focused Aim** morph was chosen (and code is using 40 meter distance in calculations) for this role because its range is 40 meters and it is relatively easy to level up. So once skill is obtained there are to ways of calc:
+**Long range calibration** (this is advised in bigger maps for better precission)
+   - Aim for this NPC and move back until **Focused Aim** gets disabled (move slowly back and forth to find that spot where it exactly gets disabled and stays disabled)
+   - Press the arrow button near "Mark position" label and notification in chat window should appear that position one was saved.
+   - Go to this NPC or Hostile on straight line and just bounce in it, when you are as close to NPC as possible then press "Save" button near chosen range (It is advides to use humanoid targets for precission)
 
-1. Party duel: This is most strait forward way but obviously require two people, if you are doing calibration then your partner should be party leader (code looks for this pin to read its position).
-   You have to find even surface start duel and spread, then pointing on your target with a bow **Focused Aim** skill will become available when you reach 40 meters. Move slowly back and forth (while bracing you move more precise)
-   to find a spot where Focused Aim just and press "+" button near "Group Calibration" text. Move camera and pins should regenerate for more precise positions.
-
-2. Solo calibration: If you have no group partner then this way is next what is possible but is more tricky.
-  
    In towns you might find some stationary NPCs (guards are good for this) the ones you are allowed to attack by game and so skill icons light up.
    Important: NPC should not move at all!!!
-   - Aim for this NPC and move back until **Focused Aim** gets disabled (move slowly back and forth to find that spot where it exactly gets disabled and stays disabled)
-   - Press the arrow button near "Solo calibration" label and notification in chat window should appear that position one was saved.
-   - Go to this NPC on straight line and just bounce in it, when you are as close to NPC as possible then press "+" button near "Solo calibration" label
-  
-   In the wild same could be done to any hostile stationary humanoid (humanoids have smaller hitbox so measurements gets more precise)
-   - Aim hostile NPC but this time find spot where **Focused Aim** skill will become available
-   - Press the arrow button near "Solo calibration" label and notification in chat window should appear that position one was saved.
-   - Now need to kill this NPC and make sure it does not move and stand on exact place where it was standing. (I use stampede 2H skill to jump on target and trying remember where exactly it is standing, because when they fall they are not centered on place where they were standing)
 
-**Checking calibration**
+**Short range calibration**
 
-For smaller maps like Delves, crypts, dungeons etc it is not so much important to have it extra precise because zone is quite small.
-For main zone maps and subzone maps calibration needs to be checked after calibrating zones and subzones that those values are in accepted error range. 
-- Go near town go in and out of subzone
-- Find common pin that exists in both maps (usually wayshrines and world bosses)
-- Move slowly in/out subzone and check distance and how much it is changing when you enter/exit subzone (sometimes you can get close to point where subzone usually switches and open and close map may trigger zone chanage - easier to spot distance differences)
-- Distance diffecences shoul be lower than 1% for seamless transition from zone to subzone distances.
-- If it is bigger then need to ckeck other subzone and terermine is some measured imprecise or subzone and recalibrate
+For smaller maps like Delves, crypts, dungeons etc it is not so much important to have it extra precise because zone is quite small. 
+Sometimes there is no way to use Bow skill (No one is around or no straight lines long range)
+For that secondary calibration range might be used for you area skill of choice. I have chosen templar skill "Cleansing Ritual" with area of 12 meters with self cast.
+Skill of choice should have clear area visual where you can clearly see the range of it.
+So to calibrate just find any even surface and press "Mark position", cast your area skill centered on you and move to the outer edge of area effect and press "Save" near your short range section
+
 
 **What places to calibrate**
 
@@ -57,7 +48,6 @@ On Windows PC ESO addon data is stored in "%userprofile%\Documents\Elder Scrolls
 **Calibration data analysis **
 
 I will try to combine all received data to some google sheet and calculate results from there, so more measurmenets from different people the better and less need for checking each zone to validate.
-
 
 
 **Outro**

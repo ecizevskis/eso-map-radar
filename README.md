@@ -7,6 +7,7 @@ As there is huge amount of maps it is taking long time to calibrate them for any
 When showing distance labels in enabled then if they are yellow(ish) that means this map is not calibrated (for zone and subzone defaults are used and are inprecise but close, but all other types of maps just goes off the charts incorrect)
 
 
+
 **How to calibrate**
 
 To toggle calibration UI need to run command line:  /mapradar calibrate or /mr calibrate. Following form should appear on left side of screen.

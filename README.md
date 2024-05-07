@@ -1,4 +1,4 @@
-**About distance calculation**
+## About distance calculation
 
 All of the zones does not provide positions in any convertable units but in relative positions for whole map (all coords are relative position from 0 to 1 with decimal precision of 10).
 They are somewhat close from wiever perspective but are a bit different for each zone if you aim for percission. As fart as I seen most addons just use some common coeficient for type of zone.
@@ -7,8 +7,7 @@ As there is huge amount of maps it is taking long time to calibrate them for any
 When showing distance labels in enabled then if they are yellow(ish) that means this map is not calibrated (for zone and subzone defaults are used and are inprecise but close, but all other types of maps just goes off the charts incorrect)
 
 
-
-**How to calibrate**
+## How to calibrate
 
 To toggle calibration UI need to run command line:  /mapradar calibrate or /mr calibrate. Following form should appear on left side of screen.
 ![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/d1ca62ef-6632-411f-8079-e7989f570f62)
@@ -19,7 +18,8 @@ To toggle calibration UI need to run command line:  /mapradar calibrate or /mr c
 For calculation 1 meter value in relative units some distance is measured in world with some skill and then divided by skill range.
 Bow skill **Snipe** with **Focused Aim** morph is suggested for this role because its range is 40 meters and it is relatively easy to level up. 
 
-**Long range calibration** (this is advised in bigger maps for better precission)
+## Long range calibration
+(this is advised in bigger maps for better precission)
    - Aim for this NPC and move back until **Focused Aim** gets disabled (move slowly back and forth to find that spot where it exactly gets disabled and stays disabled)
    - Press the arrow button near "Mark position" label and notification in chat window should appear that position one was saved.
    - Go to this NPC or Hostile on straight line and just bounce in it, when you are as close to NPC as possible then press "Save" button near chosen range (It is advides to use humanoid targets for precission)
@@ -27,7 +27,7 @@ Bow skill **Snipe** with **Focused Aim** morph is suggested for this role becaus
    In towns you might find some stationary NPCs (guards are good for this) the ones you are allowed to attack by game and so skill icons light up.
    Important: NPC should not move at all!!!
 
-**Short range calibration**
+## Short range calibration
 
 For smaller maps like Delves, crypts, dungeons etc it is not so much important to have it extra precise because zone is quite small. 
 Sometimes there is no way to use Bow skill (No one is around or no straight lines long range)
@@ -36,21 +36,21 @@ Skill of choice should have clear area visual where you can clearly see the rang
 So to calibrate just find any even surface and press "Mark position", cast your area skill centered on you and move to the outer edge of area effect and press "Save" near your short range section
 
 
-**What places to calibrate**
+## What places to calibrate
 
 Plan is to calibrate all possible maps (caves, crypts, mansion and so on) so anywhere you see distance is not calibrated (yellow(ish) distance labels) then this place should be measured. If there is no way of doing that as mentioned before, then can just mention this place and how to get to it in Issues. For referencing places English would be desired or finding it on https://gamemap.uesp.net/eso/ and posting link to map or wiki would be very helpful.
 
 
-**Sending calibration data**
+## Sending calibration data
 
 On Windows PC ESO addon data is stored in "%userprofile%\Documents\Elder Scrolls Online\live\SavedVariables", you can find MapRadar.lua there and post its content in **Issues** section of this repository
 
 
-**Calibration data analysis **
+## Calibration data analysis
 
 I will try to combine all received data to some google sheet and calculate results from there, so more measurmenets from different people the better and less need for checking each zone to validate.
 
 
-**Outro**
+## Outro
 
 If you would help on calibrating the world that would be huuuge help and make this addon functional much faster 

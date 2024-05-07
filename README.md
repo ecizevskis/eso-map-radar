@@ -42,7 +42,8 @@ Example:
 
 In this templar "Cleansing Ritual" skill can see that there is denser greeen color where the front leg is. So on calibrating tight spaces with this area skill try to step on the edge same way
 
-So to calibrate just find any even surface and press "Mark position", cast your area skill centered on you and move to the outer edge of area effect and press "Save" near your short range section
+
+To calibrate some small map just find any even surface and press "Mark position", cast your area skill centered on you and move to the outer edge of area effect and press "Save" near your short range section
 
 
 ## What places to calibrate

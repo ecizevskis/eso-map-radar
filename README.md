@@ -40,6 +40,7 @@ Example:
 ![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/5f030f63-d437-4f1b-bc76-d0bc954c8305)
 ![image](https://github.com/ecizevskis/eso-map-radar/assets/9670736/5dc97a7b-ff2f-4a35-a1f8-eb6bfbb07073)
 
+In this templar "Cleansing Ritual" skill can see that there is denser greeen color where the front leg is. So on calibrating tight spaces with this area skill try to step on the edge same way
 
 So to calibrate just find any even surface and press "Mark position", cast your area skill centered on you and move to the outer edge of area effect and press "Save" near your short range section
 

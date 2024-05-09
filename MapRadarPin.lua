@@ -24,13 +24,13 @@ local function getMeterCoefficient()
 
     local zData = zoneData[getCurrentMapId()]
     if zData ~= nil then
-        MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData.d1m))
+        -- MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData.d1m))
         return zData.d1m, true
     end
 
     local calibratedData = MapRadar.config.scaleData[getCurrentMapId()]
     if calibratedData ~= nil and calibratedData.unit1 ~= nil then
-        MapRadar.debugDebounce("Get calibrated zone unit1: <<1>>", MapRadar.getStrVal(calibratedData.unit1))
+        -- MapRadar.debugDebounce("Get calibrated zone unit1: <<1>>", MapRadar.getStrVal(calibratedData.unit1))
         return calibratedData.unit1, true
     end
 
@@ -215,14 +215,7 @@ function MapRadarPin:ApplyTint()
         return
     end
 
-    self.texture:SetColor(
-        unpack(
-            {
-                1,
-                1,
-                1,
-                1
-             }))
+    self.texture:SetColor(1, 1, 1, 1)
 end
 
 function MapRadarPin:CheckIntegrity()

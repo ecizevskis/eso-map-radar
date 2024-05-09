@@ -268,6 +268,14 @@ end
 -- ==================================================================================================
 -- Slash commands
 local function slashCommands(args)
+    if args == "config" then
+        MapRadar_toggleSettings()
+    end
+
+    if args == "mode" then
+        setOverlayMode(not MR.config.isOverlayMode)
+    end
+
     if args == "all" then
         MR.showAllPins = not MR.showAllPins
         local flagStr = MR.showAllPins and "ON" or "OFF"
@@ -278,12 +286,6 @@ local function slashCommands(args)
         MR.showPinNames = not MR.showPinNames
         local flagStr = MR.showPinNames and "ON" or "OFF"
         MR.debug("Show names: <<1>>", flagStr)
-    end
-
-    if args == "dist" then
-        MR.modeSettings.showDistance = not MR.modeSettings.showDistance
-        local flagStr = MR.modeSettings.showDistance and "ON" or "OFF"
-        MR.debug("Show disatnce: <<1>>", flagStr)
     end
 
     if args == "para" then

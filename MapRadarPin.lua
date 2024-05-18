@@ -88,13 +88,15 @@ local function IsValidPOI(pin)
     local pinData = zoMapPin.PIN_DATA[pinType]
     local texturePath = MapRadar.value(pinData.texture, pin)
 
-    if texturePath:find("poi_wayshrine") and MapRadar.modeSettings.showWayshrines -- Wayshrine
-    or texturePath:find("poi_dungeon") and MapRadar.modeSettings.showDungeons --
-    or (texturePath:find("poi_delve") or texturePath:find("poi_groupdelve")) and MapRadar.modeSettings.showDelves --
-    or texturePath:find("poi_portal") and MapRadar.modeSettings.showPortals -- dolmen but also other portals :/
-    or texturePath:find("poi_groupboss") and MapRadar.modeSettings.showWorldBosses -- 
-    then
-        return true
+    if texturePath ~= nil then
+        if texturePath:find("poi_wayshrine") and MapRadar.modeSettings.showWayshrines -- Wayshrine
+        or texturePath:find("poi_dungeon") and MapRadar.modeSettings.showDungeons --
+        or (texturePath:find("poi_delve") or texturePath:find("poi_groupdelve")) and MapRadar.modeSettings.showDelves --
+        or texturePath:find("poi_portal") and MapRadar.modeSettings.showPortals -- dolmen but also other portals :/
+        or texturePath:find("poi_groupboss") and MapRadar.modeSettings.showWorldBosses -- 
+        then
+            return true
+        end
     end
 
     return false

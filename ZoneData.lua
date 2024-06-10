@@ -36,6 +36,18 @@ MapRadarZoneData = {  -- Based on MapId
 [203] = { type = ZT_DELVE, d1m = 0.0022164888 }, -- Enduum
 [215] = { type = ZT_DELVE, d1m = 0.0046966881 }, -- Ebon Crypt
 [111] = { type = ZT_DELVE, d1m = 0.0035572145 }, -- Silumm
+[99] = { type = ZT_NONE, d1m = 0.0044524865 }, -- Bad Man's Hallows - Entrance
+[65] = { type = ZT_NONE, d1m = 0.0023318648 }, -- Bad Man's Hallows
+[64] = { type = ZT_NONE, d1m = 0.0029251075 }, -- Cath Bedraud
+[253] = { type = ZT_NONE, d1m = 0.0034552444 }, -- Tomb of Lost Kings
+[801] = { type = ZT_NONE, d1m = 0.0077288139 }, -- East Hut Portal Cave
+[799] = { type = ZT_NONE, d1m = 0.0078599712 }, -- South Hut Portal Cave
+[802] = { type = ZT_NONE, d1m = 0.0064668647 }, -- West Hut Portal Cave
+[803] = { type = ZT_NONE, d1m = 0.0087072519 }, -- North Hut Portal Cave
+[556] = { type = ZT_NONE, d1m = 0.0046547702 }, -- Themond Mine
+[174] = { type = ZT_NONE, d1m = 0.0025699957 }, -- Spindleclutch I
+[1156] = { type = ZT_NONE, d1m = 0.0024960189 }, -- Spindleclutch II
+[2044] = { type = ZT_NONE, d1m = 0.0024485171 }, -- Red Petal Bastion Exterior
 
 -- ============================================================================== 
 [12] = { type = ZT_ZONE, d1m = 0.0002785960 }, -- Stormheaven
@@ -74,6 +86,39 @@ MapRadarZoneData = {  -- Based on MapId
 [312] = { type = ZT_SUBZONE, d1m = 0.0023366842 }, -- Rawl'kha
 [533] = { type = ZT_SUBZONE, d1m = 0.0014817404 }, -- Dune
 [535] = { type = ZT_SUBZONE, d1m = 0.0015664403 }, -- Arenthia
+[213] = { type = ZT_NONE, d1m = 0.0046961947 }, -- Khaj Rawlith
+[527] = { type = ZT_NONE, d1m = 0.0049653082 }, -- Senalana
+[29] = { type = ZT_NONE, d1m = 0.0037155534 }, -- Greenhill Catacombs
+[305] = { type = ZT_NONE, d1m = 0.0038845108 }, -- Ren-dro Caverns
+[116] = { type = ZT_NONE, d1m = 0.0022069658 }, -- Fort Sphinxmoth
+[4] = { type = ZT_NONE, d1m = 0.0024134572 }, -- Rawl'kha Temple
+[823] = { type = ZT_NONE, d1m = 0.0048645998 }, -- Rawl'kha Outlaws Refuge
+[306] = { type = ZT_NONE, d1m = 0.0029347797 }, -- Moonmont Temple
+[302] = { type = ZT_NONE, d1m = 0.0028413782 }, -- Do'Krin Temple
+[758] = { type = ZT_NONE, d1m = 0.0029712775 }, -- The Five Finger Dance
+[557] = { type = ZT_NONE, d1m = 0.0052097645 }, -- Cleft Rock Cave
+[308] = { type = ZT_NONE, d1m = 0.0056267146 }, -- Temple of the Dance
+[310] = { type = ZT_NONE, d1m = 0.0014422868 }, -- The Demiplane of Jode
+[601] = { type = ZT_NONE, d1m = 0.0019078486 }, -- The Wild Hunt
+[589] = { type = ZT_NONE, d1m = 0.0030454762 }, -- Urcelmo's Betrayal
+[309] = { type = ZT_NONE, d1m = 0.0045030857 }, -- The Demiplane of Jode
+[311] = { type = ZT_NONE, d1m = 0.0029233472 }, -- Den of Lorkhaj
+[303] = { type = ZT_NONE, d1m = 0.0024149462 }, -- Halls of Ichor
+[558] = { type = ZT_NONE, d1m = 0.0070824956 }, -- Old S'ren-ja Cave
+[559] = { type = ZT_NONE, d1m = 0.0081223794 }, -- Rainshadow Cave
+[323] = { type = ZT_NONE, d1m = 0.0034749502 }, -- Thibaut's Cairn
+[301] = { type = ZT_NONE, d1m = 0.0030427269 }, -- Claw's Strike
+[304] = { type = ZT_NONE, d1m = 0.0028622799 }, -- Jode's Light
+[210] = { type = ZT_NONE, d1m = 0.0038356397 }, -- Fardir's Folly
+[343] = { type = ZT_NONE, d1m = 0.0032292248 }, -- Kuna's Delve
+[307] = { type = ZT_NONE, d1m = 0.0032198138 }, -- Weeping Wind Cave
+[763] = { type = ZT_NONE, d1m = 0.0174327309 }, -- The Vile Manse
+[764] = { type = ZT_NONE, d1m = 0.0175051278 }, -- The Vile Manse
+[317] = { type = ZT_NONE, d1m = 0.002110461 }, -- The Vile Manse
+[318] = { type = ZT_NONE, d1m = 0.0021430987 }, -- The Vile Manse
+[334] = { type = ZT_NONE, d1m = 0.0015694004 }, -- Selene's Web
+[997] = { type = ZT_NONE, d1m = 0.0018711862 }, -- Maw of Lorkhaj
+[998] = { type = ZT_NONE, d1m = 0.006737295 }, -- Maw of Lorkhaj - Temple Hall
 
 -- ============================================================================== 
 [125] = { type = ZT_ZONE, d1m = 0.0002438741 }, -- The Rift
@@ -431,8 +476,68 @@ MapRadarZoneData = {  -- Based on MapId
 [1385] = { type = ZT_INDOOR, d1m = 0.0059019841 }, -- Clockwork Basilica
 
 -- ===============================================================================
+[2427] = { type = ZT_NONE, d1m = 0.0001857625 }, -- West Weald
+[2514] = { type = ZT_NONE, d1m = 0.0012258665 }, -- Skingrad
+[2501] = { type = ZT_NONE, d1m = 0.0026774126 }, -- Skingrad Outlaws Refuge
+[2604] = { type = ZT_NONE, d1m = 0.0035726306 }, -- Vashabar
+[2592] = { type = ZT_NONE, d1m = 0.0014973795 }, -- Ontus
+[2519] = { type = ZT_NONE, d1m = 0.0064299461 }, -- Sunnamere
+[2440] = { type = ZT_NONE, d1m = 0.0063950629 }, -- Rustwall Catacombs
+[2550] = { type = ZT_NONE, d1m = 0.0028729929 }, -- Rustwall Catacombs
+[2568] = { type = ZT_NONE, d1m = 0.0094679577 }, -- Weatherleah Manor
+[2573] = { type = ZT_NONE, d1m = 0.031431509 }, -- Weatherleah Basement
+[2471] = { type = ZT_NONE, d1m = 0.0037394524 }, -- Weatherleah Cavern
+[2444] = { type = ZT_NONE, d1m = 0.0020764399 }, -- Elenglynn
+[2445] = { type = ZT_NONE, d1m = 0.0015349056 }, -- Wendir
+[2458] = { type = ZT_NONE, d1m = 0.0032057342 }, -- Valente Winery
+[2460] = { type = ZT_NONE, d1m = 0.0036616977 }, -- Valente Winery Shipping Cavern
+[2516] = { type = ZT_NONE, d1m = 0.0048840825 }, -- Zeggar's Blind
+[2454] = { type = ZT_NONE, d1m = 0.0025173216 }, -- Essondul
+[2506] = { type = ZT_NONE, d1m = 0.0071548469 }, -- Wilderhall
+[2507] = { type = ZT_NONE, d1m = 0.0048583816 }, -- Cualorn
+[2472] = { type = ZT_NONE, d1m = 0.005479524 }, -- Feldagard Keep
+[2473] = { type = ZT_NONE, d1m = 0.0063481041 }, -- Feldagard Keep Barracks
+[2474] = { type = ZT_NONE, d1m = 0.006834363 }, -- Feldagard Keep Barracks
+[2475] = { type = ZT_NONE, d1m = 0.0054867919 }, -- Mirrormoor
+[2486] = { type = ZT_NONE, d1m = 0.0036297983 }, -- Sutch Mine
+[2508] = { type = ZT_NONE, d1m = 0.0023946823 }, -- Hoperoot
+[2588] = { type = ZT_NONE, d1m = 0.0023917222 }, -- Hoperoot
+[2593] = { type = ZT_NONE, d1m = 0.002331068 }, -- Hoperoot
+[2594] = { type = ZT_NONE, d1m = 0.0035433035 }, -- Hoperoot
+[2589] = { type = ZT_NONE, d1m = 0.0035763706 }, -- Hoperoot
+[2490] = { type = ZT_NONE, d1m = 0.0071417378 }, -- Outcast Inn Cellar
+[2491] = { type = ZT_NONE, d1m = 0.0067010282 }, -- Ithelia's Shrine
+[2492] = { type = ZT_NONE, d1m = 0.0022202805 }, -- Ithelia's Shrine
+[2493] = { type = ZT_NONE, d1m = 0.0022195611 }, -- Ithelia's Shrine
+[2468] = { type = ZT_NONE, d1m = 0.0019518791 }, -- Niryastare
+[2505] = { type = ZT_NONE, d1m = 0.00475731 }, -- Hastrel Hollow Shrine
+[2503] = { type = ZT_NONE, d1m = 0.0086219789 }, -- Terthil's Well Cave
+[2504] = { type = ZT_NONE, d1m = 0.0070424002 }, -- Fort Dirich Dungeons
+[2500] = { type = ZT_NONE, d1m = 0.0020549539 }, -- Miscarcand
+[2502] = { type = ZT_NONE, d1m = 0.0042711464 }, -- Miscarcand
+[2509] = { type = ZT_NONE, d1m = 0.004741517 }, -- Fargrave Outer Ruins
+[2558] = { type = ZT_NONE, d1m = 0.0029881389 }, -- Fargrave Inner Quarter
+[2512] = { type = ZT_NONE, d1m = 0.0031861683 }, -- Fargrave Loom Quarter
+[2605] = { type = ZT_NONE, d1m = 0.0073760964 }, -- Ithelia's Prison
+[2513] = { type = ZT_NONE, d1m = 0.0042846957 }, -- Loom of the Untraveled Road
+[2582] = { type = ZT_NONE, d1m = 0.0055787493 }, -- Caelum Cellars
+[2585] = { type = ZT_NONE, d1m = 0.0057202573 }, -- Caelum Cellars Inner Vaults
+[2590] = { type = ZT_NONE, d1m = 0.0056568936 }, -- Caelum Cellars Sewers
+[2442] = { type = ZT_NONE, d1m = 0.0020313638 }, -- Varen's Watch
+[2595] = { type = ZT_NONE, d1m = 0.0055759803 }, -- Varen's Watch
+[2432] = { type = ZT_NONE, d1m = 0.0014366874 }, -- Fyrelight Cave
+[2439] = { type = ZT_NONE, d1m = 0.0016864751 }, -- Nonungalo
+[2459] = { type = ZT_NONE, d1m = 0.00143721 }, -- Fort Colovia
+[2433] = { type = ZT_NONE, d1m = 0.0022994067 }, -- Legion's Rest
+[2453] = { type = ZT_NONE, d1m = 0.0014692443 }, -- Haldain Lumber Camp
+[2441] = { type = ZT_NONE, d1m = 0.0012948504 }, -- Silorn
+[2456] = { type = ZT_NONE, d1m = 0.0015579194 }, -- Leftwheal Trading Post
+[2552] = { type = ZT_NONE, d1m = 0.0008915378 }, -- Lucent Citadel
 
 -- ===============================================================================
+[2515] = { type = ZT_NONE, d1m = 0.0035152244 }, -- The Scholarium
+[2525] = { type = ZT_NONE, d1m = 0.0023908911 }, -- The Scholarium Ruins
+[2520] = { type = ZT_NONE, d1m = 0.0060463738 }, -- Wing of the Indrik
 
 -- ===============================================================================
 -- TODO: Need to sort 

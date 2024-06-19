@@ -272,6 +272,32 @@ MapRadarZoneData = {  -- Based on MapId
 [812] = { type = ZT_SEWERS, d1m = 0.0086449157 }, -- Shornhelm Outlaws Refuge
 [513] = { type = ZT_SUBZONE, d1m = 0.0020501388 }, -- Northpoint
 [528] = { type = ZT_SUBZONE, d1m = 0.0033063168 }, -- Hoarfrost Downs
+[225] = { d1m = 0.0033539153 }, -- Crestshade Mine
+[204] = { d1m = 0.0038841174 }, -- Erokii Ruins
+[216] = { d1m = 0.00487429 }, -- Flyleaf Catacombs
+[244] = { d1m = 0.0032803593 }, -- Hildune's Secret Refuge
+[200] = { d1m = 0.00395449 }, -- Orc's Finger Ruins
+[220] = { d1m = 0.0049022633 }, -- Tribulation Crypt
+[42] = { d1m = 0.0034371911 }, -- Obsidian Scar
+[151] = { d1m = 0.0021397545 }, -- Crypt of Hearts I
+[1154] = { d1m = 0.0021470868 }, -- Crypt of Hearts II
+[2120] = { d1m = 0.0009764159 }, -- Shipwright's Regret
+[2157] = { d1m = 0.0042596374 }, -- Shipwright's Regret - Frigid Cavern
+[788] = { d1m = 0.0041946511 }, -- Fevered Mews
+[789] = { d1m = 0.0101709289 }, -- Fevered Mews
+[59] = { d1m = 0.0031010404 }, -- Doomcrag Shrouded Pass
+[476] = { d1m = 0.0041512739 }, -- Shadowfate Cavern
+[480] = { d1m = 0.0039229956 }, -- Lorkrata Ruins
+[481] = { d1m = 0.0040170412 }, -- Lorkrata Ruins
+[647] = { d1m = 0.004772374 }, -- Edrald Undercroft
+[2] = { d1m = 0.0032313591 }, -- Edrald Undercroft
+[478] = { d1m = 0.0049754363 }, -- Breagha-Fin
+[479] = { d1m = 0.0042564525 }, -- Breagha-Fin
+[560] = { d1m = 0.0046712024 }, -- Shrouded Pass - Varlasel
+[477] = { d1m = 0.0052908156 }, -- Shrouded Pass - Chamber of the Stone Guardian
+[57] = { d1m = 0.0083758007 }, -- Doomcrag
+[58] = { d1m = 0.0079444878 }, -- Doomcrag
+[442] = { d1m = 0.0111099251 }, -- Doomcrag
 
 -- ===============================================================================
 [667] = { type = ZT_ZONE, d1m = 0.0002783857 }, -- Wrothgar
@@ -543,6 +569,21 @@ MapRadarZoneData = {  -- Based on MapId
 -- TODO: Need to sort 
 
 
+
+
+
+[710] = { d1m = 0.005086359 }, -- Yokudan Palace
+[336] = { d1m = 0.0046970627 }, -- Salas En
+[337] = { d1m = 0.0049273408 }, -- Impervious Vault
+[226] = { d1m = 0.0029322787 }, -- Divad's Chagrin Mine
+[553] = { d1m = 0.0046134077 }, -- Kulati Mines
+[554] = { d1m = 0.0078632482 }, -- Kulati Mines
+[50] = { d1m = 0.0051321651 }, -- Yokudan Palace
+[51] = { d1m = 0.0017840399 }, -- Ash'abah Pass
+
+
+[776] = { d1m = 0.0071759754 }, -- The Portal Chamber
+[774] = { d1m = 0.0073212047 }, -- Shore Cave
 
 
 

@@ -80,6 +80,32 @@ MapRadarZoneData = {  -- Based on MapId
 [538] = { type = ZT_SUBZONE, d1m = 0.0019356809 }, -- Kozanset
 [539] = { type = ZT_SUBZONE, d1m = 0.0018257869 }, -- Bergama
 [246] = { type = ZT_DELVE, d1m = 0.0029204309 }, -- Santaki
+[226] = { d1m = 0.0029322787 }, -- Divad's Chagrin Mine
+[231] = { d1m = 0.0027612072 }, -- Aldunz
+[224] = { d1m = 0.0028517083 }, -- Coldrock Diggings
+[230] = { d1m = 0.0030540499 }, -- Sandblown Mine
+[233] = { d1m = 0.0030633718 }, -- Yldzuun
+[774] = { d1m = 0.0073212047 }, -- Shore Cave
+[51] = { d1m = 0.0017840399 }, -- Ash'abah Pass
+[50] = { d1m = 0.0051321651 }, -- Yokudan Palace
+[710] = { d1m = 0.005086359 }, -- Yokudan Palace
+[336] = { d1m = 0.0046970627 }, -- Salas En
+[776] = { d1m = 0.0071759754 }, -- The Portal Chamber
+[553] = { d1m = 0.0046134077 }, -- Kulati Mines
+[554] = { d1m = 0.0078632482 }, -- Kulati Mines
+[337] = { d1m = 0.0049273408 }, -- Impervious Vault
+[728] = { d1m = 0.0105549014 }, -- Magistrate's Basement
+[729] = { d1m = 0.013863428 }, -- The Master's Crypt
+[775] = { d1m = 0.0078885852 }, -- Rkulftzel
+[76] = { d1m = 0.0013746124 }, -- Lost City of the Na-Totambu
+[3] = { d1m = 0.0019834415 }, -- Volenfell
+[790] = { d1m = 0.0090528074 }, -- Volenfell - Secret Tunnel
+[732] = { d1m = 0.0069281904 }, -- Volenfell - The Guardian's Helm
+[791] = { d1m = 0.0065574418 }, -- Volenfell - The Guardians Skull
+[658] = { d1m = 0.0073043412 }, -- Volenfell - The Eye's Chamber
+[659] = { d1m = 0.0099752145 }, -- Volenfell - The Guardian's Orbit
+[773] = { d1m = 0.0045457633 }, -- Smuggler King's Tunnel
+[734] = { d1m = 0.0052344623 }, -- Suturah's Crypt
 
 -- ============================================================================== 
 [256] = { type = ZT_ZONE, d1m = 0.000294604 }, -- Reaper's March
@@ -569,28 +595,12 @@ MapRadarZoneData = {  -- Based on MapId
 -- TODO: Need to sort 
 
 
-
-
-
-[710] = { d1m = 0.005086359 }, -- Yokudan Palace
-[336] = { d1m = 0.0046970627 }, -- Salas En
-[337] = { d1m = 0.0049273408 }, -- Impervious Vault
-[226] = { d1m = 0.0029322787 }, -- Divad's Chagrin Mine
-[553] = { d1m = 0.0046134077 }, -- Kulati Mines
-[554] = { d1m = 0.0078632482 }, -- Kulati Mines
-[50] = { d1m = 0.0051321651 }, -- Yokudan Palace
-[51] = { d1m = 0.0017840399 }, -- Ash'abah Pass
-
-
-[776] = { d1m = 0.0071759754 }, -- The Portal Chamber
-[774] = { d1m = 0.0073212047 }, -- Shore Cave
+[171] = { d1m = 0.0072137645 }, -- Giant's Run
+[1607] = { d1m = 0.0026806485 }, -- Iceflow Rift
 
 
 
 
-
---  ============================================================================== 
-[0] = { type = ZT_ZONE, d1m = 11111111, zoneIndex = 0 }  -- xxxxxxx
 }
 
 -- LuaFormatter on

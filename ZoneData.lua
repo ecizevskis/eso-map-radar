@@ -445,7 +445,80 @@ MapRadarZoneData = {  -- Based on MapId
 [1431] = { type = ZT_SUBZONE, d1m = 0.0011896607 }, -- Shimmerene
 [1430] = { type = ZT_SUBZONE, d1m = 0.0017004198 }, -- Alinor
 [1455] = { type = ZT_SUBZONE, d1m = 0.0019638236 }, -- Lillandril
+[1453] = { d1m = 0.0104330929 }, -- Alinor Outlaws Refuge
+[1454] = { d1m = 0.010355667 }, -- Alinor Outlaws Refuge
 [1438] = { type = ZT_DUNGEON, d1m = 0.0011481346 }, -- Sunhold
+[1377] = { d1m = 0.0024114161 }, -- Tor-Hame-Khard
+[1378] = { d1m = 0.0024244619 }, -- Tor-Hame-Khard
+[1370] = { d1m = 0.0019172003 }, -- Archon's Grove
+[1469] = { d1m = 0.0011343741 }, -- Wasten Coraldale
+[1366] = { d1m = 0.0019530203 }, -- King's Haven Pass
+[1367] = { d1m = 0.0025392356 }, -- King's Haven Pass - Coral-Splitter Caves
+[1372] = { d1m = 0.0025995979 }, -- Eton Nir Grotto
+[1373] = { d1m = 0.0096958727 }, -- Eton Nir Grotto
+[1482] = { d1m = 0.0019379091 }, -- Shimmerene Waterworks
+[1459] = { d1m = 0.0055140166 }, -- Monastery Of Serene Harmony
+[1460] = { d1m = 0.0054634262 }, -- Monastery Of Serene Harmony
+[1461] = { d1m = 0.0032014044 }, -- Monastery Of Serene Harmony - Undercroft
+[1440] = { d1m = 0.0074112346 }, -- Red Temple Catacombs
+[1441] = { d1m = 0.0028747635 }, -- Red Temple Catacombs
+[1423] = { d1m = 0.0039303166 }, -- Cey-Tarn Keep
+[1424] = { d1m = 0.0039613918 }, -- The Gorge - Cey-Tarn Keep
+[1463] = { d1m = 0.004059654 }, -- The Gorge - The Vaults of Heinarwe
+[1464] = { d1m = 0.0118232511 }, -- The Vaults of Heinarwe
+[1465] = { d1m = 0.0118173654 }, -- The Vaults of Heinarwe
+[1420] = { d1m = 0.0028738843 }, -- The Vaults of Heinarwe
+[1421] = { d1m = 0.0059824545 }, -- The Vaults of Heinarwe
+[1422] = { d1m = 0.0118999609 }, -- The Vaults of Heinarwe - Altar Room
+[1466] = { d1m = 0.0072507213 }, -- Ebon Sanctum
+[1467] = { d1m = 0.0072663442 }, -- Ebon Sanctum
+[1404] = { d1m = 0.0019547266 }, -- Ebon Sanctum
+[1380] = { d1m = 0.0018283526 }, -- Rellenthil Sinkhole
+[1381] = { d1m = 0.0039312739 }, -- Illumination Academy Stacks
+[1382] = { d1m = 0.0039808262 }, -- Illumination Academy Stacks
+[1383] = { d1m = 0.0039454054 }, -- Illumination Academy Stacks
+[1406] = { d1m = 0.0040584137 }, -- Illumination Academy Stacks
+[1477] = { d1m = 0.0023348315 }, -- Corgrad Wastes
+[1478] = { d1m = 0.0023117675 }, -- Corgrad Wastes
+[1479] = { d1m = 0.0023160686 }, -- Corgrad Wastes
+[1397] = { d1m = 0.0009246035 }, -- Karnwasten
+[2110] = { d1m = 0.0015932437 }, -- Coral Aerie - Brackish Cove
+[2185] = { d1m = 0.0040489178 }, -- Coral Aerie - Tide Hollow
+-- TODO More Coral Aerie
+[1409] = { d1m = 0.0023802134 }, -- Sea Keep
+[1410] = { d1m = 0.002426 }, -- Sea Keep
+[1496] = { d1m = 0.0023906563 }, -- Sea Keep
+[1390] = { d1m = 0.0037419007 }, -- Saltbreeze Cave
+[1500] = { d1m = 0.0038909181 }, -- Saltbreeze Cave
+[1398] = { d1m = 0.0030930808 }, -- Direnni Acropolis
+[1399] = { d1m = 0.0031894865 }, -- Direnni Acropolis
+[1516] = { d1m = 0.0031325103 }, -- Direnni Acropolis
+[1401] = { d1m = 0.0021647598 }, -- Direnni Acropolis
+[1402] = { d1m = 0.002075503 }, -- Direnni Acropolis
+[1498] = { d1m = 0.0022920914 }, -- Direnni Acropolis
+[1443] = { d1m = 0.0051175725 }, -- Eldbur Ruins
+[1444] = { d1m = 0.0051386371 }, -- Eldbur Ruins
+[1448] = { d1m = 0.003735808 }, -- Eldbur Ruins - Cainar's Mind Trap
+[1449] = { d1m = 0.003739134 }, -- Eldbur Ruins - Miriya's Mind Trap
+[1450] = { d1m = 0.0037083823 }, -- Eldbur Ruins - Oriandra's Mind Trap
+[1502] = { d1m = 0.0012447086 }, -- Cloudrest
+[1445] = { d1m = 0.0088180945 }, -- Alinor Royal Palace
+[1411] = { d1m = 0.004863975 }, -- College of Sapiarchs Labyrinth
+[1412] = { d1m = 0.0072657423 }, -- College of Sapiarchs
+[1480] = { d1m = 0.0046907407 }, -- College of Sapiarchs Labyrinth
+[1403] = { d1m = 0.0018595971 }, -- Evergloam
+[1405] = { d1m = 0.002936206 }, -- Cathedral of Webs
+[1413] = { d1m = 0.002599655 }, -- Crystal Tower
+[1414] = { d1m = 0.0048529866 }, -- Crystal Tower
+[1415] = { d1m = 0.0052124445 }, -- Crystal Tower
+[1416] = { d1m = 0.0039977538 }, -- Crystal Tower
+[1417] = { d1m = 0.0066735234 }, -- Crystal Tower
+[1418] = { d1m = 0.0104292323 }, -- Crystal Tower
+[1419] = { d1m = 0.0075964756 }, -- Crystal Tower
+[1486] = { d1m = 0.0065384591 }, -- Crystal Tower
+[1487] = { d1m = 0.0048127435 }, -- Crystal Tower
+[1491] = { d1m = 0.0054035194 }, -- Crystal Tower
+[1495] = { d1m = 0.0041026405 }, -- Crystal Tower
 
 -- ===============================================================================
 [255] = { type = ZT_ZONE, d1m = 0.0002321149 }, -- Coldharbour
@@ -495,11 +568,21 @@ MapRadarZoneData = {  -- Based on MapId
 [1429] = { type = ZT_ZONE, d1m = 0.0006685503 }, -- Artaeum
 [1503] = { type = ZT_RUIN, d1m = 0.0056992395 }, -- College of Psijics Ruins
 [1493] = { type = ZT_RUIN, d1m = 0.0057857578 }, -- College of Psijics Ruins
+[1492] = { d1m = 0.0057192767 }, -- College of Psijics Ruins
+[1388] = { d1m = 0.0052665588 }, -- Psijic Relic Vaults
+[1472] = { d1m = 0.0052691109 }, -- Psijic Relic Vaults
+[1389] = { d1m = 0.0040166394 }, -- K'Tora's Mindscape
 [1470] = { type = ZT_CAVE, d1m = 0.0122416255 }, -- The Dreaming Cave
 [1476] = { type = ZT_INDOOR, d1m = 0.0055373652 }, -- Ceporah Tower
 [1488] = { type = ZT_INDOOR, d1m = 0.0092728526 }, -- Ceporah Tower - Valsirenn's Study
 [1489] = { type = ZT_INDOOR, d1m = 0.0090905429 }, -- Ceporah Tower - Ritemaster Study
 [1490] = { type = ZT_INDOOR, d1m = 0.0091401959 }, -- Ceporah Tower - Sotha Sil's Study
+[1393] = { d1m = 0.0022843587 }, -- The Spiral Skein
+[1394] = { d1m = 0.0091131521 }, -- The Spiral Skein
+[1395] = { d1m = 0.0048335593 }, -- The Spiral Skein
+[1396] = { d1m = 0.0046141419 }, -- The Spiral Skein
+[1497] = { d1m = 0.0034553138 }, -- The Spiral Skein
+[1499] = { d1m = 0.0091137589 }, -- The Spiral Skein
 [1471] = { type = ZT_DELVE, d1m = 0.0031010005 }, -- Traitor's Vault
 [1473] = { type = ZT_DELVE, d1m = 0.0030088954 }, -- Traitor's Vault
 [1474] = { type = ZT_DELVE, d1m = 0.0030954662 }, -- Traitor's Vault
@@ -519,6 +602,54 @@ MapRadarZoneData = {  -- Based on MapId
 [2114] = { type = ZT_ZONE, d1m = 0.000202333 }, -- High Isle and Amenos
 [2163] = { type = ZT_SUBZONE, d1m = 0.001435772 }, -- Gonfalon Bay
 [2214] = { type = ZT_SUBZONE, d1m = 0.0022311999 }, -- Amenos Station
+[2213] = { d1m = 0.0037654485 }, -- Stonelore Grove
+[2130] = { d1m = 0.0019922983 }, -- Breakwater Cave
+[2156] = { d1m = 0.0018793594 }, -- The Firepot
+[2133] = { d1m = 0.0028320556 }, -- Death's Valor Keep
+[2134] = { d1m = 0.0030277071 }, -- Death's Valor Keep Catacombs
+[2131] = { d1m = 0.0014294369 }, -- Shipwreck Shoals
+[2132] = { d1m = 0.0037698271 }, -- Shipwreck Shoals - Hadolid Warrens
+[2153] = { d1m = 0.0023280267 }, -- Coral Cliffs
+[2154] = { d1m = 0.0040737656 }, -- Coral Cliffs - Cave
+[2138] = { d1m = 0.0015078225 }, -- Whalefall
+[2221] = { d1m = 0.0027774766 }, -- Mysterious Cave
+[2219] = { d1m = 0.0066989641 }, -- Castle Navire Knight's Wing
+[2223] = { d1m = 0.0043403305 }, -- Castle Navire South Courtyard
+[2174] = { d1m = 0.002049985 }, -- Castle Navire Chapel
+[2161] = { d1m = 0.0042543335 }, -- The Undergrove
+[2159] = { d1m = 0.0017171426 }, -- Garick's Rest
+[2215] = { d1m = 0.0026790279 }, -- Garick's Rest
+[2216] = { d1m = 0.0026929806 }, -- Garick's Rest
+[2217] = { d1m = 0.0017994482 }, -- Garick's Rest
+[2164] = { d1m = 0.0012218497 }, -- Dreadsail Reef
+[2146] = { d1m = 0.002179686 }, -- Abhain Chapel Crypts
+[2171] = { d1m = 0.0012151841 }, -- Spire of the Crimson Coin
+[2205] = { d1m = 0.0121910462 }, -- Spire of the Crimson Coin - Statuary Hall
+[2200] = { d1m = 0.0039246455 }, -- Spire of the Crimson Coin - Prison Warrens
+[2204] = { d1m = 0.0095853875 }, -- Spire of the Crimson Coin - Blacksmith Shop
+[2196] = { d1m = 0.0075014559 }, -- Spire of the Crimson Coin - First Level of the Spire
+[2197] = { d1m = 0.0075570331 }, -- Spire of the Crimson Coin - Second Level of the Spire
+[2198] = { d1m = 0.0066181464 }, -- Spire of the Crimson Coin - Spire Lower Sanctum
+[2201] = { d1m = 0.0065306767 }, -- Spire of the Crimson Coin - Lower Sanctum Stairway
+[2202] = { d1m = 0.0064345194 }, -- Spire of the Crimson Coin - Upper Sanctum Stairway
+[2203] = { d1m = 0.0064711785 }, -- Spire of the Crimson Coin - Spire Upper Sanctum
+[2162] = { d1m = 0.0026235579 }, -- Tarnished Grotto
+[2172] = { d1m = 0.0043272181 }, -- Castle Navire Courtyard
+[2173] = { d1m = 0.0035072543 }, -- Lower Castle Navire
+[2211] = { d1m = 0.0021063456 }, -- Ghost Haven Bay
+[2199] = { d1m = 0.0018068313 }, -- Ghost Haven Bay Cavern
+[2160] = { d1m = 0.002073948 }, -- Brokerock Mine
+[2175] = { d1m = 0.0064978021 }, -- Old Coin Fort
+[2176] = { d1m = 0.0027926837 }, -- Coin Fort Docks
+[2177] = { d1m = 0.002923843 }, -- Old Coin Fort
+[2167] = { d1m = 0.0022629256 }, -- Mistmouth Cave
+[2168] = { d1m = 0.0021774682 }, -- Navire Dungeons
+[2195] = { d1m = 0.0024721096 }, -- All Flags Islet
+[2193] = { d1m = 0.0043265445 }, -- All Flags Islet - All Flags Castle
+[2194] = { d1m = 0.0083586882 }, -- All Flags Islet - Memorial Hall
+[2178] = { d1m = 0.0033530542 }, -- Systres Sisters Vault
+[2206] = { d1m = 0.0012688415 }, -- Earthen Root Enclave
+[2229] = { d1m = 0.0015927534 }, -- Graven Deep
 
 -- ===============================================================================
 [1313] = { type = ZT_ZONE, d1m = 0.0003883737 }, -- Clockwork City
@@ -595,10 +726,12 @@ MapRadarZoneData = {  -- Based on MapId
 -- TODO: Need to sort 
 
 
+
+
+
+[149] = { d1m = 0.0043885207 }, -- Shrine of the Black Maw
 [171] = { d1m = 0.0072137645 }, -- Giant's Run
 [1607] = { d1m = 0.0026806485 }, -- Iceflow Rift
-
-
 
 
 }

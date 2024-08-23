@@ -291,6 +291,75 @@ MapRadarZoneData = {  -- Based on MapId
 [2018] = { type = ZT_SUBZONE, d1m = 0.0024283691 }, -- Gideon
 [1940] = { type = ZT_SUBZONE, d1m = 0.0020021955 }, -- Leyawiin
 [2000] = { type = ZT_DUNGEON, d1m = 0.000729305 }, -- Atoll of Immolation
+[2053] = { d1m = 0.0049349434 }, -- Atoll of Immolation
+[2054] = { d1m = 0.0033802343 }, -- Atoll of Immolation
+[1939] = { d1m = 0.0020331409 }, -- Arpenia
+[2030] = { d1m = 0.0020468821 }, -- Arpenia
+[2031] = { d1m = 0.0020626755 }, -- Arpenia
+[2032] = { d1m = 0.002046325 }, -- Arpenia
+[1979] = { d1m = 0.0050946151 }, -- Doomvault Porcixid
+[2057] = { d1m = 0.0023088193 }, -- Doomvault Porcixid
+[2058] = { d1m = 0.0047740369 }, -- Doomvault Porcixid
+[2059] = { d1m = 0.0050166325 }, -- Doomvault Porcixid
+[2060] = { d1m = 0.0018254849 }, -- Doomvault Porcixid
+[2061] = { d1m = 0.0035589465 }, -- Doomvault Porcixid
+[2063] = { d1m = 0.0052202363 }, -- Doomvault Porcixid
+[2064] = { d1m = 0.003637248 }, -- Doomvault Porcixid
+[1977] = { d1m = 0.002033495 }, -- Vunalk
+[2062] = { d1m = 0.0021329104 }, -- Vunalk
+[1945] = { d1m = 0.0020052452 }, -- Xi-Tsei
+[1946] = { d1m = 0.0027023436 }, -- Xi-Tsei
+[1930] = { d1m = 0.0015113201 }, -- Bloodrun Cave
+[1935] = { d1m = 0.001355822 }, -- Undertow Cavern
+[1943] = { d1m = 0.0027006307 }, -- The Silent Halls
+[1958] = { d1m = 0.0021283035 }, -- The Silent Halls
+[1959] = { d1m = 0.0021278131 }, -- The Silent Halls
+[2055] = { d1m = 0.0045015374 }, -- The Silent Halls
+[2056] = { d1m = 0.007925431 }, -- The Silent Halls
+[2077] = { d1m = 0.0043622797 }, -- The Silent Halls
+[1985] = { d1m = 0.0012745276 }, -- Zenithar's Abbey - Bazaar
+[1986] = { d1m = 0.0013033735 }, -- Zenithar's Abbey - Grounds
+[1987] = { d1m = 0.0012828589 }, -- Zenithar's Abbey - Trade Port
+[1988] = { d1m = 0.001323075 }, -- Zenithar's Abbey - Cloister
+[1989] = { d1m = 0.0012718378 }, -- Zenithar's Abbey - Bazaar 2
+[2022] = { d1m = 0.0050347943 }, -- Zenithar's Abbey - Adytum
+[1978] = { d1m = 0.0018930139 }, -- Deepscorn Hollow
+[1984] = { d1m = 0.0030472632 }, -- Tidewater Cave
+[1974] = { d1m = 0.0018634321 }, -- Veyond
+[1975] = { d1m = 0.0039554776 }, -- Veyond
+[1976] = { d1m = 0.0034043298 }, -- Veyond
+[1981] = { d1m = 0.0028738777 }, -- Xal Irasotl
+[1934] = { d1m = 0.0021617982 }, -- Glenbridge Xanmeer
+[2016] = { d1m = 0.0067294087 }, -- Stonewastes Keep
+[1937] = { d1m = 0.0019352295 }, -- Welke
+[2033] = { d1m = 0.0034761736 }, -- Welke
+[2034] = { d1m = 0.0039690849 }, -- Welke
+[1991] = { d1m = 0.0022266789 }, -- Doomvault Vulpinaz Upper Level
+[1992] = { d1m = 0.0021912921 }, -- Doomvault Vulpinaz Mid Level
+[1993] = { d1m = 0.002213962 }, -- Doomvault Vulpinaz Lower Level
+[1994] = { d1m = 0.0022781831 }, -- Doomvault Vulpinaz Anchor Chamber
+[2004] = { d1m = 0.0012192158 }, -- Ancient City of Rockgrove
+[1950] = { d1m = 0.0029191394 }, -- Borderwatch Courtyard
+[1951] = { d1m = 0.0056156874 }, -- Borderwatch Ayleid Ruins
+[1952] = { d1m = 0.0044587318 }, -- Borderwatch Crypt
+[1953] = { d1m = 0.0050838434 }, -- Borderwatch Keep
+[1954] = { d1m = 0.0034428056 }, -- Borderwatch Sewers
+[1998] = { d1m = 0.0049401918 }, -- Leyawiin Outlaws Refuge
+[1999] = { d1m = 0.0049337819 }, -- Leyawiin Outlaws Refuge
+[2017] = { d1m = 0.0049179387 }, -- Leyawiin Outlaws Refuge
+[2013] = { d1m = 0.0041843465 }, -- Twyllbek Ruins
+[2014] = { d1m = 0.0042013201 }, -- Twyllbek Ruins
+[1969] = { d1m = 0.0052805305 }, -- Leyawiin Castle
+[1970] = { d1m = 0.0053467428 }, -- Leyawiin Castle
+[1972] = { d1m = 0.0019269423 }, -- Leyawiin Castle Courtyard
+[1938] = { d1m = 0.0014063811 }, -- Doomvault Capraxus
+[1948] = { d1m = 0.0026133223 }, -- Vandacia's Deadlands Keep
+[1949] = { d1m = 0.0024895378 }, -- Vandacia's Deadlands Keep
+[1941] = { d1m = 0.0029222213 }, -- Xynaa's Sanctuary
+[1942] = { d1m = 0.0015751335 }, -- Xynaa's Sanctuary - Deadlands: The Ashen Forest
+[2065] = { d1m = 0.008412701 }, -- Xynaa's Sanctuary - White Gold Tower Throne Room
+[1982] = { d1m = 0.0022993731 }, -- Fort Redmane
+[1983] = { d1m = 0.0018153067 }, -- Fort Redmane
 
 -- ===============================================================================
 [10] = { type = ZT_ZONE, d1m = 0.0003210387 }, -- Rivenspire
@@ -410,6 +479,44 @@ MapRadarZoneData = {  -- Based on MapId
 -- ===============================================================================
 [1654] = { type = ZT_ZONE, d1m = 0.0002713487 }, -- Southern Elsweyr
 [1675] = { type = ZT_SUBZONE, d1m = 0.0013743243 }, -- Senchal
+[1684] = { d1m = 0.0017992368 }, -- Tideholm
+[1683] = { d1m = 0.0064651117 }, -- Tidehoml Ruin
+[1685] = { d1m = 0.0062894189 }, -- Tidehoml Ruin
+[1686] = { d1m = 0.0060461363 }, -- Tidehoml Ruin
+[1714] = { d1m = 0.0059072651 }, -- Tidehoml Ruin
+[1682] = { d1m = 0.0036991155 }, -- Dragonguard Sanctum
+[1676] = { d1m = 0.0020345967 }, -- Moonlit Cove
+[1739] = { d1m = 0.001922072 }, -- Moonlit Cove
+[1740] = { d1m = 0.0019054747 }, -- Moonlit Cove Tomb ok Kunzar-ri
+[1741] = { d1m = 0.0021657332 }, -- Moonlit Cove
+[1742] = { d1m = 0.001927035 }, -- Moonlit Cove
+[1694] = { d1m = 0.0026324693 }, -- Forsaken Citadel
+[1695] = { d1m = 0.0033799013 }, -- Forsaken Citadel
+[1690] = { d1m = 0.0063771366 }, -- Senchal Palace
+[1679] = { d1m = 0.0035977496 }, -- Senchal Outlaws Refuge
+[1730] = { d1m = 0.0037713304 }, -- Black Kiergo Arena
+[1731] = { d1m = 0.0038177785 }, -- Black Kiergo Arena
+[1692] = { d1m = 0.0021968883 }, -- Passage of Dad'na Ghaten
+[1674] = { d1m = 0.003929612 }, -- Zazaradi's Quarry and Mine
+[1732] = { d1m = 0.0033448432 }, -- New Moon Fortress
+[1733] = { d1m = 0.0015717811 }, -- New Moon Fortress
+[1738] = { d1m = 0.0015745795 }, -- New Moon Fortress
+[1743] = { d1m = 0.0017627842 }, -- New Moon Fortress
+[1701] = { d1m = 0.0016818194 }, -- Halls of the Highmane
+[1702] = { d1m = 0.0016645141 }, -- Path of Pride
+[1735] = { d1m = 0.0033192281 }, -- Halls of the Highmane
+[1711] = { d1m = 0.0017251456 }, -- Doomstone Keep
+[1712] = { d1m = 0.0024222776 }, -- Doomstone Keep
+[1713] = { d1m = 0.0022840929 }, -- The Spilled Sand
+[1727] = { d1m = 0.0024024165 }, -- Dragonhold
+[1728] = { d1m = 0.002381679 }, -- Dragonhold
+[1729] = { d1m = 0.0023890887 }, -- Dragonhold
+[1744] = { d1m = 0.0099330298 }, -- Dragonhold
+[1745] = { d1m = 0.0045537353 }, -- Dragonhold - Flying island Ruins
+[1746] = { d1m = 0.005274261 }, -- Dragonhold - Flying island Cave
+[1687] = { d1m = 0.0019988695 }, -- Dragonhold - Flying island
+[1689] = { d1m = 0.0023960784 }, -- Dragonhold
+[1688] = { d1m = 0.0030878637 }, -- Jonelight Path
 
 -- ===============================================================================
 [258] = { type = ZT_ZONE, d1m = 0.0004876827 }, -- Khenarthi's Roost
@@ -435,10 +542,21 @@ MapRadarZoneData = {  -- Based on MapId
 [1074] = { type = ZT_SUBZONE, d1m = 0.0017236623 }, -- Anvil
 [1009] = { type = ZT_SEWERS, d1m = 0.0053765306 }, -- Anvil Outlaws Refuge
 [1064] = { type = ZT_SUBZONE, d1m = 0.0022356462 }, -- Kvatch
+[1047] = { d1m = 0.0030275728 }, -- Anvil Castle
+[1007] = { d1m = 0.0032402867 }, -- Hrota Cave
+[1065] = { d1m = 0.0102547166 }, -- Hrota Cave
+[1005] = { d1m = 0.0027937739 }, -- Garlas Agea
+[1069] = { d1m = 0.0045544155 }, -- Tribune's Folly
 
 -- ===============================================================================
 [994] = { type = ZT_ZONE, d1m = 0.0003885012 }, -- Hew's Bane
 [993] = { type = ZT_SUBZONE, d1m = 0.0010983781 }, -- Abah's Landing
+[1025] = { d1m = 0.0019948311 }, -- Shark's Teeth Grotto
+[1030] = { d1m = 0.0020001464 }, -- Shark's Teeth Grotto
+[1003] = { d1m = 0.002324715 }, -- Bahraha's Gloom
+[1026] = { d1m = 0.0023195135 }, -- Bahraha's Gloom
+[1027] = { d1m = 0.0022929333 }, -- Bahraha's Gloom
+[1013] = { d1m = 0.003719523 }, -- Thieves Den
 
 -- ===============================================================================
 [1349] = { type = ZT_ZONE, d1m = 0.0001762655 }, -- Summerset
@@ -723,12 +841,35 @@ MapRadarZoneData = {  -- Based on MapId
 [2520] = { type = ZT_NONE, d1m = 0.0060463738 }, -- Wing of the Indrik
 
 -- ===============================================================================
+[737] = { d1m = 0.0078729547 }, -- The Harborage
+[507] = { d1m = 0.002024753 }, -- Halls of Torment
+[508] = { d1m = 0.00213936 }, -- Halls of Torment
+
+-- ===============================================================================
 -- TODO: Need to sort 
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[123] = { d1m = 0.0042858408 }, -- Knife Ear Grotto
+[415] = { d1m = 0.0018019178 }, -- Stirk
 [149] = { d1m = 0.0043885207 }, -- Shrine of the Black Maw
 [171] = { d1m = 0.0072137645 }, -- Giant's Run
 [1607] = { d1m = 0.0026806485 }, -- Iceflow Rift

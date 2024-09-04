@@ -474,7 +474,34 @@ MapRadarZoneData = {  -- Based on MapId
 [1561] = { type = ZT_SUBZONE, d1m = 0.0036284458 }, -- Bright-Throat Village
 [1562] = { type = ZT_SUBZONE, d1m = 0.0023736927 }, -- Dead-Water Village
 [1563] = { type = ZT_SUBZONE, d1m = 0.0024724285 }, -- Root-Whisper Village - empty
-
+[1301] = { d1m = 0.0090886857 }, -- Wither-Vault
+[1507] = { d1m = 0.0047499389 }, -- Teeth Of Sithis
+[1508] = { d1m = 0.0037962577 }, -- Teeth Of Sithis
+[1522] = { d1m = 0.0042757264 }, -- Teeth Of Sithis
+[1506] = { d1m = 0.0017332697 }, -- Tsofeer Cavern
+[1509] = { d1m = 0.0019088103 }, -- Blight Bog Sump
+[1515] = { d1m = 0.0019061801 }, -- Tomb of Many Spears
+[1565] = { d1m = 0.0051938544 }, -- Echoing Hollow Ruins
+[1514] = { d1m = 0.0019959169 }, -- Swallowed Grove
+[1541] = { d1m = 0.0079908669 }, -- The Dreaming Nest
+[1542] = { d1m = 0.0022084333 }, -- The Mists - Hunting Grounds
+[1543] = { d1m = 0.0022817009 }, -- The Mists - The Vilage
+[1544] = { d1m = 0.0046035598 }, -- The Mists - Hist Tree
+[1539] = { d1m = 0.0019897387 }, -- Ixtaxh Xanmeer
+[1557] = { d1m = 0.0030610784 }, -- Xul-Thuxis
+[1558] = { d1m = 0.0033709232 }, -- Xul-Thuxis
+[1559] = { d1m = 0.0035869328 }, -- Xul-Thuxis
+[1526] = { d1m = 0.0021953741 }, -- Vakka-Bok Xanmeer
+[1527] = { d1m = 0.0021085086 }, -- Vakka-Bok Xanmeer
+[1528] = { d1m = 0.0036088005 }, -- Vakka-Bok Xanmeer
+[1529] = { d1m = 0.0027453722 }, -- Vakka-Bok Xanmeer
+[1530] = { d1m = 0.0039052133 }, -- Vakka-Bok Xanmeer
+[1531] = { d1m = 0.0045260567 }, -- Vakka-Bok Xanmeer
+[1532] = { d1m = 0.0059545413 }, -- Vakka-Bok Xanmeer
+[1534] = { d1m = 0.0038140411 }, -- Vakka-Bok Xanmeer
+[1520] = { d1m = 0.0017708621 }, -- Vakka-Bok Xanmeer - Deep-Root
+[1540] = { d1m = 0.0030432655 }, -- Remnant of Argon
+[1564] = { d1m = 0.0059442902 }, -- Singing Grotto
 
 -- ===============================================================================
 [1654] = { type = ZT_ZONE, d1m = 0.0002713487 }, -- Southern Elsweyr
@@ -845,19 +872,22 @@ MapRadarZoneData = {  -- Based on MapId
 [507] = { d1m = 0.002024753 }, -- Halls of Torment
 [508] = { d1m = 0.00213936 }, -- Halls of Torment
 
+[495] = { d1m = 0.0034759 }, -- Sancre Tor - Antechamber
+[496] = { d1m = 0.0050262527 }, -- Sancre Tor - Crypt of Heroes
+[497] = { d1m = 0.005334161 }, -- Sancre Tor - Inner Chamber
+[498] = { d1m = 0.0053133478 }, --Sancre Tor - Inner Courtyard
+[499] = { d1m = 0.0063568617 }, -- Sancre Tor - Reman Vault
+[500] = { d1m = 0.0060668284 }, -- Sancre Tor - Dragonguard Tomb
+[501] = { d1m = 0.0045995765 }, -- Sancre Tor - Vault Antechamber
+[502] = { d1m = 0.0059140444 }, -- Sancre Tor - Vault of Kings
+
+[516] = { d1m = 0.0019902342 }, -- Valley of Blades
+[517] = { d1m = 0.0044704724 }, -- Valley of Blades - Ancestral Crypt
+
+
+
 -- ===============================================================================
 -- TODO: Need to sort 
-
-
-
-
-
-
-
-
-
-
-
 
 
 

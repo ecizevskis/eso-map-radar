@@ -454,6 +454,28 @@ MapRadarZoneData = {  -- Based on MapId
 [2274] = { type = ZT_ZONE, d1m = 0.0003372194 }, -- Telvanni Peninsula
 [2343] = { type = ZT_SUBZONE, d1m = 0.0014023653 }, -- Necrom
 [2386] = { type = ZT_SUBZONE, d1m = 0.0029882703 }, -- Ald Isra
+[2305] = { d1m = 0.0019800289 }, -- Anchre Egg Mine
+[2292] = { d1m = 0.0020716972 }, -- Camonnaruhn
+[2302] = { d1m = 0.0014599752 }, -- Gorne
+[2303] = { d1m = 0.0124699323 }, -- Gorne - Dreynis's Den
+[2333] = { d1m = 0.0150975068 }, -- Sanity's Edge - Tower
+[2372] = { d1m = 0.0016992784 }, -- Sanity's Edge - Vanton's Nightmare
+[2293] = { d1m = 0.0022522073 }, -- Tel Dreloth Caverns
+[2397] = { d1m = 0.0028723323 }, -- Tel Dreloth Isolation Tower Cellar
+[2403] = { d1m = 0.0023770486 }, -- Tel Dreloth Caverns
+[2401] = { d1m = 0.002353448 }, -- Tel Dreloth
+[2283] = { d1m = 0.0031521446 }, -- Sailenmora Crypts
+[2300] = { d1m = 0.0022446061 }, -- Kemel-Ze - Antechamber
+[2301] = { d1m = 0.0027397571 }, -- Kemel-Ze - Outer Laborotory
+[2282] = { d1m = 0.0022480131 }, -- Old Sailenmora Outpost
+[2299] = { d1m = 0.0049204902 }, -- Alavelis Glass Mine
+[2285] = { d1m = 0.0051013381 }, -- Tel Rendys
+[2284] = { d1m = 0.0038030086 }, -- Tel Baro Cavern
+[2385] = { d1m = 0.0051144395 }, -- Necrom Underways
+[2402] = { d1m = 0.0039091122 }, -- Necrom Outlaws Refuge
+[2342] = { d1m = 0.0038810903 }, -- Necrom Outlaws Refuge
+[2347] = { d1m = 0.0034860473 }, -- Necrom Necropolis
+[2315] = { d1m = 0.0032878414 }, -- Necropolis Catacombs
 
 -- ===============================================================================
 [75] = { type = ZT_ZONE, d1m = 0.0007797666 }, -- Bal Foyen
@@ -709,6 +731,13 @@ MapRadarZoneData = {  -- Based on MapId
 [2384] = { type = ZT_SUBZONE, d1m = 0.0038110488 }, -- Cipher's Midden
 [2391] = { type = ZT_CAVE, d1m = 0.002476771 }, -- Central Orphic Tunnels
 
+[2308] = { d1m = 0.0054007683 }, -- The Tranquil Catalog
+[2309] = { d1m = 0.005336233 }, -- Shrine of Hyrma Mora
+[2310] = { d1m = 0.0059516846 }, -- Shrine of Herma-Mora
+[2311] = { d1m = 0.0064883312 }, -- Shrine of Hermorah
+[2312] = { d1m = 0.0065249844 }, -- Catalog Boss Location
+[2313] = { d1m = 0.0216147188 }, -- Pool of Inquiry
+
 -- ===============================================================================
 [1429] = { type = ZT_ZONE, d1m = 0.0006685503 }, -- Artaeum
 [1503] = { type = ZT_RUIN, d1m = 0.0056992395 }, -- College of Psijics Ruins
@@ -904,6 +933,9 @@ MapRadarZoneData = {  -- Based on MapId
 [171] = { d1m = 0.0072137645 }, -- Giant's Run
 [1607] = { d1m = 0.0026806485 }, -- Iceflow Rift
 
+
+[767] = { d1m = 0.0029668411 }, -- Imperial Prison
+[765] = { d1m = 0.0047850433 }, -- Prison District
 
 }
 

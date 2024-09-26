@@ -3,14 +3,7 @@
 local function CreateLabel(name, parent, text)
     local label = CreateControl(name, parent, CT_LABEL)
     label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(
-        unpack(
-            {
-                1,
-                1,
-                1,
-                1
-             }))
+    label:SetColor(1, 1, 1, 1)
 
     if text ~= nil then
         label:SetText(text)

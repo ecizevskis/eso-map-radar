@@ -3,7 +3,14 @@
 local function CreateLabel(name, parent, text)
     local label = CreateControl(name, parent, CT_LABEL)
     label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(unpack({1, 1, 1, 1}))
+    label:SetColor(
+        unpack(
+            {
+                1,
+                1,
+                1,
+                1
+             }))
 
     if text ~= nil then
         label:SetText(text)
@@ -62,7 +69,7 @@ function LabelStack:New(name, parent, count)
 end
 
 -- ==================================================================================================
--- Label stack
+-- Data form
 local DataForm = {}
 function DataForm:New(id, parent)
     local control = CreateControl("$(parent)DataAnchor" .. id, parent, CT_CONTROL)
@@ -87,7 +94,7 @@ function DataForm:New(id, parent)
         self.labels[index] = {
             control = dataLabel,
             fetch = dataFunc
-        }
+         }
 
         local baseWidth, baseHeight = self:GetDimensions()
         local labelWidth, labelHeight = textLabel:GetDimensions()
@@ -105,7 +112,7 @@ function DataForm:New(id, parent)
         local textLabel = CreateLabel("$(parent)TextLabel" .. index, self, text)
         local dataLabel = MapRadarCommon.LabelStack:New("$(parent)DataLabel" .. index, self, 5)
         dataLabel:SetFont("$(BOLD_FONT)|16|outline")
-        dataLabel:SetColor(unpack({1, 1, 1, 1}))
+        dataLabel:SetColor(1, 1, 1, 1)
 
         if (index == 1) then
             textLabel:SetAnchor(TOPRIGHT, self, TOPLEFT, -10)
@@ -118,7 +125,7 @@ function DataForm:New(id, parent)
         self.labels[index] = {
             control = dataLabel,
             fetch = dataFunc
-        }
+         }
 
         local baseWidth, baseHeight = self:GetDimensions()
         local labelWidth, labelHeight = textLabel:GetDimensions()
@@ -126,6 +133,12 @@ function DataForm:New(id, parent)
         self:SetDimensions(baseWidth, baseHeight + labelHeight)
 
         lastTextLabel = textLabel
+    end
+
+    control.SetColor = function(self, ...)
+        for key, label in pairs(self.labels) do
+            label.control:SetColor(...)
+        end
     end
 
     control.Update = function(self)
@@ -147,7 +160,7 @@ function Debouncer:New(callback, waitTimeMs)
         timeout = 0,
         count = 0,
         waitTimeMs = waitTimeMs or 300
-    }
+     }
 
     local function waitForTimeout(self)
         self.timeout = self.timeout - 100
@@ -298,7 +311,7 @@ MapRadarCommon = {
     LabelStack = LabelStack,
     DataForm = DataForm,
     Debouncer = Debouncer
-}
+ }
 
 -- Just event to load some test demo
 --[[

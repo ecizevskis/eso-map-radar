@@ -114,6 +114,15 @@ local function CreateCalibrationDistanceSection(id, parent, configKey)
     return control
 end
 
+local latestMapId = 0
+local function checkMapIdUpdated(mapId)
+    if latestMapId ~= mapId then
+        dataForm:SetColor(1, 1, MapRadarZoneData[mapId] and 1 or 0, 1)
+    end
+
+    latestMapId = mapId;
+end
+
 local function CreateCalibrationDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("CalibrateDataForm", MapRadarContainer)
@@ -121,7 +130,9 @@ local function CreateCalibrationDataForm()
 
     dataForm:AddLabel(
         "GetCurrentMapId", function()
-            return GetCurrentMapId()
+            local mapId = GetCurrentMapId()
+            checkMapIdUpdated(mapId)
+            return mapId;
         end)
 
     dataForm:AddLabel(

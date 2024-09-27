@@ -1,6 +1,6 @@
 ## Title: MapRadar
 ## APIVersion: 101042 101043
-## Version: 1.0.6
+## Version: 1.0.7
 ## Author: Dude
 ## SavedVariables: MapRadar_Data
 ## Description: Configurable map pin display in radar or screen overlay mode for easier map navigation.

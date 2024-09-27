@@ -3,7 +3,7 @@ local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 local dataForm = nil
 local worldMap = ZO_WorldMap
 local getMapPlayerPosition = GetMapPlayerPosition
-
+local latestMapId = 0
 local ScaleData = {
     px = 0,
     py = 0
@@ -16,6 +16,15 @@ local storedPos1 = {}
 -- Create label/data form component with confing methods
 -- Create data stack component
 -- Add data label/datastack to form component
+
+local function checkMapIdUpdated(mapId)
+    if latestMapId ~= mapId then
+        local isCalibrated = MapRadar.config.scaleData[mapId] ~= nil or MapRadarZoneData[mapId] ~= nil
+        dataForm:SetColor(1, 1, isCalibrated and 1 or 0, 1)
+    end
+
+    latestMapId = mapId;
+end
 
 local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
     local label, labelKey = labelPool:AcquireObject()
@@ -56,6 +65,9 @@ local function saveMeasuredDistance(measuredMeters)
 
     MapRadar.config.scaleData[data.mapId] = data
     MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(data.unit1), worldMap.zoneName)
+
+    latestMapId = 0
+    checkMapIdUpdated(data.mapId)
 end
 
 local function selfData()
@@ -112,15 +124,6 @@ local function CreateCalibrationDistanceSection(id, parent, configKey)
     end
 
     return control
-end
-
-local latestMapId = 0
-local function checkMapIdUpdated(mapId)
-    if latestMapId ~= mapId then
-        dataForm:SetColor(1, 1, MapRadarZoneData[mapId] and 1 or 0, 1)
-    end
-
-    latestMapId = mapId;
 end
 
 local function CreateCalibrationDataForm()

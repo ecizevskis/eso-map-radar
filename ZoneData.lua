@@ -476,6 +476,9 @@ MapRadarZoneData = {  -- Based on MapId
 [2342] = { d1m = 0.0038810903 }, -- Necrom Outlaws Refuge
 [2347] = { d1m = 0.0034860473 }, -- Necrom Necropolis
 [2315] = { d1m = 0.0032878414 }, -- Necropolis Catacombs
+[2316] = { d1m = 0.0035975657 }, -- Tel Huulen Assembly Halls
+[2396] = { d1m = 0.0035236569 }, -- Tel Huulen Assembly Halls
+[2406] = { d1m = 0.0030488181 }, -- Shrine of Vaermina
 
 -- ===============================================================================
 [75] = { type = ZT_ZONE, d1m = 0.0007797666 }, -- Bal Foyen
@@ -737,6 +740,64 @@ MapRadarZoneData = {  -- Based on MapId
 [2311] = { d1m = 0.0064883312 }, -- Shrine of Hermorah
 [2312] = { d1m = 0.0065249844 }, -- Catalog Boss Location
 [2313] = { d1m = 0.0216147188 }, -- Pool of Inquiry
+[2355] = { d1m = 0.0017384532 }, -- Fathoms Drift
+[2389] = { d1m = 0.0017487536 }, -- Fathoms Drift
+[2349] = { d1m = 0.0016579471 }, -- Apogee of the Tormenting Eye
+[2393] = { d1m = 0.0047393161 }, -- Apogee of the Tormenting Eye - Ritual Site
+[2334] = { d1m = 0.0021541181 }, -- Quires Wind
+[2317] = { d1m = 0.0015904261 }, -- The Disquiet Study
+[2350] = { d1m = 0.0024083667 }, -- Underweave Courtyard
+[2351] = { d1m = 0.0051310903 }, -- Underweave Heart
+[2352] = { d1m = 0.0025393624 }, -- Underweave Nullifactory
+[2404] = { d1m = 0.0106759397 }, -- Martina's Sanctum
+[2344] = { d1m = 0.002147904 }, -- The Forbidden Exhibit
+[2367] = { d1m = 0.0018940096 }, -- Rectory Network
+[2318] = { d1m = 0.0071428571 }, -- The Infinite Panopticon
+[2319] = { d1m = 0.0070048628 }, -- The Infinite Panopticon
+[2320] = { d1m = 0.0055525169 }, -- The Infinite Panopticon
+[2321] = { d1m = 0.0074374381 }, -- The Infinite Panopticon
+[2322] = { d1m = 0.002962805 }, -- The Infinite Panopticon
+[2323] = { d1m = 0.0076347144 }, -- The Infinite Panopticon
+[2324] = { d1m = 0.0052536234 }, -- The Infinite Panopticon
+[2326] = { d1m = 0.0044599161 }, -- The Infinite Panopticon
+[2335] = { d1m = 0.0044753614 }, -- The Infinite Panopticon
+[2368] = { d1m = 0.0024571187 }, -- The Infinite Panopticon
+[2369] = { d1m = 0.0029091255 }, -- The Infinite Panopticon
+[2370] = { d1m = 0.0052321791 }, -- The Infinite Panopticon
+[2398] = { d1m = 0.0072153749 }, -- The Infinite Panopticon
+[2329] = { d1m = 0.0037400077 }, -- The Mythos
+[2358] = { d1m = 0.0043816697 }, -- The Mythos Vaults
+[2359] = { d1m = 0.001591558 }, -- The Mythos
+[2371] = { d1m = 0.0045734917 }, -- The Mythos Vault
+[2375] = { d1m = 0.0016207254 }, -- The Mythos
+[2376] = { d1m = 0.005081471 }, -- The Mythos
+[2356] = { d1m = 0.002183616 }, -- The Sidereal Cloisters
+[2405] = { d1m = 0.0043666952 }, -- The Sidereal Cloisters
+[2346] = { d1m = 0.0031745157 }, -- Obscured Forum
+[2392] = { d1m = 0.0037457381 }, -- Northern Orphic Tunnels
+[2336] = { d1m = 0.003474782 }, -- Cenotaph Fundament
+[2337] = { d1m = 0.0026340269 }, -- Courtyard of Communion
+[2338] = { d1m = 0.0137340332 }, -- Cenotaph Rise
+[2339] = { d1m = 0.0035517417 }, -- Cathedral of Hermaeus Mora
+[2340] = { d1m = 0.0015157883 }, -- The Crux
+[2566] = { d1m = 0.0020130509 }, -- Infinite Archive
+[2407] = { d1m = 0.0028908178 }, -- Infinite Archive - Antechamber
+[2411] = { d1m = 0.0103364993 }, -- Infinite Archive
+[2417] = { d1m = 0.0012677309 }, -- Infinite Archive - Wings 6
+[2418] = { d1m = 0.0022355863 }, -- Infinite Archive - Boss
+[2410] = { d1m = 0.0048305877 }, -- Infinite Archive - Wings 2
+[2425] = { d1m = 0.0100154217 }, -- Infinite Archive - Destozuno's Library
+[2415] = { d1m = 0.0019421334 }, -- Infinite Archive - Wings 4
+[2416] = { d1m = 0.002291892 }, -- Infinite Archive - Wings 5
+[2424] = { d1m = 0.0101507626 }, -- Infinite Archive - Theater of War
+[2408] = { d1m = 0.0027402798 }, -- Infinite Archive - Wings 1
+[2422] = { d1m = 0.0057604246 }, -- Infinite Archive - Filer's Wing
+[2419] = { d1m = 0.0051941185 }, -- Infinite Archive - Tho'at Replicanum
+[2420] = { d1m = 0.0061570182 }, -- Infinite Archive - Treacherous Crossing
+[2421] = { d1m = 0.0033597915 }, -- Infinite Archive - Heafal's Butchery
+[2414] = { d1m = 0.0014414808 }, -- Infinite Archive - Wings 3
+[2423] = { d1m = 0.0065517557 }, -- Infinite Archive - Echoing Den
+
 
 -- ===============================================================================
 [1429] = { type = ZT_ZONE, d1m = 0.0006685503 }, -- Artaeum
@@ -917,6 +978,11 @@ MapRadarZoneData = {  -- Based on MapId
 
 -- ===============================================================================
 -- TODO: Need to sort 
+
+
+
+
+
 
 
 

@@ -73,6 +73,31 @@ MapRadarZoneData = {  -- Based on MapId
 [544] = { type = ZT_SUBZONE, d1m = 0.0016061114 }, -- Alten Corimont
 [836] = { type = ZT_RUIN, d1m = 0.00269393 }, -- Cold-Blood Cavern
 [875] = { type = ZT_COSMIC, d1m = 0.0037631993 }, -- Dyzera's Realm
+[132] = { d1m = 0.0029541605 }, -- Silyanorn Ruins
+[133] = { d1m = 0.0049308737 }, -- Odious Chapel
+[135] = { d1m = 0.0055138706 }, -- Ruins of Ten-Maur-Wolk
+[136] = { d1m = 0.004416924 }, -- Sunscale Ruins
+[137] = { d1m = 0.0046688916 }, -- Temple of Sul
+[138] = { d1m = 0.0036698688 }, -- White Rose Prison Dungeon
+[139] = { d1m = 0.0019522124 }, -- Loriasel
+[144] = { d1m = 0.0022893343 }, -- Sanguine's Demesne
+[146] = { d1m = 0.0035593808 }, -- Atanaz Ruins
+[147] = { d1m = 0.0032509694 }, -- Onkobra Kwama Mine
+[148] = { d1m = 0.0033360541 }, -- Chid-Moska Ruins
+[149] = { d1m = 0.0043885207 }, -- Shrine of the Black Maw
+[150] = { d1m = 0.0033062593 }, -- Gandranen Ruins
+[155] = { d1m = 0.0044852835 }, -- Broken Tusk
+[274] = { d1m = 0.0051390809 }, -- Lair of the Skin Stealer
+[561] = { d1m = 0.0045697183 }, -- Mud Tree Mine
+[562] = { d1m = 0.0040452751 }, -- Vision of the Hist
+[563] = { d1m = 0.0028651244 }, -- Abagarlas
+[650] = { d1m = 0.0082642865 }, -- Mudshallow Cave
+[716] = { d1m = 0.006844773 }, -- Stormhold Guild Hall
+[720] = { d1m = 0.0102140763 }, -- Stormhold Mortuary
+[722] = { d1m = 0.0067543096 }, -- Percolating Mire
+[723] = { d1m = 0.0074934593 }, -- Hissmir Ruins
+
+
 
 -- ============================================================================== 
 [30] = { type = ZT_ZONE, d1m = 0.0002428292 }, -- Alik'r Desert
@@ -145,6 +170,7 @@ MapRadarZoneData = {  -- Based on MapId
 [334] = { type = ZT_NONE, d1m = 0.0015694004 }, -- Selene's Web
 [997] = { type = ZT_NONE, d1m = 0.0018711862 }, -- Maw of Lorkhaj
 [998] = { type = ZT_NONE, d1m = 0.006737295 }, -- Maw of Lorkhaj - Temple Hall
+[2271] = { d1m = 0.0027961496 }, -- Shrine of the Golden Eye
 
 -- ============================================================================== 
 [125] = { type = ZT_ZONE, d1m = 0.0002438741 }, -- The Rift
@@ -154,8 +180,6 @@ MapRadarZoneData = {  -- Based on MapId
 [815] = { type = ZT_SEWERS, d1m = 0.0052393002 }, -- Riften Outlaws Refuge
 [1784] = { type = ZT_SEWERS, d1m = 0.0037908691 }, -- Riften Ratway Lower
 [1753] = { type = ZT_SEWERS, d1m = 0.0037930828 }, -- Riften Ratway
-[103] = { type = ZT_POCKET, d1m = 0.0017372258 }, -- The Earth Forge
-[583] = { type = ZT_POCKET, d1m = 0.0085430814 }, -- The Earth Forge - Pressure Room III
 [81] = { type = ZT_MINE, d1m = 0.0057099136 }, -- Lost Prospect
 [580] = { type = ZT_MINE, d1m = 0.0042756113 }, -- Lost Prospect
 [463] = { type = ZT_CRYPT, d1m = 0.0065409461 }, -- Dragon Cult Temple
@@ -245,6 +269,17 @@ MapRadarZoneData = {  -- Based on MapId
 [404] = { type = ZT_DELVE, d1m = 0.0042121438 }, -- Ne Salas
 [283] = { type = ZT_DUNGEON, d1m = 0.0027290363 }, -- Root Sunder Ruins
 
+[1717] = { d1m = 0.0025323616 }, -- Lair of Maarselok - Tenmar Mountain Valley
+[1718] = { d1m = 0.0021091002 }, -- Lair of Maarselok - Path of the Rising Sun
+[1720] = { d1m = 0.0025202426 }, -- Lair of Maarselok - Ruins of Magrus's Ascent
+[1722] = { d1m = 0.0027316486 }, -- Lair of Maarselok - Ruins of Magrus's Ascent
+[1723] = { d1m = 0.0018964983 }, -- Lair of Maarselok - Noon Ray's Path
+[1724] = { d1m = 0.0018995892 }, -- Lair of Maarselok - Azureblight Summit
+
+
+[2270] = { d1m = 0.0032245275 }, -- Emerald Glyphic Vault
+[2348] = { d1m = 0.0032221756 }, -- Emerald Glyphic Vault
+
 --  ============================================================================== 
 [108] = { type = ZT_ZONE, d1m = 0.0016754935 }, -- Eyevea
 
@@ -253,6 +288,29 @@ MapRadarZoneData = {  -- Based on MapId
 [24] = { type = ZT_SUBZONE, d1m = 0.0013623396 }, -- Davon's Watch
 [510] = { type = ZT_SUBZONE, d1m = 0.0016319819 }, -- Kragenmoor
 [511] = { type = ZT_SUBZONE, d1m = 0.0012971857 }, -- Ebonheart
+[814] = { d1m = 0.0052090732 }, -- Davon's Watch Outlaws Refuge
+[70] = { d1m = 0.003079081 }, -- Ash Mountain
+[72] = { d1m = 0.0019906754 }, -- Crow's Wood
+[86] = { d1m = 0.0047630319 }, -- Fort Arand Dungeons
+[90] = { d1m = 0.0026485507 }, -- Inner Sea Armature
+[91] = { d1m = 0.0043910694 }, -- Iliath Temple Mines
+[92] = { d1m = 0.0038203791 }, -- Heimlyn Keep Reliquary
+[93] = { d1m = 0.0042698381 }, -- House Indoril Crypt
+[94] = { d1m = 0.0034943608 }, -- House Dres Crypts
+[95] = { d1m = 0.0059496041 }, -- Coral Heart Chamber
+[97] = { d1m = 0.0035764946 }, -- Hightide Hollow
+[105] = { d1m = 0.0024072157 }, -- Cheesemonger's Hollow
+[109] = { d1m = 0.0061535384 }, -- Fort Virak Ruin
+[110] = { d1m = 0.0026132299 }, -- Softloam Cavern
+[112] = { d1m = 0.002552828 }, -- Emberflint Mine
+[113] = { d1m = 0.002464829 }, -- Sheogorath's Tongue
+[114] = { d1m = 0.0031386988 }, -- Mephala's Nest
+[482] = { d1m = 0.0057728354 }, -- The Worm's Retreat
+[602] = { d1m = 0.0033442459 }, -- Tormented Spire
+[717] = { d1m = 0.0055147074 }, -- Starved Planes
+[719] = { d1m = 0.0088780445 }, -- Crow's Wood
+[766] = { d1m = 0.0019277766 }, -- Charred Ridge
+[786] = { d1m = 0.0020319004 }, -- Tormented Spire
 
 --  ============================================================================== 
 [143] = { type = ZT_ZONE, d1m = 0.0002456598 }, -- Auridon
@@ -271,7 +329,29 @@ MapRadarZoneData = {  -- Based on MapId
 [13] = { type = ZT_ZONE, d1m = 0.0002437870 }, -- Deshaan
 [205] = { type = ZT_SUBZONE, d1m = 0.0011725358 }, -- Mournhold
 [537] = { type = ZT_SUBZONE, d1m = 0.0020445189 }, -- Narsis
-[126] = { type = ZT_CAVE, d1m = 0.0029097984 }, -- Deepcrag Den
+[82] = { d1m = 0.0049169536 }, -- Reservoir of Souls
+[115] = { d1m = 0.0029387062 }, -- Forgotten Crypts
+[117] = { d1m = 0.0030121652 }, -- Eidolon's Hollow
+[119] = { d1m = 0.0160577814 }, -- Lady Llarel's Shelter
+[120] = { d1m = 0.0033841259 }, -- The Triple Circle Mine
+[121] = { d1m = 0.003801128 }, -- Lower Bthanual
+[122] = { d1m = 0.0033202889 }, -- Taleon's Crag
+[123] = { d1m = 0.004297208 }, -- Knife Ear Grotto
+[124] = { d1m = 0.0040723323 }, -- The Corpse Garden
+[126] = { d1m = 0.0029097984 }, -- Deepcrag Den
+[127] = { d1m = 0.0032769111 }, -- Mzithumz
+[128] = { d1m = 0.0042786697 }, -- Tribunal Temple
+[129] = { d1m = 0.0059835669 }, -- Shad Astula Underhalls
+[131] = { d1m = 0.003243115 }, -- Tal'Deic Crypts
+[191] = { d1m = 0.0030918162 }, -- Bthanual
+[392] = { d1m = 0.0031939756 }, -- Mournhold Sewers
+[547] = { d1m = 0.0028397064 }, -- Obsidian Gorge
+[569] = { d1m = 0.0029904501 }, -- Quarantine Serk Catacombs
+[714] = { d1m = 0.0105795429 }, -- The Shrine of St.Veloth
+[715] = { d1m = 0.008858271 }, -- Apothacarium
+[747] = { d1m = 0.0077445433 }, -- Vale of the Ghost Snake
+[819] = { d1m = 0.0035307235 }, -- Mournhold Outlaws Refuge
+
 
 --  ============================================================================== 
 [61] = { type = ZT_ZONE, d1m = 0.0002429406 }, -- Eastmarch
@@ -282,9 +362,25 @@ MapRadarZoneData = {  -- Based on MapId
 [1789] = { type = ZT_INDOOR, d1m = 0.0065098086 }, -- Palace of Kings Inner Chamber
 [1794] = { type = ZT_INDOOR, d1m = 0.008328403 }, -- Palace Of Kings
 
-[163] = { type = ZT_DELVE, d1m = 0.0037132925 }, -- The Chill Hollow
-[166] = { type = ZT_DELVE, d1m = 0.004134479 }, -- The Frigid Grotto
-[140] = { type = ZT_DUNGEON, d1m = 0.0019804589 }, -- Hall of the Dead
+[140] = { d1m = 0.0019804589 }, -- Hall of the Dead
+[153] = { d1m = 0.0030924386 }, -- Fort Morvunskar
+[154] = { d1m = 0.003515375 }, -- Bonestrewn Crest
+[156] = { d1m = 0.0029977971 }, -- Lost Knife Cave
+[157] = { d1m = 0.0028553574 }, -- Mistwatch Creavase - Ice Cave
+[158] = { d1m = 0.0040034799 }, -- Cragwallow
+[159] = { d1m = 0.0017165238 }, -- Mzulft
+[163] = { d1m = 0.0037132925 }, -- The Chill Hollow
+[164] = { d1m = 0.0031417291 }, -- Icehammer's Vault
+[165] = { d1m = 0.0029903774 }, -- Old Sord's Cave
+[166] = { d1m = 0.004134479 }, -- The Frigid Grotto
+[167] = { d1m = 0.0029870452 }, -- The Bastard's Tomb
+[168] = { d1m = 0.003830362 }, -- Stormcrag Crypt
+[171] = { d1m = 0.0072137645 }, -- Giant's Run
+[324] = { d1m = 0.0037470331 }, -- Wittestadr Crypts
+[461] = { d1m = 0.0051324915 }, -- Mistwatch Crevasse
+[462] = { d1m = 0.0057218455 }, -- Hall of Trials
+[1607] = { d1m = 0.0026806485 }, -- Frostvault - Iceflow Rift
+[2387] = { d1m = 0.0030623617 }, -- Mistwatch Creavase - Ice Cave Upper
 
 --  ============================================================================== 
 [1887] = { type = ZT_ZONE, d1m = 0.0001989522 }, -- Blackwood
@@ -428,8 +524,10 @@ MapRadarZoneData = {  -- Based on MapId
 -- ===============================================================================
 [74] = { type = ZT_ZONE, d1m = 0.0006736522 }, -- Bleakrock Isle
 [8] = { type = ZT_SUBZONE, d1m = 0.0022367409 }, -- Bleakrock Village
-[88] = { type = ZT_MINE, d1m = 0.0037461546 }, -- Hozzin's Folly
-[87] = { type = ZT_CAVE, d1m = 0.0031875867 }, -- Orkey's Hollow
+[87] = { d1m = 0.0031016467 }, -- Orkey's Hollow
+[88] = { d1m = 0.0036230893 }, -- Hozzin's Folly
+[89] = { d1m = 0.0022965229 }, -- Last Rest
+[726] = { d1m = 0.0079384916 }, -- Skyshroud Barrow
 
 -- ===============================================================================
 [1747] = { type = ZT_UNDERWORLD, d1m = 0.0003791088 }, -- Blackreach: Greymoor Caverns
@@ -443,12 +541,92 @@ MapRadarZoneData = {  -- Based on MapId
 [1290] = { type = ZT_SUBZONE, d1m = 0.0022589554 }, -- Balmora
 [1288] = { type = ZT_SUBZONE, d1m = 0.0021236292 }, -- Sadrith Mora
 [1276] = { type = ZT_DUNGEON, d1m = 0.0016598261 }, -- The Forgotten Wastes
-[1279] = { type = ZT_DUNGEON, d1m = 0.0052680142 }, -- Kora Dur
-[1277] = { type = ZT_DUNGEON, d1m = 0.0028944653 }, -- Caverns of Kogoruhn
-[1278] = { type = ZT_DUNGEON, d1m = 0.003716386 }, -- Forgotten Depths
-[1280] = { type = ZT_DUNGEON, d1m = 0.0070284756 }, -- Drinith Ancestral Tomb
+[1279] = { type = ZT_DUNGEON, d1m = 0.0052680142 }, -- The Forgotten Wastes - Kora Dur
+[1277] = { type = ZT_DUNGEON, d1m = 0.0028944653 }, -- The Forgotten Wastes - Caverns of Kogoruhn
+[1278] = { type = ZT_DUNGEON, d1m = 0.003716386 }, -- The Forgotten Wastes - Forgotten Depths
+[1280] = { type = ZT_DUNGEON, d1m = 0.0070284756 }, -- The Forgotten Wastes - Drinith Ancestral Tomb
+[1310] = { d1m = 0.0056868659 }, -- Nchuleftingth Approach
+[1311] = { d1m = 0.0052882871 }, -- Nchuleftingth Approach
+[1312] = { d1m = 0.0018256001 }, -- Nchuleftingth Approach
+[1314] = { d1m = 0.0018239685 }, -- Nchuleftingth Ruins
+[1315] = { d1m = 0.0025810991 }, -- Nchuleftingth Lavaworks
+[1316] = { d1m = 0.0025483311 }, -- Nchuleftingth Lavaworks
+[1317] = { d1m = 0.0036120221 }, -- Nchuleftingth Core
+[1318] = { d1m = 0.0044322819 }, -- Nchuleftingth Sanctum
+
 [1300] = { type = ZT_DELVE, d1m = 0.0030112466 }, -- Pulk
 [1161] = { type = ZT_DELVE, d1m = 0.0030347234 }, -- Pulk
+
+[1157] = { d1m = 0.0025280069 }, -- Khartag Point
+[2141] = { d1m = 0.0026582831 }, -- Ascendant Order Hideout
+[1158] = { d1m = 0.0054542236 }, -- Ashalmawia
+[1274] = { d1m = 0.0033443609 }, -- Ashalmawia - Sunken Vaults
+[1275] = { d1m = 0.0032723854 }, -- Ashalmawia - Sunken Vaults
+[1159] = { d1m = 0.0019376823 }, -- Zainsipilu
+[1160] = { d1m = 0.0021469062 }, -- Matus-Akin Egg Mine
+[1162] = { d1m = 0.0052054133 }, -- Nchuleft
+[1283] = { d1m = 0.0038986585 }, -- Nchuleft Depths
+[1207] = { d1m = 0.0084638152 }, -- Veloth Ancestral Tomb
+[1269] = { d1m = 0.0028972226 }, -- Veloth Ancestral Tomb - Undertomb
+[1270] = { d1m = 0.0050675684 }, -- Veloth Ancestral Tomb - Tomb of the Matriarch
+[1208] = { d1m = 0.0080064723 }, -- Dreloth Ancestral Tomb
+[1209] = { d1m = 0.0059895737 }, -- Hleran Ancestral Tomb
+[1210] = { d1m = 0.0024850855 }, -- Inanius Egg mine
+[1211] = { d1m = 0.0038432977 }, -- Ashurnibibi
+[1212] = { d1m = 0.0060382791 }, -- Andrano Ancestral Tomb
+[1213] = { d1m = 0.0030339915 }, -- Galom Daeus
+[1297] = { d1m = 0.0030269218 }, -- Galom Daeus
+[1214] = { d1m = 0.002677509 }, -- Zalkin-Sul Egg Mine
+[1215] = { d1m = 0.0041893701 }, -- Mzanchend
+[1216] = { d1m = 0.0040338036 }, -- Mzanchend
+[1219] = { d1m = 0.0039280649 }, -- Vassamsi Mine
+[1289] = { d1m = 0.0038927788 }, -- Vassamsi Mine
+[1220] = { d1m = 0.0146980136 }, -- Palace Receiving Room
+[1221] = { d1m = 0.0148344535 }, -- Lord Vivec's Chambers
+[1222] = { d1m = 0.0176910984 }, -- Library of Vivec
+[1224] = { d1m = 0.0180949353 }, -- Archcanon's Office
+[1225] = { d1m = 0.016950143 }, -- Hall of Justice
+[1230] = { d1m = 0.010282003 }, -- Saint Olms Plaza
+[1231] = { d1m = 0.0089233212 }, -- Saint Olms Waistworks
+[1232] = { d1m = 0.0102099575 }, -- Saint Olms Square
+[1233] = { d1m = 0.0085456392 }, -- Saint Olms Guild Halls
+[1235] = { d1m = 0.0092314334 }, -- Saint Delyn Waistworks
+[1236] = { d1m = 0.0072117797 }, -- Saint Delyn Square
+[1237] = { d1m = 0.0097252155 }, -- Saint Delyn Guild Halls
+[1238] = { d1m = 0.0111993364 }, -- Saint Delyn's Inn
+[1239] = { d1m = 0.0063313682 }, -- Skar
+[1240] = { d1m = 0.0026802722 }, -- Dreudurai Glass Mine
+[1241] = { d1m = 0.0036586047 }, -- Zaintiraris
+[1242] = { d1m = 0.0039125247 }, -- Arkngthunch-Sturdumz
+[1243] = { d1m = 0.0089712239 }, -- Library of Andule
+[1244] = { d1m = 0.0078149599 }, -- Library of Andule
+[1245] = { d1m = 0.008054406 }, -- Vivec City Outlaws Refuge
+[1246] = { d1m = 0.0022875366 }, -- Vassir-Didanat Mine
+[1247] = { d1m = 0.0073560348 }, -- Vassir-Didanat Mine
+[1248] = { d1m = 0.001478285 }, -- Firemoth Island
+[1249] = { d1m = 0.0043489312 }, -- Shulk Ore Mine
+[1250] = { d1m = 0.0031926093 }, -- Ashimanu Cave
+[1251] = { d1m = 0.0032747347 }, -- Ashimanu Cave
+[1252] = { d1m = 0.003008768 }, -- Pinsun
+[1253] = { d1m = 0.0049058037 }, -- Tusenend
+[1254] = { d1m = 0.006240274 }, -- Ramimilk
+[1255] = { d1m = 0.0069493357 }, -- Kudanat Mine
+[1256] = { d1m = 0.0038041203 }, -- Kaushtarari
+[1257] = { d1m = 0.00370236 }, -- Kaushtarari
+[1258] = { d1m = 0.0118474165 }, -- Barilzar's Tower
+[1259] = { d1m = 0.010477081 }, -- Cavern of the Incarnate
+[1260] = { d1m = 0.0036207937 }, -- Mallapi Cave
+[1261] = { d1m = 0.0028442279 }, -- Bal Ur
+[1262] = { d1m = 0.0054564298 }, -- Redoran Garrison
+[1263] = { d1m = 0.0054851078 }, -- Redoran Garrison
+[1264] = { d1m = 0.0110280456 }, -- Redoran Garrison
+[1271] = { d1m = 0.0016064693 }, -- Gnisis Egg Mine
+[1272] = { d1m = 0.0105180834 }, -- Bal Fell
+[1273] = { d1m = 0.0079994035 }, -- Prison of Xykenaz
+[2155] = { d1m = 0.0018940765 }, -- Sareloth Grotto
+[2143] = { d1m = 0.0016458992 }, -- Sword's Rest Isle
+[2144] = { d1m = 0.0088666401 }, -- Sword's Rest Keep
+[2145] = { d1m = 0.0046556164 }, -- Sword's Rest Keep Basement
 
 -- ===============================================================================
 [2274] = { type = ZT_ZONE, d1m = 0.0003372194 }, -- Telvanni Peninsula
@@ -483,6 +661,7 @@ MapRadarZoneData = {  -- Based on MapId
 -- ===============================================================================
 [75] = { type = ZT_ZONE, d1m = 0.0007797666 }, -- Bal Foyen
 [56] = { type = ZT_SUBZONE, d1m = 0.0032823159 }, -- Dhalmora
+[713] = { d1m = 0.0090123185 }, -- Smuggler's Tunnel
 
 -- ===============================================================================
 [1997] = { type = ZT_ZONE, d1m = 0.0020926431 }, -- Isle of Balfiera
@@ -573,6 +752,11 @@ MapRadarZoneData = {  -- Based on MapId
 -- ===============================================================================
 [258] = { type = ZT_ZONE, d1m = 0.0004876827 }, -- Khenarthi's Roost
 [567] = { type = ZT_SUBZONE, d1m = 0.0017943787 }, -- Mistral
+[328] = { d1m = 0.0032836857 }, -- Cat's Eye Quay
+[329] = { d1m = 0.0030047774 }, -- Temple of the Mourning Springs
+[605] = { d1m = 0.0053204693 }, -- Hazak's Lair
+[743] = { d1m = 0.0050508661 }, -- The Mangroves
+[744] = { d1m = 0.009145279 }, -- Shattered Shoals
 
 -- ===============================================================================
 [22] = { type = ZT_ZONE, d1m = 0.0003011848 }, -- Malabal Tor
@@ -962,6 +1146,16 @@ MapRadarZoneData = {  -- Based on MapId
 [507] = { d1m = 0.002024753 }, -- Halls of Torment
 [508] = { d1m = 0.00213936 }, -- Halls of Torment
 
+[437] = { d1m = 0.0308413925 }, -- Vision of the Companions
+[100] = { d1m = 0.0012037183 }, -- Foundry of Woe
+
+[483] = { d1m = 0.0044093162 }, -- The Wailing Prison
+[484] = { d1m = 0.0093752316 }, -- The Wailing Prison - The Bleeding Forge
+[486] = { d1m = 0.0025333912 }, -- The Wailing Prison - The Towers of Eyes
+[487] = { d1m = 0.004171014 }, -- The Wailing Prison- The Undercroft
+[488] = { d1m = 0.0050705096 }, -- The Wailing Prison - The Prophet's Cell
+[489] = { d1m = 0.0045750326 }, -- The Wailing Prison - The Anchor Mooring
+
 [495] = { d1m = 0.0034759 }, -- Sancre Tor - Antechamber
 [496] = { d1m = 0.0050262527 }, -- Sancre Tor - Crypt of Heroes
 [497] = { d1m = 0.005334161 }, -- Sancre Tor - Inner Chamber
@@ -975,8 +1169,80 @@ MapRadarZoneData = {  -- Based on MapId
 [517] = { d1m = 0.0044704724 }, -- Valley of Blades - Ancestral Crypt
 
 
+-- ===============================================================================
+[16] = { d1m = 0.0001171357 }, -- Cyrodiil
+[1661] = { d1m = 0.0039978861 }, -- Cheesemonger's Hollow
+[573] = { d1m = 0.0013352976 }, -- Northern Morrowind Gate
+[574] = { d1m = 0.001354273 }, -- Southern Morrowind Gate
+
+
+[285] = { d1m = 0.0033204326 }, -- Breakneck Cave
+[286] = { d1m = 0.0039011301 }, -- Haynote Cave
+[287] = { d1m = 0.0054117807 }, -- Muck Valley Cavern
+[288] = { d1m = 0.0045828676 }, -- Underpall Cave
+[289] = { d1m = 0.0045267124 }, -- Red Ruby Cave
+[290] = { d1m = 0.0039108927 }, -- Lipsand Tarn
+[291] = { d1m = 0.003912211 }, -- Pothole Caverns
+[293] = { d1m = 0.0058367974 }, -- Toadstool Hollow
+[294] = { d1m = 0.0035712208 }, -- Toadstool Hollow
+[299] = { d1m = 0.0037768501 }, -- Vahtacen
+[340] = { d1m = 0.0090385283 }, -- Kingscrest Cavern
+
+[466] = { d1m = 0.0051074989 }, -- Serpent Hollow Cave
+[467] = { d1m = 0.0037269165 }, -- Nisin Cave
+[468] = { d1m = 0.0040629666 }, -- Newt Cave
+[469] = { d1m = 0.0034341934 }, -- Bloodmayne Cave
+[470] = { d1m = 0.0042175581 }, -- Capstone Cave
+[471] = { d1m = 0.0037834058 }, -- Quickwater Cave
+[472] = { d1m = 0.0051644737 }, -- Quickwater Depths
+[473] = { d1m = 0.0036799562 }, -- Echo Cave
+[474] = { d1m = 0.0032681042 }, -- Cracked Wood Cave
+
+
 
 -- ===============================================================================
+[660] = { d1m = 0.0009137505 }, -- Imperial City
+[785] = { d1m = 0.0003259916 }, -- Barathrum Centrata
+[890] = { d1m = 0.000317002 }, -- Harena Hypogeum
+[891] = { d1m = 0.0003255053 }, -- Antediluvian Vaults
+[900] = { d1m = 0.0003248974 }, -- Lambent Passage
+[901] = { d1m = 0.0003256086 }, -- Vile Drainage
+[902] = { d1m = 0.0003233072 }, -- Wavering Veil
+[903] = { d1m = 0.0003217392 }, -- Alessian Tombs
+[905] = { d1m = 0.0003244409 }, -- Wavering Veil
+[906] = { d1m = 0.0003217392 }, -- Alessian Tombs
+
+
+
+[765] = { d1m = 0.0047850433 }, -- Imperial City Prison - Prison District
+[767] = { d1m = 0.0029668411 }, -- Imperial City Prison - Imperial Prison
+[768] = { d1m = 0.0038285472 }, -- Imperial City Prison - Imperial Subterrane
+[769] = { d1m = 0.0038651263 }, -- Imperial Prison
+[770] = { d1m = 0.0015998593 }, -- Imperial City Prison - Unnatural Caverns
+[771] = { d1m = 0.0022397191 }, -- Imperial City Prison - Lost Sanctum
+
+-- ===============================================================================
+[1703] = { d1m = 0.0033406493 }, -- Wind Scour Temple
+[1704] = { d1m = 0.0022920683 }, -- Storm Talon Temple
+[1705] = { d1m = 0.0022958461 }, -- Dark Water Temple
+[1706] = { d1m = 0.001899402 }, -- Valley of Blades
+[1707] = { d1m = 0.0015731373 }, -- Vahlokzin's Domain
+[1708] = { d1m = 0.0013897877 }, -- Vahlokzin's Lair
+[1709] = { d1m = 0.002487503 }, -- Vahlokzin's Lair
+[1710] = { d1m = 0.0046423993 }, -- Vahlokzin's Lair
+
+
+-- ===============================================================================
+-- Fighters guild
+[241] = { d1m = 0.0056900887 }, -- Stonefang Cavern
+
+[102] = { d1m = 0.0022533422 }, -- Mzeneldt
+[103] = { d1m = 0.0017372258 }, -- The Earth Forge
+[583] = { d1m = 0.0085430814 }, -- The Earth Forge - Pressure Room III
+[104] = { d1m = 0.0050662253 }, -- Ragnthar
+
+-- ===============================================================================
+
 -- TODO: Need to sort 
 
 
@@ -993,15 +1259,22 @@ MapRadarZoneData = {  -- Based on MapId
 
 
 
-[123] = { d1m = 0.0042858408 }, -- Knife Ear Grotto
+
+
+[1327] = { d1m = 0.003555925 }, -- Clockwork City Vaults
+[1328] = { d1m = 0.0037832755 }, -- Clockwork City Vaults
+[1329] = { d1m = 0.0017328584 }, -- Clockwork City Vaults
+
+[2443] = { d1m = 0.0056979065 }, -- Sanctuary of Whispers
+
+
+
+
+
+
 [415] = { d1m = 0.0018019178 }, -- Stirk
-[149] = { d1m = 0.0043885207 }, -- Shrine of the Black Maw
-[171] = { d1m = 0.0072137645 }, -- Giant's Run
-[1607] = { d1m = 0.0026806485 }, -- Iceflow Rift
 
 
-[767] = { d1m = 0.0029668411 }, -- Imperial Prison
-[765] = { d1m = 0.0047850433 }, -- Prison District
 
 }
 

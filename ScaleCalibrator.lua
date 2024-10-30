@@ -132,7 +132,7 @@ local function CreateCalibrationDataForm()
     dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 150, -100)
 
     dataForm:AddLabel(
-        "GetCurrentMapId", function()
+        "MapId", function()
             local mapId = GetCurrentMapId()
             checkMapIdUpdated(mapId)
             return mapId;

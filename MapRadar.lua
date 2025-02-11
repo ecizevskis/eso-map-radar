@@ -251,11 +251,19 @@ EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
     function(count)
 
+        if count == 1 then
+            return setOverlayMode(not MR.config.isOverlayMode)
+        end
+
         if count == 2 then
             return MapRadar_toggleSettings()
         end
 
-        setOverlayMode(not MR.config.isOverlayMode)
+        if count == 3 then
+            -- ZO_ActionBarAssignmentManager:SetCurrentHotbar(HOTBAR_CATEGORY_BACKUP)
+            -- ZO_ActionBarAssignmentManager.hotbarProxy()
+        end
+
     end)
 
 ZO_CreateStringId("SI_BINDING_NAME_MAPRADAR_HOTKEY", "Hotkey")

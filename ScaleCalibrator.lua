@@ -3,6 +3,7 @@ local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
 local dataForm = nil
 local worldMap = ZO_WorldMap
 local getMapPlayerPosition = GetMapPlayerPosition
+local getUnitRawWorldPosition = GetUnitRawWorldPosition
 local latestMapId = 0
 local ScaleData = {
     px = 0,
@@ -72,9 +73,14 @@ end
 
 local function selfData()
     local playerX, playerY = getMapPlayerPosition("player")
+    local zoneId, wx, wy, wz = getUnitRawWorldPosition("player");
 
     ScaleData.px = playerX
     ScaleData.py = playerY
+
+    ScaleData.wx = wx
+    ScaleData.wy = wy
+    ScaleData.wz = wz
 end
 
 local function CreateCalibrationDistanceSection(id, parent, configKey)
@@ -154,6 +160,21 @@ local function CreateCalibrationDataForm()
     dataForm:AddLabel(
         "Rel PY", function()
             return ScaleData.py
+        end)
+
+    dataForm:AddLabel(
+        "World X", function()
+            return ScaleData.wx
+        end)
+
+    dataForm:AddLabel(
+        "World Y", function()
+            return ScaleData.wy
+        end)
+
+    dataForm:AddLabel(
+        "World Z", function()
+            return ScaleData.wz
         end)
 
     local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "ZO_NextArrowButton")

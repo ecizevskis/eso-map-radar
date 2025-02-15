@@ -7,9 +7,6 @@
 MapRadarPin = {}
 
 local zoMapPin = ZO_MapPin
-local pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
-local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
-local pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
 
 local getCurrentMapId = GetCurrentMapId
 local zoneData = MapRadarZoneData
@@ -18,8 +15,6 @@ local getMapType = GetMapType
 
 -- ========================================================================================
 -- helper methods
--- TODO: convert to table with zone name and data params + defaults
-
 local function getMeterCoefficient()
 
     local zData = zoneData[getCurrentMapId()]
@@ -95,6 +90,7 @@ local function IsValidPOI(pin)
         or (texturePath:find("poi_delve") or texturePath:find("poi_groupdelve")) and MapRadar.modeSettings.showDelves --
         or texturePath:find("poi_portal") and MapRadar.modeSettings.showPortals -- dolmen but also other portals :/
         or texturePath:find("poi_groupboss") and MapRadar.modeSettings.showWorldBosses -- 
+        or texturePath:find("LoreBooks") and MapRadar.modeSettings.showLoreBooks -- Show pins from LoreBooks addon
         then
             return true
         end
@@ -277,14 +273,14 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
 
     self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / coefficient
 
-    -- Set visibility (hidden or transparency) and if not vissible then stop processing further 
+    -- Set visibility (hidden or transparency) and if not visible then stop processing further 
     if not self:SetVisibility(isCalibrated) then
         return
     end
 
     local radarDistance = math.min(MapRadar.maxRadarDistance, self.distance)
 
-    -- recalc coordinates to apply rotation
+    -- recalculate coordinates to apply rotation
     local angle = math.atan2(-dx, -dy) - heading
     dx = radarDistance * -math.sin(angle)
     dy = radarDistance * -math.cos(angle)
@@ -366,6 +362,7 @@ function MapRadarPin:IsValidPin(pin)
     -- zoneStoryQuest_icon_door_assisted
 
     if (pin:IsQuest() or pinType == MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY) and MapRadar.modeSettings.showQuests -- or pin:IsObjective() -- or pin:IsAvAObjective()
+    or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE -- Antiquity
     or pin:IsUnit() and MapRadar.modeSettings.showGroup -- Player/Group/Companion units
     or pin:IsWorldEventPOIPin() -- Active Dolmens
     -- or pin:IsAssisted() -- or pin:IsMapPing()
@@ -389,7 +386,7 @@ function MapRadarPin:New(pin, key)
     setmetatable(radarPin, self)
     self.__index = self
 
-    local texture, textureKey = pinPool:AcquireObject()
+    local texture, textureKey = MapRadar.pinPool:AcquireObject()
 
     radarPin.texture = texture
     radarPin.textureKey = textureKey
@@ -405,13 +402,13 @@ function MapRadarPin:New(pin, key)
     radarPin:ApplyTexture()
     radarPin:ApplyTint()
 
-    local label, labelKey = pinLabelPool:AcquireObject()
+    local label, labelKey = MapRadar.pinLabelPool:AcquireObject()
     label:SetAnchor(BOTTOMLEFT, radarPin.texture, BOTTOMRIGHT)
     radarPin.label = label
     radarPin.labelKey = labelKey
 
     if IsValidForPointer(pin) then
-        local pointerTexture, pointerKey = pointerPool:AcquireObject()
+        local pointerTexture, pointerKey = MapRadar.pointerPool:AcquireObject()
         pointerTexture:SetTexture("MapRadar/textures/pointer.dds")
         pointerTexture:SetAnchor(BOTTOM, MapRadar.playerPinTexture, CENTER)
         pointerTexture:SetAlpha(0.5)
@@ -441,20 +438,20 @@ function MapRadarPin:Dispose()
     end
 
     self.texture:ClearAnchors()
-    pinPool:ReleaseObject(self.textureKey)
+    MapRadar.pinPool:ReleaseObject(self.textureKey)
     self.textureKey = nil
     self.texture = nil
 
     if self.pointer ~= nil then
         self.pointer:ClearAnchors()
-        pointerPool:ReleaseObject(self.pointerKey)
+        MapRadar.pointerPool:ReleaseObject(self.pointerKey)
         self.pointerKey = nil
         self.pointer = nil
     end
 
     if self.label ~= nil then
         self.label:SetText("")
-        pinLabelPool:ReleaseObject(self.labelKey)
+        MapRadar.pinLabelPool:ReleaseObject(self.labelKey)
         self.labelKey = nil
         self.label = nil
     end
@@ -463,10 +460,4 @@ function MapRadarPin:Dispose()
     self.distance = nil
     self.size = nil
     self.scaledSize = nil
-end
-
-function MapRadarPin:ReleaseAll()
-    pointerPool:ReleaseAllObjects()
-    pinLabelPool:ReleaseAllObjects()
-    pinPool:ReleaseAllObjects()
 end

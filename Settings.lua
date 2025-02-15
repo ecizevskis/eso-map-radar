@@ -22,6 +22,8 @@ local function SettingsInit()
             showGroup = true,
             showPortals = true,
             showWorldBosses = true,
+            showLoreBooks = false,
+            showHarvestMap = false,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -40,6 +42,8 @@ local function SettingsInit()
             showGroup = true,
             showPortals = true,
             showWorldBosses = true,
+            showLoreBooks = false,
+            showHarvestMap = false,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -138,6 +142,14 @@ local function CreateModeSection(id, parent, title, config, w, h)
         "showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds",
         "Show porals (originally those are Dolmens but MapPins can add more of portals)")
     optionStack:addPinButton("showWorldBosses", "/esoui/art/icons/poi/poi_groupboss_complete.dds", "Show world bosses")
+
+    if LoreBooks then
+        optionStack:addPinButton("showLoreBooks", "/LoreBooks/Icons/book1-invert.dds", "Show LoreBooks pins")
+    end
+
+    if Harvest then
+        optionStack:addPinButton("showHarvestMap", "/HarvestMap/Textures/Map/flower.dds", "Show HarvestMap pins")
+    end
 
     local showDistanceCbx = MapRadarCommon.CreateCheckBox(
         "$(parent)_distCbx", control, config, "showDistance", "Show distance", "Show distance in meters for each radar pin")

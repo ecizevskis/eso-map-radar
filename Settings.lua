@@ -205,10 +205,10 @@ local function addHarvestFilterButton(id, parent, pinTypeId)
     local texturePath = Harvest.settings.savedVars.settings.pinLayouts[pinTypeId].texture
     local tooltip = Harvest.GetLocalization("pintype" .. pinTypeId)
 
-    btn:SetDimensions(25, 25)
+    btn:SetDimensions(30, 30)
     btn.texture:SetTexture(texturePath)
     btn.texture:SetColor(tint.r, tint.g, tint.b, 1)
-    btn.texture:SetDimensions(25, 25)
+    btn.texture:SetDimensions(30, 30)
     btn:SetAlpha(HarvestMapFilterProfile[pinTypeId] and 1 or 0.3)
     btn:SetHandler(
         "OnClicked", function(self)
@@ -247,13 +247,13 @@ local function CreateHarvestMapSettings()
     title:SetAnchor(TOPLEFT, control, TOPLEFT, 15, 15)
 
     local harvestPinAnchor = WINDOW_MANAGER:CreateControl("$(parent)harvestPinAnchor", control, CT_CONTROL)
-    harvestPinAnchor:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 20, 10)
+    harvestPinAnchor:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 20)
 
     local anchorControl = harvestPinAnchor
     for index, pinTypeId in ipairs(Harvest.PINTYPES) do
         if not Harvest.HIDDEN_PINTYPES[pinTypeId] then
             local harvestPinBtn = addHarvestFilterButton("$(parent)pin" .. index, control, pinTypeId)
-            harvestPinBtn:SetAnchor(TOPLEFT, anchorControl, BOTTOMLEFT, 0, 5)
+            harvestPinBtn:SetAnchor(TOPLEFT, anchorControl, BOTTOMLEFT, 0, 2)
             anchorControl = harvestPinBtn
         end
     end

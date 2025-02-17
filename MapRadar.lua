@@ -58,6 +58,12 @@ MapRadar = {
             count = count + 1
         end
         return count
+    end,
+    listElements = function(obj)
+        MapRadar.debug("-------------------------------------------------")
+        for key, val in pairs(obj) do
+            MapRadar.debug("<<1>>: <<2>>", key, MapRadar.getStrVal(val))
+        end
     end
  }
 

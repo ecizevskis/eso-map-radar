@@ -400,6 +400,16 @@ local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
         if count == 3 then
             -- ZO_ActionBarAssignmentManager:SetCurrentHotbar(HOTBAR_CATEGORY_BACKUP)
             -- ZO_ActionBarAssignmentManager.hotbarProxy()
+
+            -- local addonManager = GetAddOnManager()
+
+            -- for i = 1, addonManager:GetNumAddOns() do
+            --     local name, _, _, _, _, state = addonManager:GetAddOnInfo(i)
+            --     if state == ADDON_STATE_ENABLED then
+            --         MR.debug(name)
+            --     end
+            -- end
+
         end
 
     end)

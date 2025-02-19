@@ -26,6 +26,7 @@ local function SettingsInit()
             showWorldBosses = true,
             showLoreBooks = false,
             showHarvestMap = false,
+            showMapPinsChests = false,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -46,6 +47,7 @@ local function SettingsInit()
             showWorldBosses = true,
             showLoreBooks = false,
             showHarvestMap = false,
+            showMapPinsChests = false,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -76,6 +78,19 @@ local function SettingsInit()
              }
         end)
 end
+
+local addonManager = GetAddOnManager()
+local function IsAddonRunning(addonName) -- From sirinsidiator form comment
+    for i = 1, addonManager:GetNumAddOns() do
+        local name, _, _, _, _, state = addonManager:GetAddOnInfo(i)
+        if name == addonName and state == ADDON_STATE_ENABLED then
+            return true
+        end
+    end
+    return false
+end
+
+local isMapPinsRunning = IsAddonRunning("MapPins")
 
 local function CreatePinOptionStack(id, parent, config)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
@@ -151,6 +166,10 @@ local function CreateModeSection(id, parent, title, config, w, h)
 
     if Harvest then
         optionStack:addPinButton("showHarvestMap", "/HarvestMap/Textures/Map/flower.dds", "Show HarvestMap pins")
+    end
+
+    if isMapPinsRunning then
+        optionStack:addPinButton("showMapPinsChests", "/MapPins/Chest_1.dds", "Show MapPins chests")
     end
 
     local showDistanceCbx = MapRadarCommon.CreateCheckBox(

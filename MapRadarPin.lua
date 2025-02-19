@@ -15,6 +15,7 @@ local getMapType = GetMapType
 
 -- ========================================================================================
 -- helper methods
+
 local function getMeterCoefficient()
 
     local zData = zoneData[getCurrentMapId()]
@@ -53,20 +54,9 @@ local function customPinName(pinType)
 end
 
 local function IsCustomPin(pinType)
-    -- First chek if this pin type is not default??
-
-    -- Skyshards="Skyshards",Skyshards_done="Skyshards (done)", config of MapPins
-    -- 	SKYS_FILTER_UNKNOWN			= "(Sky) Unknown skyshards",   SkyShards
-
-    -- SkyShards <- global object exist
-    -- maybe should check map filters instead
-
-    -- How to read specific map filter??
-
-    -- Can check QuestMap pins here by name because pinType is dynamic most likely (depends on addon count and who register id first)
-
     if MapRadar.modeSettings.showQuests and (customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory") -- Quest map
     or customPinName(pinType) == "pinType_Treasure_Maps" -- from "Map Pins" by Hoft
+    or MapRadar.modeSettings.showMapPinsChests and customPinName(pinType) == "pinType_Treasure_Chests" -- from "Map Pins" by Hoft
     or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
     or customPinName(pinType) == "LostTreasure_TreasureMapPin" -- Treasure from LostTreasure
     or MapRadar.modeSettings.showSkyshards and (customPinName(pinType) == "pinType_Skyshards" -- Map Pins addon
@@ -207,7 +197,8 @@ function MapRadarPin:ApplyTexture()
 end
 
 function MapRadarPin:ApplyTint()
-    local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
+    local pinType = self.pin:GetPinType()
+    local pinData = zoMapPin.PIN_DATA[pinType]
 
     if (pinData ~= nil and pinData.tint ~= nil) then
         self.texture:SetColor(MapRadar.value(pinData.tint, self.pin):UnpackRGBA())

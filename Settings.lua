@@ -1,3 +1,5 @@
+local HarvestMapFilterProfile = {}
+
 local function SettingsInit()
     -- local accountDefaults = {}
     -- MapRadar.aData = ZO_SavedVars:NewAccountWide("MapRadar_Data", 1, nil, accountDefaults)
@@ -22,6 +24,9 @@ local function SettingsInit()
             showGroup = true,
             showPortals = true,
             showWorldBosses = true,
+            showLoreBooks = false,
+            showHarvestMap = false,
+            showMapPinsChests = false,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -40,6 +45,9 @@ local function SettingsInit()
             showGroup = true,
             showPortals = true,
             showWorldBosses = true,
+            showLoreBooks = false,
+            showHarvestMap = false,
+            showMapPinsChests = false,
 
             minAlpha = 40,
             maxAlpha = 100,
@@ -70,6 +78,19 @@ local function SettingsInit()
              }
         end)
 end
+
+local addonManager = GetAddOnManager()
+local function IsAddonRunning(addonName) -- From sirinsidiator form comment
+    for i = 1, addonManager:GetNumAddOns() do
+        local name, _, _, _, _, state = addonManager:GetAddOnInfo(i)
+        if name == addonName and state == ADDON_STATE_ENABLED then
+            return true
+        end
+    end
+    return false
+end
+
+local isMapPinsRunning = IsAddonRunning("MapPins")
 
 local function CreatePinOptionStack(id, parent, config)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
@@ -139,6 +160,18 @@ local function CreateModeSection(id, parent, title, config, w, h)
         "Show porals (originally those are Dolmens but MapPins can add more of portals)")
     optionStack:addPinButton("showWorldBosses", "/esoui/art/icons/poi/poi_groupboss_complete.dds", "Show world bosses")
 
+    if LoreBooks then
+        optionStack:addPinButton("showLoreBooks", "/LoreBooks/Icons/book1-invert.dds", "Show LoreBooks pins")
+    end
+
+    if Harvest then
+        optionStack:addPinButton("showHarvestMap", "/HarvestMap/Textures/Map/flower.dds", "Show HarvestMap pins")
+    end
+
+    if isMapPinsRunning then
+        optionStack:addPinButton("showMapPinsChests", "/MapPins/Chest_1.dds", "Show MapPins chests")
+    end
+
     local showDistanceCbx = MapRadarCommon.CreateCheckBox(
         "$(parent)_distCbx", control, config, "showDistance", "Show distance", "Show distance in meters for each radar pin")
     showDistanceCbx:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT)
@@ -171,15 +204,6 @@ local function CreateModeSection(id, parent, title, config, w, h)
     maxScaleSlider:SetAnchor(TOPLEFT, minScaleSlider, TOPRIGHT)
     maxScaleSlider:SetMinMaxStep(50, 200, 5)
 
-    -- TODO: 
-    -- Check for custom pin types by names and show filter option
-    -- LostTreasure survey maps
-    -- LostTreasure treasure maps
-    -- MapPins Survey maps
-    -- MapPins Treasure maps
-    -- MapPins Skyshards
-    -- SkyShard skyshards
-
     return control
 end
 
@@ -188,6 +212,71 @@ function MapRadar_toggleSettings()
     MapRadar_Settings:SetHidden(not isOpen)
     SetGameCameraUIMode(isOpen)
     -- MapRadar.debug("This will open configuration")
+end
+
+local function addHarvestFilterButton(id, parent, pinTypeId)
+    local btn = WINDOW_MANAGER:CreateControl(id, parent, CT_BUTTON)
+
+    btn.texture = WINDOW_MANAGER:CreateControl(id .. "texture", btn, CT_TEXTURE)
+    btn.texture:SetAnchor(TOPLEFT, btn, TOPLEFT)
+
+    local tint = Harvest.settings.defaultSettings.pinLayouts[pinTypeId].tint
+    local texturePath = Harvest.settings.savedVars.settings.pinLayouts[pinTypeId].texture
+    local tooltip = Harvest.GetLocalization("pintype" .. pinTypeId)
+
+    btn:SetDimensions(30, 30)
+    btn.texture:SetTexture(texturePath)
+    btn.texture:SetColor(tint.r, tint.g, tint.b, 1)
+    btn.texture:SetDimensions(30, 30)
+    btn:SetAlpha(HarvestMapFilterProfile[pinTypeId] and 1 or 0.3)
+    btn:SetHandler(
+        "OnClicked", function(self)
+            local isVisible = not HarvestMapFilterProfile[pinTypeId]
+            HarvestMapFilterProfile[pinTypeId] = isVisible
+            self:SetAlpha(HarvestMapFilterProfile[pinTypeId] and 1 or 0.3)
+            -- CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
+            Harvest.callbackManager:FireCallbacks(Harvest.events.FILTER_PROFILE_CHANGED, HarvestMapFilterProfile, pinTypeId, isVisible)
+        end)
+
+    btn:SetHandler(
+        "OnMouseEnter", function(self)
+            if tooltip then
+                ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
+            end
+        end)
+    btn:SetHandler(
+        "OnMouseExit", function(self)
+            if tooltip then
+                ZO_Tooltips_HideTextTooltip()
+            end
+        end)
+
+    return btn
+end
+
+local function CreateHarvestMapSettings()
+    local control = WINDOW_MANAGER:CreateControl("$(parent)harvestMapSettings", MapRadar_Settings, CT_CONTROL)
+    control:SetDimensions(100, 600)
+    control:SetAnchor(TOPLEFT, MapRadar_Settings, TOPRIGHT, 20)
+
+    WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_bg", control, "ZO_MinorMungeBackdrop_SemiTransparentBlack")
+
+    local title = MapRadarCommon.CreateLabel("$(parent)_title", control, "Harvest")
+    title:SetFont("$(BOLD_FONT)|24|outline")
+    title:SetAnchor(TOPLEFT, control, TOPLEFT, 15, 15)
+
+    local harvestPinAnchor = WINDOW_MANAGER:CreateControl("$(parent)harvestPinAnchor", control, CT_CONTROL)
+    harvestPinAnchor:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 20)
+
+    local anchorControl = harvestPinAnchor
+    for index, pinTypeId in ipairs(Harvest.PINTYPES) do
+        if not Harvest.HIDDEN_PINTYPES[pinTypeId] then
+            local harvestPinBtn = addHarvestFilterButton("$(parent)pin" .. index, control, pinTypeId)
+            harvestPinBtn:SetAnchor(TOPLEFT, anchorControl, BOTTOMLEFT, 0, 2)
+            anchorControl = harvestPinBtn
+        end
+    end
+
 end
 
 local function CreateForm()
@@ -205,6 +294,8 @@ local function CreateForm()
         "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings)
     overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
 
+    CreateHarvestMapSettings()
+
     -- Escape key handling
     ZO_PreHook(
         "ZO_SceneManager_ToggleGameMenuBinding", function()
@@ -221,6 +312,8 @@ end
 
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitializing", function()
+        HarvestMapFilterProfile = Harvest.filterProfiles["GetMapProfile"](Harvest.filterProfiles)
+
         SettingsInit()
         CreateForm()
     end)

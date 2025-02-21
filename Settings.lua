@@ -79,18 +79,14 @@ local function SettingsInit()
         end)
 end
 
-local addonManager = GetAddOnManager()
-local function IsAddonRunning(addonName) -- From sirinsidiator form comment
-    for i = 1, addonManager:GetNumAddOns() do
-        local name, _, _, _, _, state = addonManager:GetAddOnInfo(i)
-        if name == addonName and state == ADDON_STATE_ENABLED then
-            return true
-        end
+local loadedAddons = {}
+local function IsAddonRunning(addonName)
+    -- MapRadar.listElements(loadedAddons)
+    if loadedAddons[addonName] then
+        return true
     end
     return false
 end
-
-local isMapPinsRunning = IsAddonRunning("MapPins")
 
 local function CreatePinOptionStack(id, parent, config)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
@@ -168,7 +164,7 @@ local function CreateModeSection(id, parent, title, config, w, h)
         optionStack:addPinButton("showHarvestMap", "/HarvestMap/Textures/Map/flower.dds", "Show HarvestMap pins")
     end
 
-    if isMapPinsRunning then
+    if IsAddonRunning("MapPins") then
         optionStack:addPinButton("showMapPinsChests", "/MapPins/Chest_1.dds", "Show MapPins chests")
     end
 
@@ -294,7 +290,9 @@ local function CreateForm()
         "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings)
     overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
 
-    CreateHarvestMapSettings()
+    if Harvest then
+        CreateHarvestMapSettings()
+    end
 
     -- Escape key handling
     ZO_PreHook(
@@ -312,10 +310,25 @@ end
 
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitializing", function()
-        HarvestMapFilterProfile = Harvest.filterProfiles["GetMapProfile"](Harvest.filterProfiles)
+        if Harvest then
+            HarvestMapFilterProfile = Harvest.filterProfiles["GetMapProfile"](Harvest.filterProfiles)
+        end
 
         SettingsInit()
+    end)
+
+EVENT_MANAGER:RegisterForEvent(
+    "MapRadar_Settings", EVENT_PLAYER_ACTIVATED, function()
+        for i = 1, GetAddOnManager():GetNumAddOns() do
+            local name, _, _, _, _, state = GetAddOnManager():GetAddOnInfo(i)
+            if state == ADDON_STATE_ENABLED then
+                loadedAddons[name] = true
+            end
+        end
         CreateForm()
+
+        -- Prevents from firing this event each zone change
+        EVENT_MANAGER:UnregisterForEvent("MapRadar_Settings", EVENT_PLAYER_ACTIVATED)
     end)
 
 -- WORLD_MAP_MANAGER:GetFilterValue(pinGroup)

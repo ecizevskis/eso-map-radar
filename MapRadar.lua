@@ -8,10 +8,15 @@
 --    Add main zone name to saved calibration data  GetPlayerActiveZoneName()  (Test delves and some quest places, sewers ... etc)
 -- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
 MapRadar = {
+    pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin"),
+    pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer"),
+    pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance"),
+
     maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
     pinSize = 0, -- positionLabel = {},
-    activePins = {}, --
-    modeSettings = {}, --
+    activePins = {},
+    customPinLayer = {},
+    modeSettings = {},
     scale = 1, -- This meant to be used and scale param when measuring and calibrating pins on different zones
     value = function(valueOrMethod, ...)
         if type(valueOrMethod) == "function" then
@@ -53,11 +58,18 @@ MapRadar = {
             count = count + 1
         end
         return count
+    end,
+    listElements = function(obj)
+        MapRadar.debug("-------------------------------------------------")
+        for key, val in pairs(obj) do
+            MapRadar.debug("<<1>>: <<2>>", key, MapRadar.getStrVal(val))
+        end
     end
  }
 
 local MR = MapRadar
 local MRPin = MapRadarPin
+local MRCustomPin = MapRadarCustomPin
 local radarTexture = MapRadarContainerRadarTexture
 
 -- Localize global objects for better performance
@@ -157,6 +169,12 @@ local function mapUpdate()
     for key, radarPin in pairs(MR.activePins) do
         radarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     end
+
+    if hasPlayerMoved then
+        for key, customPin in pairs(MR.customPinLayer) do
+            customPin:UpdatePin(playerX, playerY, heading)
+        end
+    end
 end
 
 local function mapPinIntegrityCheck()
@@ -167,6 +185,101 @@ local function mapPinIntegrityCheck()
         end
     end
 end
+
+-- ==================================================================================================
+-- Custom pin layer methods
+
+local function MapRadar_ClearHarvestPins()
+    -- Dispose pins
+    for k, _ in pairs(MR.customPinLayer) do
+        MR.customPinLayer[k]:Dispose()
+        MR.customPinLayer[k] = nil
+    end
+end
+
+local function MapRadar_LoadHarvestPins()
+
+    MapRadar_ClearHarvestPins()
+
+    if not MapRadar.modeSettings.showHarvestMap then
+        return
+    end
+
+    local harvestMapPins = Harvest["mapPins"]
+
+    -- -- List Harvest mapPins module elements
+    -- MR.debug("harvestMapPins module -------------------------------------------------")
+    -- for key, v in pairs(harvestMapPins) do
+    --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(v))
+    -- end
+
+    -- This can be null if Harvest has disabled "Show on minimap"
+    if (harvestMapPins.mapCache) then
+        -- MR.debug("harvestMapPins.mapCache --------------------------------------------------")
+        -- for key, v in pairs(harvestMapPins.mapCache) do
+        --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(v))
+        -- end
+
+        local playerX, playerY = getMapPlayerPosition("player")
+        local heading = getPlayerCameraHeading()
+
+        -- MR.debug("harvestMapPins.mapCache.divisions --------------------------------------------------")
+        for pinTypeId, division in pairs(harvestMapPins.mapCache.divisions) do
+
+            if Harvest.InRangePins.worldFilterProfile[pinTypeId] then
+                -- MR.debug("-------------------- PinTypeId <<1>>", MR.getStrVal(pinTypeId))
+
+                for diviKey, divI in pairs(division) do
+                    -- MR.debug("<<1>>: <<2>> --------------", diviKey, MR.getStrVal(divI))
+
+                    for nodeKey, nodeId in pairs(divI) do
+                        local x, y = harvestMapPins.mapCache:GetLocal(nodeId)
+                        local texturePath = Harvest.settings.savedVars.settings.pinLayouts[pinTypeId].texture
+                        -- MR.debug("<<1>>: <<2>>  (<<3>> <<4>>) <<5>>", nodeKey, MR.getStrVal(nodeId), MR.getStrVal(x), MR.getStrVal(y), texturePath)
+
+                        local customPin = MRCustomPin:New(nodeId, x, y, pinTypeId, texturePath)
+                        customPin:UpdatePin(playerX, playerY, heading)
+                        MR.customPinLayer[nodeId] = customPin
+                        -- MR.debug("Added customPin with key: <<1>>", nodeId)
+                    end
+
+                end
+            end
+        end
+    end
+
+    -- -- Add new pins that did not exist
+    -- for key, pin in pairs(pins) do
+    --     if MR.activePins[key] == nil and MRPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
+    --         local radarPin = MRPin:New(pin, key)
+    --         radarPin:UpdatePin(playerX, playerY, heading, true)
+    --         MR.activePins[key] = radarPin
+    --     end
+    -- end
+
+    -- Check if pinTypeId can be visible
+    -- Harvest.InRangePins.worldFilterProfile[pinTypeId]
+
+    -- for key, pinV in pairs(Harvest.InRangePins.worldFilterProfile) do
+    --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(pinV))
+    -- end
+
+    -- for key, MapCache in pairs(Harvest["Data"]:GetCurrentZoneCache().mapCaches) do
+
+    --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(MapCache))
+    -- end
+
+    -- 	self.worldFilterProfile = Harvest.filterProfiles:GetWorldProfile()
+    -- self.worldFilterProfile[pinTypeId]
+
+    -- Check if can render pin ---->  Cache.hasCompassPin[NodeId]
+
+    -- local CallbackManager = Harvest.callbackManager
+    -- 	CallbackManager:FireCallbacks(Events.NEW_ZONE_ENTERED, self.currentZoneCache)
+end
+
+-- ==================================================================================================
+-- Init / Load
 
 local function initialize(eventType, addonName)
     if addonName ~= "MapRadar" then
@@ -203,15 +316,40 @@ local function initialize(eventType, addonName)
     CALLBACK_MANAGER:RegisterCallback(
         "MapRadar_Reset", function()
             playerHeading = 0
+
+            MapRadar_LoadHarvestPins()
         end)
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarInitialized")
 end
 
--- ==================================================================================================
--- Event subscribtion
+local function onPlayerActivated(eventCode, initial)
+    -- All addons already loaded at this stage.
+    if Harvest then
+        Harvest.callbackManager:RegisterCallback(
+            Harvest.events.NEW_NODES_LOADED_TO_CACHE, function(mapCache, pinTypeId, numAddedNodes)
+                MapRadar_LoadHarvestPins()
+            end)
 
--- This is good to trigger pin reset (if quest chnages 1 marker then pin count check does not see difference)
+        Harvest.callbackManager:RegisterCallback(
+            Harvest.events.MAP_CHANGE, function()
+                MapRadar_LoadHarvestPins()
+            end)
+
+        Harvest.callbackManager:RegisterCallback(
+            Harvest.events.FILTER_PROFILE_CHANGED, function()
+                MapRadar_LoadHarvestPins()
+            end)
+    end
+
+    -- Prevents from firing this event each zone change
+    EVENT_MANAGER:UnregisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED)
+end
+
+-- ==================================================================================================
+-- Event subscription
+
+-- This is good to trigger pin reset (if quest changes 1 marker then pin count check does not see difference)
 EVENT_MANAGER:RegisterForEvent(
     "MapRadar", EVENT_QUEST_ADVANCED, function()
         zo_callLater(registerMapPins, 200)
@@ -244,7 +382,7 @@ EVENT_MANAGER:RegisterForEvent(
     end)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
-
+EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, onPlayerActivated)
 -- ==================================================================================================
 -- Key binding
 
@@ -262,6 +400,16 @@ local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
         if count == 3 then
             -- ZO_ActionBarAssignmentManager:SetCurrentHotbar(HOTBAR_CATEGORY_BACKUP)
             -- ZO_ActionBarAssignmentManager.hotbarProxy()
+
+            -- local addonManager = GetAddOnManager()
+
+            -- for i = 1, addonManager:GetNumAddOns() do
+            --     local name, _, _, _, _, state = addonManager:GetAddOnInfo(i)
+            --     if state == ADDON_STATE_ENABLED then
+            --         MR.debug(name)
+            --     end
+            -- end
+
         end
 
     end)

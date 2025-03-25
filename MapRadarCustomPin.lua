@@ -13,8 +13,8 @@ local function getMeterCoefficient()
 
     local zData = zoneData[getCurrentMapId()]
     if zData ~= nil then
-        -- MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData.d1m))
-        return zData.d1m, true
+        -- MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData))
+        return zData, true
     end
 
     local calibratedData = MapRadar.config.scaleData[getCurrentMapId()]

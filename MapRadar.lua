@@ -462,6 +462,12 @@ local function slashCommands(args)
         MR.debug("Show analyzer: <<1>>", flagStr)
     end
 
+    if args == "speed" then
+        MR.config.showSpeedometer = not MR.config.showSpeedometer
+        local flagStr = MR.config.showSpeedometer and "ON" or "OFF"
+        MR.debug("Show Speedometer: <<1>>", flagStr)
+    end
+
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
 end

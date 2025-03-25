@@ -12,7 +12,7 @@
 				</Texture>
 
 				<Control name="MapRadar_Settings" hidden="true" tier="MEDIUM">
-					<Dimensions x="700" y="600" />
+					<Dimensions x="700" y="620" />
 					<Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="CENTER" offsetX="" />
 					<Controls>
 						<Backdrop name="$(parent)BG" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack" hidden="false" />

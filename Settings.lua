@@ -11,6 +11,12 @@ local function SettingsInit()
             offsetX = -300,
             offsetY = -40
          },
+        speedPosition = {
+            point = CENTER,
+            relativePoint = CENTER,
+            offsetX = 0,
+            offsetY = 0
+         },
         isOverlayMode = false,
         radarSettings = {
             maxDistance = 800,
@@ -54,6 +60,8 @@ local function SettingsInit()
             minScale = 60,
             maxScale = 100
          },
+
+        showSpeedometer = false,
 
         -- Debug 
         showCalibrate = false,
@@ -132,9 +140,27 @@ local function CreatePinOptionStack(id, parent, config)
     return control
 end
 
+local function CreateCommonSection(parent, config)
+    local control = WINDOW_MANAGER:CreateControl("$(parent)_commonSettings", parent, CT_CONTROL)
+    control:SetDimensions(500, 80)
+
+    local title = MapRadarCommon.CreateLabel("$(parent)_title", control, "Common settings")
+    title:SetAnchor(TOPLEFT, control, TOPLEFT)
+
+    local sectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_sectionDivider", control, "ZO_Options_Divider")
+    sectionDivider:SetAnchor(TOPLEFT, title, BOTTOMLEFT)
+
+    local showSpeedCbx = MapRadarCommon.CreateCheckBox("$(parent)_speedCbx", control, config, "showSpeedometer", "Show speed", "Show speed widget")
+    showSpeedCbx:SetAnchor(TOPLEFT, sectionDivider, BOTTOMLEFT)
+
+    -- CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
+
+    return control
+end
+
 local function CreateModeSection(id, parent, title, config, w, h)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
-    control:SetDimensions(w or 500, h or 300)
+    control:SetDimensions(w or 500, h or 230)
 
     local title = MapRadarCommon.CreateLabel("$(parent)_title", control, title)
     title:SetAnchor(TOPLEFT, control, TOPLEFT)
@@ -208,6 +234,9 @@ function MapRadar_toggleSettings()
     MapRadar_Settings:SetHidden(not isOpen)
     SetGameCameraUIMode(isOpen)
     -- MapRadar.debug("This will open configuration")
+    if (isOpen) then
+        MapRadar_Settings:Refresh()
+    end
 end
 
 local function addHarvestFilterButton(id, parent, pinTypeId)
@@ -224,14 +253,12 @@ local function addHarvestFilterButton(id, parent, pinTypeId)
     btn.texture:SetTexture(texturePath)
     btn.texture:SetColor(tint.r, tint.g, tint.b, 1)
     btn.texture:SetDimensions(30, 30)
-    btn:SetAlpha(HarvestMapFilterProfile[pinTypeId] and 1 or 0.3)
     btn:SetHandler(
         "OnClicked", function(self)
             local isVisible = not HarvestMapFilterProfile[pinTypeId]
             HarvestMapFilterProfile[pinTypeId] = isVisible
-            self:SetAlpha(HarvestMapFilterProfile[pinTypeId] and 1 or 0.3)
-            -- CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
             Harvest.callbackManager:FireCallbacks(Harvest.events.FILTER_PROFILE_CHANGED, HarvestMapFilterProfile, pinTypeId, isVisible)
+            self:Refresh()
         end)
 
     btn:SetHandler(
@@ -247,13 +274,19 @@ local function addHarvestFilterButton(id, parent, pinTypeId)
             end
         end)
 
+    btn.Refresh = function(self)
+        self:SetAlpha(HarvestMapFilterProfile[pinTypeId] and 1 or 0.3)
+    end
+
     return btn
 end
 
 local function CreateHarvestMapSettings()
     local control = WINDOW_MANAGER:CreateControl("$(parent)harvestMapSettings", MapRadar_Settings, CT_CONTROL)
-    control:SetDimensions(100, 600)
+    control:SetDimensions(100, 620)
     control:SetAnchor(TOPLEFT, MapRadar_Settings, TOPRIGHT, 20)
+
+    control.buttons = {}
 
     WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_bg", control, "ZO_MinorMungeBackdrop_SemiTransparentBlack")
 
@@ -270,12 +303,27 @@ local function CreateHarvestMapSettings()
             local harvestPinBtn = addHarvestFilterButton("$(parent)pin" .. index, control, pinTypeId)
             harvestPinBtn:SetAnchor(TOPLEFT, anchorControl, BOTTOMLEFT, 0, 2)
             anchorControl = harvestPinBtn
+            control.buttons[pinTypeId] = harvestPinBtn
         end
     end
 
+    control.Refresh = function(self)
+        for pinTypeId, button in ipairs(self.buttons) do
+            button:Refresh()
+        end
+    end
+
+    return control
 end
 
 local function CreateForm()
+    MapRadar_Settings.refreshControls = {}
+    MapRadar_Settings.Refresh = function(self)
+        for _, ctrl in ipairs(self.refreshControls) do
+            ctrl:Refresh()
+        end
+    end
+
     local closeButton = CreateControlFromVirtual("$(parent)closeButton", MapRadar_Settings, "ZO_DialogButton")
     closeButton:SetAnchor(BOTTOMRIGHT, btnSavePosition2, BOTTOMRIGHT, -20, -20)
     ZO_KeybindButtonTemplate_Setup(
@@ -283,15 +331,18 @@ local function CreateForm()
             MapRadar_toggleSettings()
         end, "Close")
 
+    local commonSection = CreateCommonSection(MapRadar_Settings, MapRadar.config)
+    commonSection:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
+
     local radarModeSection = CreateModeSection("$(parent)_radarSection", MapRadar_Settings, "Radar mode settings", MapRadar.config.radarSettings)
-    radarModeSection:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
+    radarModeSection:SetAnchor(TOPLEFT, commonSection, BOTTOMLEFT)
 
     local overlayModeSection = CreateModeSection(
         "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings)
     overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
 
     if Harvest then
-        CreateHarvestMapSettings()
+        table.insert(MapRadar_Settings.refreshControls, CreateHarvestMapSettings())
     end
 
     -- Escape key handling
@@ -305,7 +356,6 @@ local function CreateForm()
 
             return false
         end)
-
 end
 
 CALLBACK_MANAGER:RegisterCallback(

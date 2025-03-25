@@ -1,6 +1,6 @@
 ## Title: MapRadar
-## APIVersion: 101043 101044
-## Version: 1.1.1
+## APIVersion: 101044 101045
+## Version: 1.2.1
 ## Author: Dude
 ## SavedVariables: MapRadar_Data
 ## Description: Configurable map pin display in radar or screen overlay mode for easier map navigation.
@@ -10,12 +10,16 @@ MapRadar.xml
 Bindings.xml
 
 Components.lua
-ScaleCalibrator.lua
+
 PinTypeNames.lua
 Settings.lua
-InvokeAnalyzer.lua
 ZoneData.lua
+
+InvokeAnalyzer.lua
+ScaleCalibrator.lua
 
 MapRadarPin.lua
 MapRadarCustomPin.lua
 MapRadar.lua
+
+Speedometer.lua

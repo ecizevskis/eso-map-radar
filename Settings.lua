@@ -342,6 +342,7 @@ local function CreateForm()
     overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
 
     if Harvest then
+        HarvestMapFilterProfile = Harvest.filterProfiles:GetMapProfile()
         table.insert(MapRadar_Settings.refreshControls, CreateHarvestMapSettings())
     end
 
@@ -360,10 +361,6 @@ end
 
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitializing", function()
-        if Harvest then
-            HarvestMapFilterProfile = Harvest.filterProfiles["GetMapProfile"](Harvest.filterProfiles)
-        end
-
         SettingsInit()
     end)
 

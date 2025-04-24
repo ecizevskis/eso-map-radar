@@ -4,6 +4,7 @@ local dataForm = nil
 local worldMap = ZO_WorldMap
 local getMapPlayerPosition = GetMapPlayerPosition
 local getUnitRawWorldPosition = GetUnitRawWorldPosition
+local getUnitWorldPosition = GetUnitWorldPosition
 local latestMapId = 0
 local ScaleData = {
     px = 0,
@@ -73,7 +74,7 @@ end
 
 local function selfData()
     local playerX, playerY = getMapPlayerPosition("player")
-    local zoneId, wx, wy, wz = getUnitRawWorldPosition("player");
+    local zoneId, wx, wy, wz = getUnitWorldPosition("player");
 
     ScaleData.px = playerX
     ScaleData.py = playerY
@@ -135,7 +136,7 @@ end
 local function CreateCalibrationDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("CalibrateDataForm", MapRadarContainer)
-    dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 150, -100)
+    dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 150, -50)
 
     dataForm:AddLabel(
         "MapId", function()
@@ -160,21 +161,6 @@ local function CreateCalibrationDataForm()
     dataForm:AddLabel(
         "Rel PY", function()
             return ScaleData.py
-        end)
-
-    dataForm:AddLabel(
-        "World X", function()
-            return ScaleData.wx
-        end)
-
-    dataForm:AddLabel(
-        "World Y", function()
-            return ScaleData.wy
-        end)
-
-    dataForm:AddLabel(
-        "World Z", function()
-            return ScaleData.wz
         end)
 
     local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "ZO_NextArrowButton")

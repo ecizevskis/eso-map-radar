@@ -14,13 +14,20 @@ local getMapType = GetMapType
 
 local function getMeterCoefficient()
 
-    local zData = zoneData[getCurrentMapId()]
+    local mapId = getCurrentMapId()
+
+    local worldCalibratedData = MapRadar.config.worldScaleData[mapId]
+    if worldCalibratedData ~= nil then
+        return worldCalibratedData, true
+    end
+
+    local zData = zoneData[mapId]
     if zData ~= nil then
         -- MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData))
         return zData, true
     end
 
-    local calibratedData = MapRadar.config.scaleData[getCurrentMapId()]
+    local calibratedData = MapRadar.config.scaleData[mapId]
     if calibratedData ~= nil and calibratedData.unit1 ~= nil then
         -- MapRadar.debugDebounce("Get calibrated zone unit1: <<1>>", MapRadar.getStrVal(calibratedData.unit1))
         return calibratedData.unit1, true
@@ -86,8 +93,8 @@ local function IsValidPOI(pin)
 end
 
 local function IsValidForPointer(pin)
-    -- List only specific pins to have pointers. just active quest pins now
-    if pin:IsQuest() then
+    local pinType = pin:GetPinType()
+    if zoMapPin.ASSISTED_PIN_TYPES[pinType] then
         return true;
     end
 

@@ -589,6 +589,7 @@ MapRadarZoneData = {  -- Based on MapId
 [1987] = 0.0012828589, -- Zenithar's Abbey - Trade Port
 [1988] = 0.001323075, -- Zenithar's Abbey - Cloister
 [1989] = 0.0012718378, -- Zenithar's Abbey - Bazaar 2
+[1990] = 0.0043333337, -- Black Market
 [2022] = 0.0050347943, -- Zenithar's Abbey - Adytum
 [1978] = 0.0018930139, -- Deepscorn Hollow
 [1984] = 0.0030472632, -- Tidewater Cave
@@ -1114,6 +1115,16 @@ MapRadarZoneData = {  -- Based on MapId
 [2143] = 0.0016458992, -- Sword's Rest Isle
 [2144] = 0.0088666401, -- Sword's Rest Keep
 [2145] = 0.0046556164, -- Sword's Rest Keep Basement
+
+[1201] = 0.0048496477, -- Seht's Vault
+[1202] = 0.0029083239, -- Maintenance Junction
+[1203] = 0.0063017514, -- Engineering Junction
+[1204] = 0.0029981048, -- The Divinity Atelier
+
+[1265] = 0.0036514702, -- Dockworks
+[1266] = 0.0061693939, -- Engineering Access
+[1267] = 0.0060509345, -- Atelier Courtyard
+[1268] = 0.0093956404, -- Clavicus Vile Shrine
 
 -- ===============================================================================
 [2274] = 0.0003372194, -- Telvanni Peninsula
@@ -1939,6 +1950,12 @@ MapRadarZoneData = {  -- Based on MapId
 [2515] = 0.0035152244, -- The Scholarium
 [2525] = 0.0023908911, -- The Scholarium Ruins
 [2520] = 0.0060463738, -- Wing of the Indrik
+[2521] = 0.0043626022, -- Wing of the Netch
+[2522] = 0.0038619005, -- Wing of the Gryphon
+[2523] = 0.0048706478, -- Wing of the Dragon
+[2541] = 0.0050474893, -- Wing of the Crow
+[2542] = 0.0050906596, -- Arena of the Luminary Flames
+[2544] = 0.0015825055, -- The Crow's Labyrinthian
 
 -- ===============================================================================
 [737] = 0.0078729547, -- The Harborage
@@ -2158,17 +2175,17 @@ MapRadarZoneData = {  -- Based on MapId
 -- ===============================================================================
 -- Psijic
 [1457] = 0.0081676204, -- Imperial Throne Room
+[1325] = 0.0018803782, -- Dranil Kir Island
+
+-- ===============================================================================
+-- Justice for the Fallen
+[2640] = 0.0027783344, -- Worm Cult Nest
+[2641] = 0.0041417221, -- Underground Sanctum
+[2645] = 0.0017025797, -- The Earth Forge
+[2695] = 0.0017751584, -- Stirk
 
 -- ===============================================================================
 -- TODO: Need to sort 
-
-
-
-
-
-
-
-
 
 
 

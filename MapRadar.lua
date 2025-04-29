@@ -117,9 +117,13 @@ end
 
 -- ==================================================================================================
 -- Mode change
+local function setVisibilityForRadarTexture()
+    local isHidden = MR.config.isOverlayMode or MR.config.hideRadarTexture
+    radarTexture:SetHidden(isHidden)
+end
+
 local function setOverlayMode(flag)
     MR.playerPinTexture:ClearAnchors()
-    radarTexture:SetHidden(flag)
 
     if flag then
         MR.playerPinTexture:SetAnchor(CENTER, GuiRoot, BOTTOM, 0, -UIHeight * 0.4)
@@ -138,6 +142,8 @@ local function setOverlayMode(flag)
     else
         MR.modeSettings = MR.config.radarSettings
     end
+
+    setVisibilityForRadarTexture()
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
 end
 
@@ -318,6 +324,7 @@ local function initialize(eventType, addonName)
             playerHeading = 0
 
             MapRadar_LoadHarvestPins()
+            setVisibilityForRadarTexture()
         end)
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarInitialized")

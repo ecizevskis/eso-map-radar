@@ -62,6 +62,7 @@ local function SettingsInit()
          },
 
         showSpeedometer = false,
+        hideRadarTexture = false,
 
         -- Debug 
         showCalibrate = false,
@@ -152,6 +153,10 @@ local function CreateCommonSection(parent, config)
 
     local showSpeedCbx = MapRadarCommon.CreateCheckBox("$(parent)_speedCbx", control, config, "showSpeedometer", "Show speed", "Show speed widget")
     showSpeedCbx:SetAnchor(TOPLEFT, sectionDivider, BOTTOMLEFT)
+
+    local hideRadarTextureCbx = MapRadarCommon.CreateCheckBox(
+        "$(parent)_hideRadarTextureCbx", control, config, "hideRadarTexture", "Hide radar texture", "Hides radar texture in radar mode")
+    hideRadarTextureCbx:SetAnchor(TOPLEFT, showSpeedCbx, TOPRIGHT, 0)
 
     -- CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
 

@@ -16,7 +16,7 @@ local function getMeterCoefficient()
 
     local mapId = getCurrentMapId()
 
-    local worldCalibratedData = MapRadar.config.worldScaleData[mapId]
+    local worldCalibratedData = MapRadar.accountData.worldScaleData[mapId]
     if worldCalibratedData ~= nil then
         return worldCalibratedData, true
     end

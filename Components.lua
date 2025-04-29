@@ -16,7 +16,7 @@ end
 -- Label stack
 local LabelStack = {}
 function LabelStack:New(name, parent, count)
-    local control = CreateLabel(name, parent, " ") -- Empty space forces to render tabel text and calc its bottom position for anchors
+    local control = CreateLabel(name, parent, " ") -- Empty space forces to render table text and calc its bottom position for anchors
 
     control.SetFontBase = control.SetFont
     control.SetColorBase = control.SetColor
@@ -249,7 +249,7 @@ local function CreateSlider(id, parent, data, key, text, tooltip, w, h)
     end
 
     control.SetLabelDimensions = function(self, w, h)
-        self.lable:SetDimensions(w, h)
+        self.label:SetDimensions(w, h)
     end
 
     -- Value label
@@ -293,9 +293,68 @@ local function CreateSlider(id, parent, data, key, text, tooltip, w, h)
 end
 
 -- ==================================================================================================
+-- Counter List
+local CounterList = {}
+function CounterList:New(id, parent)
+    local control = CreateControl("$(parent)CounterList" .. id, parent, CT_CONTROL)
+
+    control.lastTextLabel = {}
+    control.lastCountLabel = {}
+    control.records = {}
+    control.labelPool = ZO_ControlPool:New("LabelTemplate", control, "ZoneName")
+    control.labelCountPool = ZO_ControlPool:New("LabelTemplate", control, "Count")
+
+    control.AddOrUpdateCounter = function(self, key, text, count)
+
+        if (self.records[key] == nil) then
+            local label, labelKey = self.labelPool:AcquireObject()
+            label.objkey = labelKey
+
+            local countLabel, countLabelKey = self.labelCountPool:AcquireObject()
+            label.objkey = countLabelKey
+
+            -- TODO: add option to expand upwards!
+
+            if (table.maxn(self.records) == 0) then
+                label:SetAnchor(TOPRIGHT, self, TOPLEFT, -10)
+                countLabel:SetAnchor(TOPLEFT, self, TOPRIGHT, 10)
+            else
+                label:SetAnchor(TOPRIGHT, self.lastTextLabel, BOTTOMRIGHT)
+                countLabel:SetAnchor(TOPLEFT, self.lastCountLabel, BOTTOMLEFT)
+            end
+
+            self.records[key] = {
+                label = label,
+                count = countLabel
+             }
+
+            self.lastTextLabel = label
+            self.lastCountLabel = countLabel
+        end
+
+        self.records[key].label:SetText(text)
+        self.records[key].count:SetText(count)
+    end
+
+    control.Clear = function(self)
+        self.labelPool:ReleaseAllObjects()
+        self.labelCountPool:ReleaseAllObjects()
+
+        for i, v in pairs(self.records) do
+            self.records[i] = nil
+        end
+
+        self.lastTextLabel = {}
+        self.lastCountLabel = {}
+    end
+
+    return control
+end
+
+-- ==================================================================================================
 -- namespace to export class to public
 MapRadarCommon = {
-    -- simple construcotr metods
+    -- simple constructor methods
     CreateLabel = CreateLabel,
     CreateCheckBox = CreateCheckBox,
     CreateSlider = CreateSlider,
@@ -303,7 +362,8 @@ MapRadarCommon = {
     -- components
     LabelStack = LabelStack,
     DataForm = DataForm,
-    Debouncer = Debouncer
+    Debouncer = Debouncer,
+    CounterList = CounterList
  }
 
 -- Just event to load some test demo

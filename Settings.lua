@@ -1,8 +1,8 @@
 local HarvestMapFilterProfile = {}
 
 local function SettingsInit()
-    -- local accountDefaults = {}
-    -- MapRadar.aData = ZO_SavedVars:NewAccountWide("MapRadar_Data", 1, nil, accountDefaults)
+    local accountDefaults = {}
+    MapRadar.accountData = ZO_SavedVars:NewAccountWide("MapRadar_Data", 1, nil, accountDefaults)
 
     local defaults = {
         radarPosition = {

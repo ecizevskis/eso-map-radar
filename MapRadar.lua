@@ -468,6 +468,11 @@ local function slashCommands(args)
         MR.debug("Show Speedometer: <<1>>", flagStr)
     end
 
+    if args == "wipe asc" then
+        MapRadar.accountData.worldScaleData = {}
+        MR.debug("Wiped Account world scale data")
+    end
+
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
 end

@@ -1,61 +1,81 @@
-local scaleLabel = {}
-local labelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Data")
+local mapCoordinateData = {}
+local mapCoordinateDataMatrix = {}
 local dataForm = nil
 local worldMap = ZO_WorldMap
 local getMapPlayerPosition = GetMapPlayerPosition
-local getUnitRawWorldPosition = GetUnitRawWorldPosition
 local getUnitWorldPosition = GetUnitWorldPosition
 local getUnitRawWorldPosition = GetUnitRawWorldPosition
+local getCurrentMapId = GetCurrentMapId
 local latestMapId = 0
 local ScaleData = {
     px = 0,
     py = 0
  }
 
-local storedPos = {}
-
 local function checkMapIdUpdated(mapId)
     if latestMapId ~= mapId then
-        local isCalibrated = MapRadar.config.worldScaleData[mapId] ~= nil
+        local isCalibrated = MapRadar.accountData.worldScaleData[mapId] ~= nil
         dataForm:SetColor(1, 1, isCalibrated and 1 or 0, 1)
+
+        if (mapCoordinateData[mapId] == nil) then
+            mapCoordinateData[mapId] = {
+                name = worldMap.zoneName,
+                positions = {},
+                count = 0
+             }
+            mapCoordinateDataMatrix[mapId] = {}
+        end
     end
 
     latestMapId = mapId;
 end
 
-local function CreateLabel(anchorPoint, anchor, targetAnchorPoint, text)
-    local label, labelKey = labelPool:AcquireObject()
-    label:SetFont("$(BOLD_FONT)|16|outline")
-    label:SetColor(1, 1, 1, 1)
-    label:SetAnchor(anchorPoint, anchor, targetAnchorPoint)
+local function calcAndSaveDistances()
+    for index, mapData in pairs(mapCoordinateData) do
+        local distanceData = {
+            mapDistance = 0,
+            worldDistance = 0
+         }
 
-    if text ~= nil then
-        label:SetText(text)
+        -- Iterate and compare all positions and find longest one
+        for posIndex, mapPos in pairs(mapData.positions) do
+            for posIndex2, mapPos2 in pairs(mapData.positions) do
+                local mapDistance = zo_distance(mapPos.mapX, mapPos.mapY, mapPos2.mapX, mapPos2.mapY)
+                local worldDistance = zo_distance(mapPos.worldX, mapPos.worldY, mapPos2.worldX, mapPos2.worldY) / 100
+
+                if (worldDistance > distanceData.worldDistance) then
+                    distanceData.mapDistance = mapDistance
+                    distanceData.worldDistance = worldDistance
+                end
+            end
+        end
+
+        -- If distance is calculated then calculate 1 meter coefficient
+        if (distanceData.mapDistance > 0) then
+            local map1meterCoefficient = distanceData.mapDistance / distanceData.worldDistance
+            MapRadar.accountData.worldScaleData[index] = map1meterCoefficient
+        end
+
+        -- Cleaning position table data
+        for i, pos in pairs(mapData.positions) do
+            mapData.positions[i] = nil
+        end
+        mapCoordinateData[index] = nil
     end
 
-    return label;
-end
-
-local function calcAndSaveDistance()
-
-    if storedPos.px == nil or storedPos.py == nil then
-        return
-    end
-    local mapId = GetCurrentMapId()
-    local worldDistanceMeters = zo_distance(storedPos.wx, storedPos.wz, ScaleData.wx, ScaleData.wz) / 100
-    local mapDistance = zo_distance(storedPos.px, storedPos.py, ScaleData.px, ScaleData.py)
-
-    local map1meterCoefficient = mapDistance / worldDistanceMeters
-
-    MapRadar.config.worldScaleData[mapId] = map1meterCoefficient
-    MapRadar.debug("Saved one meter unit data (<<1>>) for zone: <<2>>", MapRadar.getStrVal(map1meterCoefficient), worldMap.zoneName)
+    -- Clear counter data from UI
+    dataForm.counterList:Clear()
 
     latestMapId = 0
-    checkMapIdUpdated(mapId)
+    checkMapIdUpdated(getCurrentMapId())
 end
 
 local function selfData()
-    local playerX, playerY = getMapPlayerPosition("player")
+    local playerX, playerY, heading, isShownInCurrentMap = getMapPlayerPosition("player")
+    if not isShownInCurrentMap then
+        return
+    end
+
     local zoneId, wx, wy, wz = getUnitWorldPosition("player");
     local zoneId, rwx, rwy, rwz = getUnitRawWorldPosition("player");
 
@@ -69,22 +89,6 @@ local function selfData()
     ScaleData.rwx = rwx -- Longitude
     ScaleData.rwy = rwy -- Elevation
     ScaleData.rwz = rwz -- Latitude
-
-    if (storedPos.wx) then
-        ScaleData.wdist = zo_strformat(
-            "<<1>> : <<2>>", zo_distance(storedPos.wx, storedPos.wz, wx, wz) / 100,
-            zo_distance3D(storedPos.wx, storedPos.wy, storedPos.wz, wx, wy, wz) / 100)
-    end
-
-    if (storedPos.rwx) then
-        ScaleData.rwdist = zo_strformat(
-            "<<1>> : <<2>>", zo_distance(storedPos.rwx, storedPos.rwz, rwx, rwz) / 100,
-            zo_distance3D(storedPos.rwx, storedPos.rwy, storedPos.rwz, rwx, rwy, rwz) / 100)
-    end
-
-    if (storedPos.wy) then
-        ScaleData.eleDiff = zo_strformat("<<1>> / <<2>>", wy - storedPos.wy, rwy - storedPos.rwy)
-    end
 end
 
 local function CreateCalibrationDataForm()
@@ -94,7 +98,7 @@ local function CreateCalibrationDataForm()
 
     dataForm:AddLabel(
         "MapId", function()
-            local mapId = GetCurrentMapId()
+            local mapId = getCurrentMapId()
             checkMapIdUpdated(mapId)
             return mapId;
         end)
@@ -127,62 +131,22 @@ local function CreateCalibrationDataForm()
             return zo_strformat("<<1>>  <<2>>  <<3>>", ScaleData.rwx, ScaleData.rwz, ScaleData.rwy)
         end)
 
-    dataForm:AddLabel(
-        "World distances", function()
-            return zo_strformat("<<1>> / <<2>>", ScaleData.wdist, ScaleData.rwdist)
-        end)
-
-    dataForm:AddLabel(
-        "Elevation diff", function()
-            return zo_strformat("<<1>>", ScaleData.eleDiff)
-        end)
-
-    local btnSavePosition1 = CreateControlFromVirtual("$(parent)btnSavePosition1", dataForm, "ZO_NextArrowButton")
-    btnSavePosition1:SetDimensions(40, 40)
-    btnSavePosition1:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT, 0, 10)
-    btnSavePosition1:SetHandler(
-        "OnClicked", function()
-            storedPos.px = ScaleData.px
-            storedPos.py = ScaleData.py
-
-            storedPos.wx = ScaleData.wx
-            storedPos.wy = ScaleData.wy
-            storedPos.wz = ScaleData.wz
-
-            storedPos.rwx = ScaleData.rwx
-            storedPos.rwy = ScaleData.rwy
-            storedPos.rwz = ScaleData.rwz
-
-            MapRadar.debug("Saved world position")
-        end)
-    btnSavePosition1:SetHandler(
-        "OnMouseEnter", function(self)
-            ZO_Tooltips_ShowTextTooltip(self, BOTTOM, "Save current player position")
-        end)
-    btnSavePosition1:SetHandler(
-        "OnMouseExit", function(self)
-            ZO_Tooltips_HideTextTooltip()
-        end)
-
-    local labelPosition1 = MapRadarCommon.CreateLabel("$(parent)labelPosition1", dataForm, "Mark position")
-    labelPosition1:SetAnchor(RIGHT, btnSavePosition1, LEFT)
-
-    -- local labelSave = MapRadarCommon.CreateLabel("$(parent)labelSave", dataForm, "Save calibration")
-    -- labelSave:SetAnchor(TOPRIGHT, labelPosition1, BOTTOMRIGHT, 0, 10)
-
     local btnSave = CreateControlFromVirtual("$(parent)btnSave", dataForm, "SavingEditBoxSaveButton")
     btnSave:SetDimensions(40, 40)
-    btnSave:SetAnchor(LEFT, btnSavePosition1, RIGHT, 30)
+    btnSave:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT, 0, 10)
     btnSave:SetHandler(
         "OnClicked", function()
-            calcAndSaveDistance();
+            calcAndSaveDistances();
         end)
+
+    -- Counter list 
+    dataForm.counterList = MapRadarCommon.CounterList:New("WorldCalibrateCounterList", MapRadarContainer)
+    dataForm.counterList:SetAnchor(TOP, GuiRoot, TOP, 550, 0)
 
 end
 
 local function MapRadar_InitScaleCalibrator()
     CreateCalibrationDataForm()
-
 end
 
 local function EnableOrDisableCalibrator()
@@ -196,15 +160,71 @@ local function EnableOrDisableCalibrator()
                 selfData()
                 dataForm:Update()
             end)
+
+        latestMapId = 0
+        checkMapIdUpdated(getCurrentMapId())
     else
         EVENT_MANAGER:UnregisterForUpdate("MapRadar_CalibrationData")
+    end
+
+    if MapRadar.config.showCalibrate then
+        EVENT_MANAGER:RegisterForUpdate(
+            "MapRadar_SaveMapCoordinates", 1000, function()
+
+                local mapX, mapY, heading, isShownInCurrentMap = getMapPlayerPosition("player")
+                if not isShownInCurrentMap then
+                    return
+                end
+
+                local mapId = getCurrentMapId()
+                checkMapIdUpdated(mapId)
+
+                if MapRadar.accountData.worldScaleData[mapId] ~= nil then
+                    return; -- do not gather position data for world scaled maps
+                end
+
+                local _, wx, _, wz = getUnitWorldPosition("player");
+                -- local _, rwx, _, rwz = getUnitRawWorldPosition("player");
+
+                -- Ensures that map positions are only saved in matrix by 10meters
+                local xIndex = zo_floor(wx / 1000)
+                local yIndex = zo_floor(wz / 1000)
+
+                local mapMatrix = mapCoordinateDataMatrix[mapId]
+
+                if (mapMatrix[xIndex] == nil) then
+                    mapMatrix[xIndex] = {}
+                end
+
+                if (mapMatrix[xIndex][yIndex] == nil) then
+                    mapMatrix[xIndex][yIndex] = true
+
+                    table.insert(
+                        mapCoordinateData[mapId].positions, {
+                            mapX = mapX,
+                            mapY = mapY,
+
+                            worldX = wx,
+                            worldY = wz -- Z parameter is instead of Y because Y is elevation
+                         })
+
+                    -- Increase record counter for statistics
+                    mapCoordinateData[mapId].count = mapCoordinateData[mapId].count + 1
+
+                    local name = zo_strformat("<<1>> (<<2>>)", worldMap.zoneName, mapId)
+                    dataForm.counterList:AddOrUpdateCounter(mapId, name, mapCoordinateData[mapId].count)
+                end
+
+            end)
+    else
+        EVENT_MANAGER:UnregisterForUpdate("MapRadar_SaveMapCoordinates")
     end
 end
 
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitialized", function()
-        if MapRadar.config.worldScaleData == nil then
-            MapRadar.config.worldScaleData = {}
+        if MapRadar.accountData.worldScaleData == nil then
+            MapRadar.accountData.worldScaleData = {}
         end
 
         if MapRadar.config.showCalibrate then

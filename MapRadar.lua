@@ -480,6 +480,15 @@ local function slashCommands(args)
         MR.debug("Wiped Account world scale data")
     end
 
+    local wipeMapMatch = string.match(args, "wipe asc (%d+)")
+    if wipeMapMatch then
+        local mapId = tonumber(wipeMapMatch)
+        if MapRadar.accountData.worldScaleData[mapId] then
+            MapRadar.accountData.worldScaleData[mapId] = nil
+            MR.debug("Wiped Account world scale data for mapId: <<1>>", mapId)
+        end
+    end
+
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
 end

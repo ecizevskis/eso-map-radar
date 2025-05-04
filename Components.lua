@@ -227,6 +227,49 @@ local function CreateCheckBox(id, parent, data, key, text, tooltip, w, h)
 end
 
 -- ==================================================================================================
+-- Toggle
+local function CreateToggle(id, parent, data, key, text, tooltip, w, h)
+    local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
+    control:SetMouseEnabled(true)
+    control:SetDimensions(w or 150, h or 35)
+
+    control.checkbox = WINDOW_MANAGER:CreateControl("$(parent)_tgl", control, CT_TEXTURE)
+    control.checkbox:SetDimensions(35, 35)
+    control.checkbox:SetAnchor(TOPLEFT, control, TOPLEFT)
+
+    control.label = MapRadarCommon.CreateLabel("$(parent)_label", control, text)
+    control.label:SetAnchor(LEFT, control.checkbox, RIGHT, 5, 1)
+
+    control.SetChecked = function(self, value)
+        data[key] = value
+        self.checkbox:SetTexture(value and "MapRadar/textures/toggle-on.dds" or "MapRadar/textures/toggle-off.dds")
+        self.checkbox:SetColor(.5, value and .9 or .5, .5, value and .8 or .8)
+    end
+
+    control:SetHandler(
+        "OnMouseEnter", function(self)
+            if tooltip then
+                ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
+            end
+        end)
+    control:SetHandler(
+        "OnMouseExit", function(self)
+            if tooltip then
+                ZO_Tooltips_HideTextTooltip()
+            end
+        end)
+    control:SetHandler(
+        "OnMouseDown", function(self, button, ctrl, alt, shift)
+            self:SetChecked(not data[key])
+            CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
+        end)
+
+    -- Init state
+    control:SetChecked(data[key])
+    return control
+end
+
+-- ==================================================================================================
 -- Slider
 local function CreateSlider(id, parent, data, key, text, tooltip, w, h)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
@@ -357,6 +400,7 @@ MapRadarCommon = {
     -- simple constructor methods
     CreateLabel = CreateLabel,
     CreateCheckBox = CreateCheckBox,
+    CreateToggle = CreateToggle,
     CreateSlider = CreateSlider,
 
     -- components

@@ -151,10 +151,10 @@ local function CreateCommonSection(parent, config)
     local sectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_sectionDivider", control, "ZO_Options_Divider")
     sectionDivider:SetAnchor(TOPLEFT, title, BOTTOMLEFT)
 
-    local showSpeedCbx = MapRadarCommon.CreateCheckBox("$(parent)_speedCbx", control, config, "showSpeedometer", "Show speed", "Show speed widget")
+    local showSpeedCbx = MapRadarCommon.CreateToggle("$(parent)_speedCbx", control, config, "showSpeedometer", "Show speed", "Show speed widget")
     showSpeedCbx:SetAnchor(TOPLEFT, sectionDivider, BOTTOMLEFT)
 
-    local hideRadarTextureCbx = MapRadarCommon.CreateCheckBox(
+    local hideRadarTextureCbx = MapRadarCommon.CreateToggle(
         "$(parent)_hideRadarTextureCbx", control, config, "hideRadarTexture", "Hide radar texture", "Hides radar texture in radar mode")
     hideRadarTextureCbx:SetAnchor(TOPLEFT, showSpeedCbx, TOPRIGHT, 0)
 
@@ -199,11 +199,11 @@ local function CreateModeSection(id, parent, title, config, w, h)
         optionStack:addPinButton("showMapPinsChests", "/MapPins/Chest_1.dds", "Show MapPins chests")
     end
 
-    local showDistanceCbx = MapRadarCommon.CreateCheckBox(
+    local showDistanceCbx = MapRadarCommon.CreateToggle(
         "$(parent)_distCbx", control, config, "showDistance", "Show distance", "Show distance in meters for each radar pin")
     showDistanceCbx:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT)
 
-    local showPointersCbx = MapRadarCommon.CreateCheckBox(
+    local showPointersCbx = MapRadarCommon.CreateToggle(
         "$(parent)_pointerCbx", control, config, "showPointers", "Show poiners", "Show pointers from player pin towards all quest pins")
     showPointersCbx:SetAnchor(TOPLEFT, showDistanceCbx, TOPRIGHT)
 

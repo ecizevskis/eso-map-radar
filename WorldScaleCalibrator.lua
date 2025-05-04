@@ -14,7 +14,7 @@ local ScaleData = {
 
 local function checkMapIdUpdated(mapId)
     if latestMapId ~= mapId then
-        local isCalibrated = MapRadar.accountData.worldScaleData[mapId] ~= nil
+        local isCalibrated = MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
         dataForm:SetColor(1, 1, isCalibrated and 1 or 0, 1)
 
         if (mapCoordinateData[mapId] == nil) then

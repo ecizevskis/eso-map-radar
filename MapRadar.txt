@@ -24,3 +24,4 @@ MapRadarCustomPin.lua
 MapRadar.lua
 
 Speedometer.lua
+Autoscaled.lua

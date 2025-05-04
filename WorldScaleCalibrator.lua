@@ -179,7 +179,7 @@ local function EnableOrDisableCalibrator()
                 local mapId = getCurrentMapId()
                 checkMapIdUpdated(mapId)
 
-                if MapRadar.accountData.worldScaleData[mapId] ~= nil then
+                if MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil then
                     return; -- do not gather position data for world scaled maps
                 end
 

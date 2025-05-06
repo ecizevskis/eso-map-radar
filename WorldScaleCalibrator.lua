@@ -179,6 +179,11 @@ local function EnableOrDisableCalibrator()
                 local mapId = getCurrentMapId()
                 checkMapIdUpdated(mapId)
 
+                if MapRadarZoneData[mapId] == nil and MapRadar.accountData.mapNameData[mapId] == nil then
+                    -- Need to save map name
+                    MapRadar.accountData.mapNameData[mapId] = worldMap.zoneName
+                end
+
                 if MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil then
                     return; -- do not gather position data for world scaled maps
                 end
@@ -225,6 +230,10 @@ CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitialized", function()
         if MapRadar.accountData.worldScaleData == nil then
             MapRadar.accountData.worldScaleData = {}
+        end
+
+        if MapRadar.accountData.mapNameData == nil then
+            MapRadar.accountData.mapNameData = {}
         end
 
         if MapRadar.config.showCalibrate then

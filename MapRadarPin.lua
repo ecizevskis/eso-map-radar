@@ -143,11 +143,6 @@ function MapRadarPin:SetVisibility(isCalibrated)
 end
 
 function MapRadarPin:SetPinDimensions()
-
-    -- TODO: somehow add scaling for radar and overlay
-    -- if self.size ~= nil and self.size == MapRadar.pinSize then
-    --    return
-    -- end
     local pinType = self.pin:GetPinType()
     local pinData = zoMapPin.PIN_DATA[pinType]
 
@@ -217,7 +212,7 @@ function MapRadarPin:CheckIntegrity()
         return false
     end
 
-    -- If pin type chnaged then not valid
+    -- If pin type changed then not valid
     if self.pinType ~= pinType then
         return false
     end
@@ -279,15 +274,28 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     dx = radarDistance * -math.sin(angle)
     dy = radarDistance * -math.cos(angle)
 
+    -- TODO: test distance wrapping
+    if dy > 0 then
+        dy = dy / 2
+    end
+
+    -- Reposition pin
+    self.texture:ClearAnchors()
+    self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
+
     -- Pointer points only for quests (not affected by range)
-    -- TODO: need to add fading a bit on distance??? Maybe it ok like that to be visible
     if self.pointer ~= nil then
-        self.pointer:SetTextureRotation(angle, 0.5, 1)
-        if radarDistance < 64 then
-            self.pointer:SetDimensions(8, radarDistance)
+        self.pointer:SetHidden(not MapRadar.modeSettings.showPointers)
+
+        if MapRadar.modeSettings.showPointers then
+            self.pointer:SetTextureRotation(angle, 0.5, 1)
+            if radarDistance < 64 then
+                self.pointer:SetDimensions(8, radarDistance)
+            end
         end
     end
 
+    -- TODO: extract to separate method
     -- Show distance (or other test data) near pin on radar
     if self.label ~= nil then
         local text = ""
@@ -318,16 +326,8 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
         self.label:SetText(text)
     end
 
-    if self.pointer ~= nil then
-        self.pointer:SetHidden(not MapRadar.modeSettings.showPointers)
-    end
-
     -- Resize pin 
     self:SetPinDimensions()
-
-    -- Reposition pin
-    self.texture:ClearAnchors()
-    self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
 
     -- Reset texture params
     -- self:ApplyTexture()

@@ -115,7 +115,7 @@ end
 
 function MapRadarPin:SetVisibility(isCalibrated)
     -- Most pin types they should be visible only in certain range
-    if not self.isRangeUnlimited and self.distance > MapRadar.modeSettings.maxDistance then
+    if not self.showAlways and self.distance > MapRadar.modeSettings.maxDistance then
         self:SetHidden(true)
         return false
     end
@@ -329,10 +329,6 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     -- Resize pin 
     self:SetPinDimensions()
 
-    -- Reset texture params
-    -- self:ApplyTexture()
-    -- self:ApplyTint()
-
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
 end
 
@@ -412,7 +408,7 @@ function MapRadarPin:New(pin, key)
         radarPin.pointerKey = pointerKey
     end
 
-    radarPin.isRangeUnlimited = pin:IsQuest() or pin:IsUnit() or pin:IsWorldEventPOIPin()
+    radarPin.showAlways = pin:IsQuest() or pin:IsUnit() or pin:IsWorldEventPOIPin()
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", radarPin)
 

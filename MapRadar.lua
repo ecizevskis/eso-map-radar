@@ -1,12 +1,3 @@
--- TODO
--- Scale slider to config for each mode
--- Group delve own settings option
--- Calibration interface changes 
---    Add two sections with changable distance and saving to saved variables
---    Remove party leader lookup
---    Remove party leader distance coords calculation from forms
---    Add main zone name to saved calibration data  GetPlayerActiveZoneName()  (Test delves and some quest places, sewers ... etc)
--- on zone zhange (pin count chnage maybe) can trigger checking of pins? Can try to dispose them in other method maybe?
 MapRadar = {
     pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin"),
     pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer"),
@@ -93,6 +84,8 @@ local function registerMapPins()
     end
 
     local pins = pinManager:GetActiveObjects()
+
+    -- TODO: Should this IsValidPin check be here? or in the pin class?
 
     -- Dispose invalid pins
     for k, radarPin in pairs(MR.activePins) do
@@ -254,34 +247,6 @@ local function MapRadar_LoadHarvestPins()
         end
     end
 
-    -- -- Add new pins that did not exist
-    -- for key, pin in pairs(pins) do
-    --     if MR.activePins[key] == nil and MRPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
-    --         local radarPin = MRPin:New(pin, key)
-    --         radarPin:UpdatePin(playerX, playerY, heading, true)
-    --         MR.activePins[key] = radarPin
-    --     end
-    -- end
-
-    -- Check if pinTypeId can be visible
-    -- Harvest.InRangePins.worldFilterProfile[pinTypeId]
-
-    -- for key, pinV in pairs(Harvest.InRangePins.worldFilterProfile) do
-    --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(pinV))
-    -- end
-
-    -- for key, MapCache in pairs(Harvest["Data"]:GetCurrentZoneCache().mapCaches) do
-
-    --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(MapCache))
-    -- end
-
-    -- 	self.worldFilterProfile = Harvest.filterProfiles:GetWorldProfile()
-    -- self.worldFilterProfile[pinTypeId]
-
-    -- Check if can render pin ---->  Cache.hasCompassPin[NodeId]
-
-    -- local CallbackManager = Harvest.callbackManager
-    -- 	CallbackManager:FireCallbacks(Events.NEW_ZONE_ENTERED, self.currentZoneCache)
 end
 
 -- ==================================================================================================
@@ -299,14 +264,6 @@ local function initialize(eventType, addonName)
     playerPinTexture:SetDimensions(20, 20)
     playerPinTexture:SetAlpha(0.5)
     MR.playerPinTexture = playerPinTexture
-
-    --[[
-    local positionLabel = CreateControl("$(parent)PositionLabel", MapRadarContainer, CT_LABEL)
-    positionLabel:SetAnchor(TOPLEFT, MapRadarContainer, TOPRIGHT)
-    positionLabel:SetFont("$(MEDIUM_FONT)|14|outline")
-    positionLabel:SetColor(unpack({1, 1, 1, 1}))
-    MR.positionLabel = positionLabel
-    ]]
 
     -- Set mode to radar from start (should be saved to variables later)
     setOverlayMode(MR.config.isOverlayMode);

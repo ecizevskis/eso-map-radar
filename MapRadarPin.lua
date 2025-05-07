@@ -274,11 +274,6 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     dx = radarDistance * -math.sin(angle)
     dy = radarDistance * -math.cos(angle)
 
-    -- TODO: test distance wrapping
-    if dy > 0 then
-        dy = dy / 2
-    end
-
     -- Reposition pin
     self.texture:ClearAnchors()
     self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)

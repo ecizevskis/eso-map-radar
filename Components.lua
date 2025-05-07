@@ -283,6 +283,12 @@ local function CreateSlider(id, parent, data, key, text, tooltip, w, h)
     control.slider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_slider", control, "ZO_Slider")
     control.slider:SetAnchor(TOPLEFT, control.label, TOPRIGHT, 5, 0)
 
+    control.slider:SetBackgroundBottomTexture("MapRadar/textures/slider-bg-bottom.dds")
+    control.slider:SetBackgroundTopTexture("MapRadar/textures/slider-bg-top.dds")
+    control.slider:SetBackgroundMiddleTexture("MapRadar/textures/slider-bg-mid.dds")
+    control.slider:SetThumbTexture(
+        "MapRadar/textures/slider-thumb.dds", "MapRadar/textures/slider-thumb.dds", "MapRadar/textures/slider-thumb.dds", 20, 20)
+
     control.SetMinMaxStep = function(self, min, max, step)
         self.slider:SetValueStep(step)
         self.slider:SetMinMax(min, max)

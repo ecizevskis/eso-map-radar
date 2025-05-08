@@ -111,7 +111,7 @@ end
 -- ==================================================================================================
 -- Mode change
 local function setVisibilityForRadarTexture()
-    local isHidden = MR.config.isOverlayMode or MR.config.hideRadarTexture
+    local isHidden = MR.config.isOverlayMode or MR.config.radarSettings.hideRadarTexture
     radarTexture:SetHidden(isHidden)
 end
 

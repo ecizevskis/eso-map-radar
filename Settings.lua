@@ -37,7 +37,9 @@ local function SettingsInit()
             minAlpha = 40,
             maxAlpha = 100,
             minScale = 60,
-            maxScale = 100
+            maxScale = 100,
+
+            hideRadarTexture = false
          },
         overlaySettings = {
             maxDistance = 1200,
@@ -62,7 +64,6 @@ local function SettingsInit()
          },
 
         showSpeedometer = false,
-        hideRadarTexture = false,
 
         -- Debug 
         showCalibrate = false,
@@ -154,16 +155,12 @@ local function CreateCommonSection(parent, config)
     local showSpeedCbx = MapRadarCommon.CreateToggle("$(parent)_speedCbx", control, config, "showSpeedometer", "Show speed", "Show speed widget")
     showSpeedCbx:SetAnchor(TOPLEFT, sectionDivider, BOTTOMLEFT)
 
-    local hideRadarTextureCbx = MapRadarCommon.CreateToggle(
-        "$(parent)_hideRadarTextureCbx", control, config, "hideRadarTexture", "Hide radar texture", "Hides radar texture in radar mode")
-    hideRadarTextureCbx:SetAnchor(TOPLEFT, showSpeedCbx, TOPRIGHT, 0)
-
     -- CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
 
     return control
 end
 
-local function CreateModeSection(id, parent, title, config, w, h)
+local function CreateModeSection(id, parent, title, config, w, h, customToggles)
     local control = WINDOW_MANAGER:CreateControl(id, parent, CT_CONTROL)
     control:SetDimensions(w or 500, h or 230)
 
@@ -199,18 +196,43 @@ local function CreateModeSection(id, parent, title, config, w, h)
         optionStack:addPinButton("showMapPinsChests", "/MapPins/Chest_1.dds", "Show MapPins chests")
     end
 
-    local showDistanceCbx = MapRadarCommon.CreateToggle(
-        "$(parent)_distCbx", control, config, "showDistance", "Show distance", "Show distance in meters for each radar pin")
-    showDistanceCbx:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT)
+    -- Toggles
+    local toggles = {
+        {
+            key = "showDistance",
+            label = "Show distance",
+            tooltip = "Show distance in meters for each radar pin"
+         },
+        {
+            key = "showPointers",
+            label = "Show pointers",
+            tooltip = "Show pointers from player pin towards all quest pins"
+         }
+     }
 
-    local showPointersCbx = MapRadarCommon.CreateToggle(
-        "$(parent)_pointerCbx", control, config, "showPointers", "Show poiners", "Show pointers from player pin towards all quest pins")
-    showPointersCbx:SetAnchor(TOPLEFT, showDistanceCbx, TOPRIGHT)
+    -- Add custom toggles to toggle list
+    if customToggles then
+        for _, toggle in ipairs(customToggles) do
+            table.insert(toggles, toggle)
+        end
+    end
 
+    local prevToggle = nil
+    for key, toggle in pairs(toggles) do
+        local cbx = MapRadarCommon.CreateToggle("$(parent)_" .. key .. "Cbx", control, config, toggle.key, toggle.label, toggle.tooltip)
+        if prevToggle then
+            cbx:SetAnchor(TOPLEFT, prevToggle, TOPRIGHT)
+        else
+            cbx:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT)
+        end
+        prevToggle = cbx
+    end
+
+    -- Sliders
     local maxDistanceSlider = MapRadarCommon.CreateSlider(
         "$(parent)_maxDistanceSlider", control, config, "maxDistance", "Max distance",
-        "Set maximum distance for pin to be displayed in radar (Quest and Group pins ingnore this)", 100, 30)
-    maxDistanceSlider:SetAnchor(TOPLEFT, showDistanceCbx, BOTTOMLEFT, 0, 10)
+        "Set maximum distance for pin to be displayed in radar (Quest and Group pins ignore this)", 100, 30)
+    maxDistanceSlider:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT, 0, 45)
     maxDistanceSlider:SetMinMaxStep(400, 2500, 50)
 
     -- Pin alpha sliders
@@ -339,11 +361,20 @@ local function CreateForm()
     local commonSection = CreateCommonSection(MapRadar_Settings, MapRadar.config)
     commonSection:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
 
-    local radarModeSection = CreateModeSection("$(parent)_radarSection", MapRadar_Settings, "Radar mode settings", MapRadar.config.radarSettings)
+    local radarCustomToggles = {
+        {
+            key = "hideRadarTexture",
+            label = "Hide texture",
+            tooltip = "Hides radar texture in radar mode"
+         }
+     }
+
+    local radarModeSection = CreateModeSection(
+        "$(parent)_radarSection", MapRadar_Settings, "Radar mode settings", MapRadar.config.radarSettings, 500, 230, radarCustomToggles)
     radarModeSection:SetAnchor(TOPLEFT, commonSection, BOTTOMLEFT)
 
     local overlayModeSection = CreateModeSection(
-        "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings)
+        "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings, 500, 230)
     overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
 
     if Harvest then

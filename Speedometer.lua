@@ -6,6 +6,7 @@ local speedometer = nil
 local worldMap = ZO_WorldMap
 local getMapPlayerPosition = GetMapPlayerPosition
 local getUnitWorldPosition = GetUnitWorldPosition
+local getUnitRawWorldPosition = GetUnitRawWorldPosition
 local latestMapId = 0
 local data = {}
 
@@ -70,7 +71,7 @@ local function EnableOrDisableSpeedometer()
     if MapRadar.config.showSpeedometer then
         EVENT_MANAGER:RegisterForUpdate(
             "MapRadar_Speedometer", 200, function()
-                local zoneId, wx, wy, wz = getUnitWorldPosition("player");
+                local zoneId, wx, wy, wz = getUnitRawWorldPosition("player");
                 local mps = 0
 
                 if (data.wx ~= nil and data.wy ~= nil and data.wz ~= nil) then

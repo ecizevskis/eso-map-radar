@@ -12,6 +12,16 @@ local ScaleData = {
     py = 0
  }
 
+local function isSkippedMap(mapId)
+    if mapId == 27 -- Tamriel
+    or mapId == 439 -- The Aurubis
+    then
+        return true
+    end
+
+    return false
+end
+
 local function checkMapIdUpdated(mapId)
     if latestMapId ~= mapId then
         local isCalibrated = MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
@@ -170,13 +180,13 @@ local function EnableOrDisableCalibrator()
     if MapRadar.config.showCalibrate then
         EVENT_MANAGER:RegisterForUpdate(
             "MapRadar_SaveMapCoordinates", 1000, function()
+                local mapId = getCurrentMapId()
 
                 local mapX, mapY, heading, isShownInCurrentMap = getMapPlayerPosition("player")
-                if not isShownInCurrentMap then
+                if not isShownInCurrentMap or isSkippedMap(mapId) then
                     return
                 end
 
-                local mapId = getCurrentMapId()
                 checkMapIdUpdated(mapId)
 
                 if MapRadarZoneData[mapId] == nil and MapRadar.accountData.mapNameData[mapId] == nil then
@@ -188,7 +198,7 @@ local function EnableOrDisableCalibrator()
                     return; -- do not gather position data for world scaled maps
                 end
 
-                local _, wx, _, wz = getUnitWorldPosition("player");
+                local _, wx, _, wz = getUnitRawWorldPosition("player");
                 -- local _, rwx, _, rwz = getUnitRawWorldPosition("player");
 
                 -- Ensures that map positions are only saved in matrix by 10meters

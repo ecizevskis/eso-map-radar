@@ -374,6 +374,9 @@ local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
             --     end
             -- end
 
+            d("Trying to set destination pin")
+            local x, y = getMapPlayerPosition("player")
+            PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, x, y)
         end
 
     end)

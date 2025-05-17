@@ -348,6 +348,7 @@ function MapRadarPin:IsValidPin(pin)
 
     if (pin:IsQuest() or pinType == MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY) and MapRadar.modeSettings.showQuests -- or pin:IsObjective() -- or pin:IsAvAObjective()
     or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE -- Antiquity
+    or pinType == MAP_PIN_TYPE_PLAYER_WAYPOINT -- Player map waypoint
     or pin:IsUnit() and MapRadar.modeSettings.showGroup -- Player/Group/Companion units
     or pin:IsWorldEventPOIPin() -- Active Dolmens
     -- or pin:IsAssisted() -- or pin:IsMapPing()

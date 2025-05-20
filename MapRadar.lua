@@ -374,7 +374,6 @@ local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
             --     end
             -- end
 
-            d("Trying to set destination pin")
             local x, y = getMapPlayerPosition("player")
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, x, y)
         end
@@ -447,6 +446,12 @@ local function slashCommands(args)
             MapRadar.accountData.worldScaleData[mapId] = nil
             MR.debug("Wiped Account world scale data for mapId: <<1>>", mapId)
         end
+    end
+
+    if args == "recalibrate" then
+        local mapId = GetCurrentMapId()
+        MapRadarAutoscaled[mapId] = nil
+        MR.debug("Recalibrating mapId: <<1>>", mapId)
     end
 
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")

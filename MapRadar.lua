@@ -451,6 +451,7 @@ local function slashCommands(args)
     if args == "recalibrate" then
         local mapId = GetCurrentMapId()
         MapRadarAutoscaled[mapId] = nil
+        MapRadar.accountData.worldScaleData[mapId] = nil
         MR.debug("Recalibrating mapId: <<1>>", mapId)
     end
 

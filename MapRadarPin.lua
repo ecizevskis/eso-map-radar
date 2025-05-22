@@ -14,13 +14,20 @@ local getMapType = GetMapType
 
 local function getMeterCoefficient()
 
-    local zData = zoneData[getCurrentMapId()]
+    local mapId = getCurrentMapId()
+
+    local worldCalibratedData = MapRadar.accountData.worldScaleData[mapId]
+    if worldCalibratedData ~= nil then
+        return worldCalibratedData, true
+    end
+
+    local zData = zoneData[mapId]
     if zData ~= nil then
         -- MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData))
         return zData, true
     end
 
-    local calibratedData = MapRadar.config.scaleData[getCurrentMapId()]
+    local calibratedData = MapRadar.config.scaleData[mapId]
     if calibratedData ~= nil and calibratedData.unit1 ~= nil then
         -- MapRadar.debugDebounce("Get calibrated zone unit1: <<1>>", MapRadar.getStrVal(calibratedData.unit1))
         return calibratedData.unit1, true
@@ -86,8 +93,8 @@ local function IsValidPOI(pin)
 end
 
 local function IsValidForPointer(pin)
-    -- List only specific pins to have pointers. just active quest pins now
-    if pin:IsQuest() then
+    local pinType = pin:GetPinType()
+    if zoMapPin.ASSISTED_PIN_TYPES[pinType] then
         return true;
     end
 
@@ -108,7 +115,7 @@ end
 
 function MapRadarPin:SetVisibility(isCalibrated)
     -- Most pin types they should be visible only in certain range
-    if not self.isRangeUnlimited and self.distance > MapRadar.modeSettings.maxDistance then
+    if not self.showAlways and self.distance > MapRadar.modeSettings.maxDistance then
         self:SetHidden(true)
         return false
     end
@@ -136,11 +143,6 @@ function MapRadarPin:SetVisibility(isCalibrated)
 end
 
 function MapRadarPin:SetPinDimensions()
-
-    -- TODO: somehow add scaling for radar and overlay
-    -- if self.size ~= nil and self.size == MapRadar.pinSize then
-    --    return
-    -- end
     local pinType = self.pin:GetPinType()
     local pinData = zoMapPin.PIN_DATA[pinType]
 
@@ -210,7 +212,7 @@ function MapRadarPin:CheckIntegrity()
         return false
     end
 
-    -- If pin type chnaged then not valid
+    -- If pin type changed then not valid
     if self.pinType ~= pinType then
         return false
     end
@@ -272,15 +274,23 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     dx = radarDistance * -math.sin(angle)
     dy = radarDistance * -math.cos(angle)
 
+    -- Reposition pin
+    self.texture:ClearAnchors()
+    self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
+
     -- Pointer points only for quests (not affected by range)
-    -- TODO: need to add fading a bit on distance??? Maybe it ok like that to be visible
     if self.pointer ~= nil then
-        self.pointer:SetTextureRotation(angle, 0.5, 1)
-        if radarDistance < 64 then
-            self.pointer:SetDimensions(8, radarDistance)
+        self.pointer:SetHidden(not MapRadar.modeSettings.showPointers)
+
+        if MapRadar.modeSettings.showPointers then
+            self.pointer:SetTextureRotation(angle, 0.5, 1)
+            if radarDistance < 64 then
+                self.pointer:SetDimensions(8, radarDistance)
+            end
         end
     end
 
+    -- TODO: extract to separate method
     -- Show distance (or other test data) near pin on radar
     if self.label ~= nil then
         local text = ""
@@ -311,20 +321,8 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
         self.label:SetText(text)
     end
 
-    if self.pointer ~= nil then
-        self.pointer:SetHidden(not MapRadar.modeSettings.showPointers)
-    end
-
     -- Resize pin 
     self:SetPinDimensions()
-
-    -- Reposition pin
-    self.texture:ClearAnchors()
-    self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
-
-    -- Reset texture params
-    -- self:ApplyTexture()
-    -- self:ApplyTint()
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
 end
@@ -350,6 +348,7 @@ function MapRadarPin:IsValidPin(pin)
 
     if (pin:IsQuest() or pinType == MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY) and MapRadar.modeSettings.showQuests -- or pin:IsObjective() -- or pin:IsAvAObjective()
     or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE -- Antiquity
+    or pinType == MAP_PIN_TYPE_PLAYER_WAYPOINT -- Player map waypoint
     or pin:IsUnit() and MapRadar.modeSettings.showGroup -- Player/Group/Companion units
     or pin:IsWorldEventPOIPin() -- Active Dolmens
     -- or pin:IsAssisted() -- or pin:IsMapPing()
@@ -405,7 +404,7 @@ function MapRadarPin:New(pin, key)
         radarPin.pointerKey = pointerKey
     end
 
-    radarPin.isRangeUnlimited = pin:IsQuest() or pin:IsUnit() or pin:IsWorldEventPOIPin()
+    radarPin.showAlways = pin:IsQuest() or pin:IsUnit() or pin:IsWorldEventPOIPin()
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", radarPin)
 

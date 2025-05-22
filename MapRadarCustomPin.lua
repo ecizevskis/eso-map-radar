@@ -96,17 +96,6 @@ function MapRadarCustomPin:SetPinDimensions()
     self.texture:SetDimensions(self.scaledSize, self.scaledSize)
 end
 
--- function MapRadarCustomPin:ApplyTint()
---     local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
-
---     if (pinData ~= nil and pinData.tint ~= nil) then
---         self.texture:SetColor(MapRadar.value(pinData.tint, self.pin):UnpackRGBA())
---         return
---     end
-
---     self.texture:SetColor(1, 1, 1, 1)
--- end
-
 function MapRadarCustomPin:UpdatePin(playerX, playerY, heading)
     local dx = self.x - playerX
     local dy = self.y - playerY
@@ -146,33 +135,6 @@ function MapRadarCustomPin:UpdatePin(playerX, playerY, heading)
     self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
-end
-
-function MapRadarCustomPin:IsValidPin(pin)
-    -- local pinType = pin:GetPinType()
-
-    -- if pinType == nil then
-    --     return false
-    -- end
-
-    return true; -- TODO: filter
-
-    -- if (pin:IsQuest() or pinType == MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY) and MapRadar.modeSettings.showQuests -- or pin:IsObjective() -- or pin:IsAvAObjective()
-    -- or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE -- Antiquity
-    -- or pin:IsUnit() and MapRadar.modeSettings.showGroup -- Player/Group/Companion units
-    -- or pin:IsWorldEventPOIPin() -- Active Dolmens
-    -- -- or pin:IsAssisted() -- or pin:IsMapPing()
-    -- -- or pin:IsKillLocation()
-    -- or pin:IsWorldEventUnitPin() -- Dragons and whatnot
-    -- -- or pin:IsZoneStory() or pin:IsSuggestion() -- or pin:IsAreaPin()
-    -- -- or pin:IsFastTravelWayShrine() -- Somehow some houses are in this category "MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE" (Some addon shitting?)
-    -- or IsCustomPin(pinType) -- Custom pins from other addons. Maybe valid POI method can handle it?
-    -- or IsValidPOI(pin) -- Filters POIs by texture
-    -- then
-    --     return true
-    -- end
-
-    -- return false;
 end
 
 -- ========================================================================================

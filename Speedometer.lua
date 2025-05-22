@@ -5,12 +5,10 @@ local getCurrentMapId = GetCurrentMapId
 local speedometer = nil
 local worldMap = ZO_WorldMap
 local getMapPlayerPosition = GetMapPlayerPosition
+local getUnitWorldPosition = GetUnitWorldPosition
 local getUnitRawWorldPosition = GetUnitRawWorldPosition
 local latestMapId = 0
-local data = {
-    px = 0,
-    py = 0
- }
+local data = {}
 
 local function getMeterCoefficient()
     local zData = zoneData[getCurrentMapId()]
@@ -73,25 +71,17 @@ local function EnableOrDisableSpeedometer()
     if MapRadar.config.showSpeedometer then
         EVENT_MANAGER:RegisterForUpdate(
             "MapRadar_Speedometer", 200, function()
-                local playerX, playerY = getMapPlayerPosition("player")
+                local zoneId, wx, wy, wz = getUnitRawWorldPosition("player");
                 local mps = 0
 
-                if (data.px ~= 0 and data.py ~= 0) then
-                    local dx = data.px - playerX
-                    local dy = data.py - playerY
-
-                    local distance = math.sqrt(dx ^ 2 + dy ^ 2) -- distance in percentage
-
-                    local coefficient = getMeterCoefficient()
-
-                    if (coefficient > 0) then
-                        local meters = math.sqrt(dx ^ 2 + dy ^ 2) / coefficient -- distance in meters
-                        mps = meters * 5 -- Update triggers 5 times per second
-                    end
+                if (data.wx ~= nil and data.wy ~= nil and data.wz ~= nil) then
+                    local distance = zo_distance3D(data.wx, data.wy, data.wz, wx, wy, wz) / 100
+                    mps = distance * 5 -- Update triggers 5 times per second
                 end
 
-                data.px = playerX
-                data.py = playerY
+                data.wx = wx
+                data.wy = wy
+                data.wz = wz
 
                 speedometer:SetText(zo_strformat("<<1>> m/s", mps))
             end)

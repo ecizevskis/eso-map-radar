@@ -147,21 +147,9 @@ end
 
 function MapRadarPinBase:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
 
-    -- This is for moving pins 
-    -- local pinX = self.pin.normalizedX
-    -- local pinY = self.pin.normalizedY
-
-    -- d(
-    --     "Update pin: " .. self.key .. " at " .. playerX .. ", " .. playerY .. " heading: " .. heading .. " hasPlayerMoved: " ..
-    --         tostring(hasPlayerMoved));
-
-    -- TODO: perhaps move that to separate method with checking also texture, tint or something else?
     if not hasPlayerMoved then
         return -- If nothing changed then skip update. 
     end
-
-    -- self.x = pinX
-    -- self.y = pinY
 
     local dx = self.x - playerX
     local dy = self.y - playerY
@@ -211,35 +199,30 @@ end
 
 -- ========================================================================================
 -- ctor
-function MapRadarPinBase:New()
+function MapRadarPinBase:New(key, x, y, showPointer)
     local radarPin = {}
     setmetatable(
         radarPin, {
             __index = self
          })
 
-    return radarPin
-end
-
-function MapRadarPinBase:Init(key, x, y, showPointer)
-
     local texture, textureKey = MapRadar.pinPool:AcquireObject()
 
-    self.texture = texture
-    self.textureKey = textureKey
+    radarPin.texture = texture
+    radarPin.textureKey = textureKey
 
-    self.key = key
+    radarPin.key = key
 
-    self.x = x
-    self.y = y
+    radarPin.x = x
+    radarPin.y = y
 
-    self:ApplyTexture()
-    self:ApplyTint()
+    radarPin:ApplyTexture()
+    radarPin:ApplyTint()
 
     local label, labelKey = MapRadar.pinLabelPool:AcquireObject()
-    label:SetAnchor(BOTTOMLEFT, self.texture, BOTTOMRIGHT)
-    self.label = label
-    self.labelKey = labelKey
+    label:SetAnchor(BOTTOMLEFT, radarPin.texture, BOTTOMRIGHT)
+    radarPin.label = label
+    radarPin.labelKey = labelKey
 
     if showPointer then
         local pointerTexture, pointerKey = MapRadar.pointerPool:AcquireObject()
@@ -248,11 +231,13 @@ function MapRadarPinBase:Init(key, x, y, showPointer)
         pointerTexture:SetAlpha(0.5)
         pointerTexture:SetDimensions(8, 64)
         pointerTexture:SetHidden(true)
-        self.pointer = pointerTexture
-        self.pointerKey = pointerKey
+        radarPin.pointer = pointerTexture
+        radarPin.pointerKey = pointerKey
     end
 
-    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", self)
+    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", radarPin)
+
+    return radarPin
 end
 
 -- ========================================================================================

@@ -1,11 +1,35 @@
-MapRadarHarvestPin = MapRadarPinBase:New()
-
 local zoMapPin = ZO_MapPin
 
 local getCurrentMapId = GetCurrentMapId
 local zoneData = MapRadarZoneData
 local pinManager = ZO_WorldMap_GetPinManager()
 local getMapType = GetMapType
+
+MapRadarHarvestPin = setmetatable(
+    {}, {
+        __index = MapRadarPinBase
+     })
+-- ========================================================================================
+-- ctor
+function MapRadarHarvestPin:New(key, x, y, pinTypeId, texturePath)
+    local pin = MapRadarPinBase:New(key, x, y)
+    setmetatable(
+        pin, {
+            __index = self
+         })
+
+    pin.pinTypeId = pinTypeId
+
+    pin.texturePath = texturePath
+    pin.texture:SetTexture(texturePath)
+
+    local tint = Harvest.settings.defaultSettings.pinLayouts[pinTypeId].tint
+    pin.texture:SetColor(tint.r, tint.g, tint.b, 1)
+
+    -- pin:ApplyTexture()
+
+    return pin
+end
 
 -- ========================================================================================
 -- MapRadarHarvestPin handling methods
@@ -50,28 +74,3 @@ local getMapType = GetMapType
 
 --     CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
 -- end
-
--- ========================================================================================
--- ctor
-function MapRadarHarvestPin:New(key, x, y, pinTypeId, texturePath)
-    local pin = {}
-    setmetatable(
-        pin, {
-            __index = self
-         })
-
-    pin:Init(key, x, y)
-
-    pin.pinTypeId = pinTypeId
-
-    pin.texturePath = texturePath
-    pin.texture:SetTexture(texturePath)
-
-    local tint = Harvest.settings.defaultSettings.pinLayouts[pinTypeId].tint
-    pin.texture:SetColor(tint.r, tint.g, tint.b, 1)
-
-    -- pin:ApplyTexture()
-
-    return pin
-end
-

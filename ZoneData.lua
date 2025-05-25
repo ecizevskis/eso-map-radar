@@ -137,7 +137,7 @@ MapRadarZoneData = { -- Based on MapId
     [733] = 0.0069839116, -- Camp Gushnukbur
     [817] = 0.0045295219, -- Marbruk Outlaws Refuge
     [1320] = 0.004026689, -- Falinesti Cave
-    [1519] = 0.0006459789, -- March of Sacrifices
+    [1519] = 0.0006666082, -- March of Sacrifices
     [1855] = 0.00255559, -- Hollow Den
 
     -- Khenarthi's Roost
@@ -216,9 +216,9 @@ MapRadarZoneData = { -- Based on MapId
     [823] = 0.0048645998, -- Rawl'kha Outlaws Refuge
     [997] = 0.0018711862, -- Maw of Lorkhaj
     [998] = 0.006737295, -- Maw of Lorkhaj - Temple Hall
-    [1523] = 0.0032783419, -- Moon Hunter Keep
-    [1524] = 0.0024844719, -- Moon Hunter Keep Gardens
-    [1525] = 0.002441431, -- Moon Hunter Keep - Moon Hunter Bailey
+    [1523] = 0.0033568173, -- Moon Hunter Keep
+    [1524] = 0.0024657823, -- Moon Hunter Keep Gardens
+    [1525] = 0.0023912291, -- Moon Hunter Keep - Moon Hunter Bailey
     [2271] = 0.0027961496, -- Shrine of the Golden Eye
     [2611] = 0.018793544, -- Jode's Light - Ritual Chamber
 
@@ -407,8 +407,8 @@ MapRadarZoneData = { -- Based on MapId
 
     -- Stros M'Kai
     [201] = 0.0006663001, -- Stros M'Kai
-    [247] = 0.0043528319, -- Bthzark
-    [248] = 0.0055850108, -- The Grave
+    [247] = 0.0044328604, -- Bthzark
+    [248] = 0.0057233373, -- The Grave
     [295] = 0.0059425868, -- Goblin Mines
     [296] = 0.003799409, -- Goblin Mines
     [530] = 0.0015924962, -- Port Hunding

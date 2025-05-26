@@ -1,11 +1,8 @@
-MapRadarPinBase = {}
-
-local zoMapPin = ZO_MapPin
-
 local getCurrentMapId = GetCurrentMapId
 local zoneData = MapRadarZoneData
-local pinManager = ZO_WorldMap_GetPinManager()
 local getMapType = GetMapType
+
+MapRadarPinBase = {}
 
 -- ========================================================================================
 -- helper methods
@@ -87,10 +84,10 @@ function MapRadarPinBase:SetVisibility(isCalibrated)
     return true
 end
 
-function MapRadarPinBase:SetPinDimensions()
+function MapRadarPinBase:SetPinDimensions(pinSize)
     -- MapRadar.pinSize changes on switching between modes, so need to reassign it while other different approach is found.
     -- Maybe this is not needed at all if every mode apply own scaling?
-    self.size = MapRadar.pinSize
+    self.size = pinSize or MapRadar.pinSize
     local minScale = MapRadar.modeSettings.minScale / 100
     local maxScale = MapRadar.modeSettings.maxScale / 100
 
@@ -108,40 +105,11 @@ function MapRadarPinBase:ApplyTexture()
         self.animationTimeline:Stop()
     end
 
-    -- local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
-
-    -- if (pinData ~= nil and pinData.texture ~= nil) then
-    --     texture = MapRadar.value(pinData.texture, self.pin)
-
-    --     if MapRadar.value(pinData.isAnimated, self.pin) then
-    --         self.animation, self.animationTimeline = CreateSimpleAnimation(ANIMATION_TEXTURE, self.texture)
-    --         self.animation:SetImageData(pinData.framesWide, pinData.framesHigh)
-    --         self.animation:SetFramerate(pinData.framesPerSecond)
-
-    --         -- returns texture to default state 
-    --         self.animation:SetHandler(
-    --             "OnStop", function()
-    --                 self.texture:SetTextureCoords(0, 1, 0, 1)
-    --             end)
-
-    --         self.animationTimeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
-    --         self.animationTimeline:PlayFromStart()
-    --     end
-    -- end
-
     self.texture:SetTexture(texture)
     self.texturePath = texture
 end
 
 function MapRadarPinBase:ApplyTint()
-    -- local pinType = self.pin:GetPinType()
-    -- local pinData = zoMapPin.PIN_DATA[pinType]
-
-    -- if (pinData ~= nil and pinData.tint ~= nil) then
-    --     self.texture:SetColor(MapRadar.value(pinData.tint, self.pin):UnpackRGBA())
-    --     return
-    -- end
-
     self.texture:SetColor(1, 1, 1, 1)
 end
 
@@ -201,10 +169,8 @@ end
 -- ctor
 function MapRadarPinBase:New(key, x, y, showPointer)
     local radarPin = {}
-    setmetatable(
-        radarPin, {
-            __index = self
-         })
+    setmetatable(radarPin, self)
+    self.__index = self
 
     local texture, textureKey = MapRadar.pinPool:AcquireObject()
 

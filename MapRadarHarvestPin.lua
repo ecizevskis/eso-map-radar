@@ -1,10 +1,3 @@
-local zoMapPin = ZO_MapPin
-
-local getCurrentMapId = GetCurrentMapId
-local zoneData = MapRadarZoneData
-local pinManager = ZO_WorldMap_GetPinManager()
-local getMapType = GetMapType
-
 MapRadarHarvestPin = setmetatable(
     {}, {
         __index = MapRadarPinBase

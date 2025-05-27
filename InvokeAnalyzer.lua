@@ -13,7 +13,7 @@ local AnalyzerData = {
 local function CreateInvokeAnalyzerDataForm()
 
     dataForm = MapRadarCommon.DataForm:New("InvokeAnalyzerDataForm", MapRadarContainer)
-    dataForm:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 350)
+    dataForm:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 100, 200)
 
     dataForm:AddStack(
         "Pins", function()

@@ -59,8 +59,6 @@ MapRadar = {
  }
 
 local MR = MapRadar
-local MRPin = MapRadarPin
-local MRCustomPin = MapRadarCustomPin
 local radarTexture = MapRadarContainerRadarTexture
 
 -- Localize global objects for better performance
@@ -89,7 +87,7 @@ local function registerMapPins()
 
     -- Dispose invalid pins
     for k, radarPin in pairs(MR.activePins) do
-        if radarPin.isCorrupted or not MRPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
+        if radarPin.isCorrupted or not MapRadarPin:IsValidPin(radarPin.pin) or pins[k] ~= radarPin.pin then
             MR.activePins[k]:Dispose()
             MR.activePins[k] = nil
         end
@@ -100,8 +98,8 @@ local function registerMapPins()
 
     -- Add new pins that did not exist
     for key, pin in pairs(pins) do
-        if MR.activePins[key] == nil and MRPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
-            local radarPin = MRPin:New(pin, key)
+        if MR.activePins[key] == nil and MapRadarPin:IsValidPin(pin) and pin.normalizedX and pin.normalizedY then
+            local radarPin = MapRadarPin:New(pin, key)
             radarPin:UpdatePin(playerX, playerY, heading, true)
             MR.activePins[key] = radarPin
         end
@@ -171,7 +169,7 @@ local function mapUpdate()
 
     if hasPlayerMoved then
         for key, customPin in pairs(MR.customPinLayer) do
-            customPin:UpdatePin(playerX, playerY, heading)
+            customPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
         end
     end
 end
@@ -236,8 +234,8 @@ local function MapRadar_LoadHarvestPins()
                         local texturePath = Harvest.settings.savedVars.settings.pinLayouts[pinTypeId].texture
                         -- MR.debug("<<1>>: <<2>>  (<<3>> <<4>>) <<5>>", nodeKey, MR.getStrVal(nodeId), MR.getStrVal(x), MR.getStrVal(y), texturePath)
 
-                        local customPin = MRCustomPin:New(nodeId, x, y, pinTypeId, texturePath)
-                        customPin:UpdatePin(playerX, playerY, heading)
+                        local customPin = MapRadarHarvestPin:New(nodeId, x, y, pinTypeId, texturePath)
+                        customPin:UpdatePin(playerX, playerY, heading, true)
                         MR.customPinLayer[nodeId] = customPin
                         -- MR.debug("Added customPin with key: <<1>>", nodeId)
                     end

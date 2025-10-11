@@ -746,6 +746,11 @@ MapRadarZoneData = { -- Based on MapId
     [1323] = 0.0125642899, -- Falkreath Hold
     [1364] = 0.0013211384, -- Hakkvild's High Hall
 
+    -- Hero's Return
+    [2701] = 0.0122424766, -- Aetherian Archive
+    [2702] = 0.0062641666, -- Aetherian Archive
+    [2703] = 0.0046278726, -- Aetherian Archive
+
     -- Isle of Balfiera
     [1995] = 0.0038598567, -- Balfiera Ruins
     [1996] = 0.004100072, -- Keywright's Gallery

@@ -24,8 +24,16 @@ end
 
 local function checkMapIdUpdated(mapId)
     if latestMapId ~= mapId then
-        local isCalibrated = MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
+        local isCalibrated = MapRadarAutoscaled[mapId] ~= nil or MapRadarZoneData[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
         dataForm:SetColor(1, 1, isCalibrated and 1 or 0, 1)
+
+        if dataForm.autoscaleLabel then
+            local isAutoscaled = MapRadarAutoscaled[mapId] ~= nil
+            local isInSavedVars = MapRadar.accountData.worldScaleData[mapId] ~= nil
+            local showLabel = isAutoscaled or not isInSavedVars
+            dataForm.autoscaleLabel:SetHidden(not showLabel)
+            dataForm.autoscaleLabel:SetColor(1, 1, isAutoscaled and 1 or 0, 1)
+        end
 
         if (mapCoordinateData[mapId] == nil) then
             mapCoordinateData[mapId] = {
@@ -113,23 +121,23 @@ local function CreateCalibrationDataForm()
             return mapId;
         end)
 
-    -- dataForm:AddLabel(
-    --     "Active zone", function()
-    --         return GetPlayerActiveZoneName()
-    --     end)
+    dataForm:AddLabel(
+        "Active zone", function()
+            return GetPlayerActiveZoneName()
+        end)
 
-    -- dataForm:AddLabel(
-    --     "Zone", function()
-    --         return worldMap.zoneName
-    --     end)
-    -- dataForm:AddLabel(
-    --     "Rel PX", function()
-    --         return ScaleData.px
-    --     end)
-    -- dataForm:AddLabel(
-    --     "Rel PY", function()
-    --         return ScaleData.py
-    --     end)
+    dataForm:AddLabel(
+        "Zone", function()
+            return worldMap.zoneName
+        end)
+    dataForm:AddLabel(
+        "Rel PX", function()
+            return ScaleData.px
+        end)
+    dataForm:AddLabel(
+        "Rel PY", function()
+            return ScaleData.py
+        end)
 
     dataForm:AddLabel(
         "World (X/Z/Y)", function()
@@ -140,6 +148,15 @@ local function CreateCalibrationDataForm()
         "Raw World (X/Z/Y)", function()
             return zo_strformat("<<1>>  <<2>>  <<3>>", ScaleData.rwx, ScaleData.rwz, ScaleData.rwy)
         end)
+
+    dataForm:AddLabel(
+        "AUTOSCALE", function()
+            return "AUTOSCALE"
+        end)
+    local autoscaleIndex = table.maxn(dataForm.labels)
+    dataForm.autoscaleLabel = dataForm.labels[autoscaleIndex].control
+    dataForm.autoscaleLabel:SetColor(1, 1, 0, 1)
+    dataForm.autoscaleLabel:SetHidden(true)
 
     local btnSave = CreateControlFromVirtual("$(parent)btnSave", dataForm, "SavingEditBoxSaveButton")
     btnSave:SetDimensions(40, 40)

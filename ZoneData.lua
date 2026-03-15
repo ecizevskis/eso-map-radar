@@ -37,6 +37,7 @@ MapRadarZoneData = { -- Based on MapId
     [595] = 0.0033032735, -- Abandoned Mine
     [761] = 0.0092281922, -- Sanessalmo's Lair
     [800] = 0.0037231044, -- Smuggler's Tunnel
+    [808] = 0.0064791265, -- Vulkhel Guard Outlaws Refuge
     [1148] = 0.002438073, -- The Banished Cells II
 
     -- Grahtwood
@@ -291,7 +292,7 @@ MapRadarZoneData = { -- Based on MapId
     [1795] = 0.001871378, -- Unhallowed Grave - Forsaken Ruins
     [1796] = 0.0024365248, -- Unhallowed Grave - Halls of Banishment
     [1797] = 0.0029302373, -- Unhallowed Grave - Clifftop Laboratory
-    [1860] = 0.0060117945, -- Gray Host Sanctuary
+    [1860] = 0.0061080144, -- Gray Host Sanctuary
     [2470] = 0.0029585796, -- Onsi's Breath Mine
 
     -- Betnikh
@@ -321,7 +322,6 @@ MapRadarZoneData = { -- Based on MapId
     [331] = 0.0034711381, -- Spindleclutch II - Spindleclutch Lair
     [531] = 0.0020078306, -- Aldcroft
     [541] = 0.0016151435, -- Crosswych
-    [555] = 0.0040313119, -- Dourstone Vault
     [556] = 0.0047626603, -- Themond Mine
     [665] = 0.0029928928, -- Angof's Sanctum
     [724] = 0.0050457326, -- Dresan Keep Vaults
@@ -835,6 +835,7 @@ MapRadarZoneData = { -- Based on MapId
     [2567] = 0.001987294, -- Infinite Archive
 
     -- Artaeum
+    [1374] = 0.0020246566, -- Traitor's Vault - External
     [1388] = 0.0054070663, -- Psijic Relic Vaults
     [1389] = 0.0041320821, -- K'Tora's Mindscape
     [1393] = 0.0023416463, -- The Spiral Skein
@@ -1499,12 +1500,12 @@ MapRadarZoneData = { -- Based on MapId
     [2307] = 0.0020855717, -- Ivyhame - Druind King's Garden
 
     -- Gold Coast
-    [1005] = 0.0027937739, -- Garlas Agea
+    [1005] = 0.0029573316, -- Garlas Agea
     [1006] = 0.0004, -- Gold Coast
     [1007] = 0.0033655265, -- Hrota Cave
-    [1008] = 0.0036682406, -- Cathedral of Akatosh - Catacombs
+    [1008] = 0.0038196219, -- Cathedral of Akatosh - Catacombs
     [1009] = 0.0054461285, -- Anvil Outlaws Refuge
-    [1011] = 0.0024571055, -- Enclave of the Hourglass - Lower
+    [1011] = 0.0025427309, -- Enclave of the Hourglass - Lower
     [1015] = 0.0126753762, -- Jarol Estate Wine Cellar
     [1016] = 0.0061269361, -- Jarol Estate Smuggling Tunnels
     [1017] = 0.0061402302, -- Jarol Estate Smuggling Tunnels
@@ -1518,22 +1519,22 @@ MapRadarZoneData = { -- Based on MapId
     [1054] = 0.0321975163, -- Castle Kvatch Passage
     [1055] = 0.0035801003, -- At-Himah Estate Caves
     [1056] = 0.0021561912, -- Jerall Mountains
-    [1057] = 0.0019055205, -- Knightsgrave
-    [1058] = 0.0019190021, -- Kingsgrave - Chamber of Shadow
-    [1059] = 0.0029019012, -- Kingsgrave - Boss
-    [1061] = 0.0023061284, -- Blackwood Borderlands
-    [1062] = 0.0026929379, -- Xith-Izkul Sanctuary
+    [1057] = 0.0019603036, -- Knightsgrave
+    [1058] = 0.0019771774, -- Kingsgrave - Chamber of Shadow
+    [1059] = 0.0029866769, -- Kingsgrave - Boss
+    [1061] = 0.002356676, -- Blackwood Borderlands
+    [1062] = 0.0027510807, -- Xith-Izkul Sanctuary
     [1063] = 0.0041861463, -- Dark Brotherhood Sanctuary
     [1064] = 0.0022911607, -- Kvatch
-    [1065] = 0.0102547166, -- Hrota Cave
+    [1065] = 0.0106150697, -- Hrota Cave - Secret
     [1066] = 0.0106296142, -- At-Himah Estate - Ground Floor
     [1067] = 0.0106658732, -- At-Himah Estate - Second Floor
     [1068] = 0.0106311757, -- At-Himah Estate - Second Floor
-    [1069] = 0.0045544155, -- Tribune's Folly
-    [1070] = 0.0018718965, -- Kingsgrave - Entrance
-    [1071] = 0.0019117897, -- Kingsgrave - Under
-    [1072] = 0.0024571055, -- Enclave of the Hourglass
-    [1073] = 0.0024571055, -- Enclave of the Hourglass - Entrance
+    [1069] = 0.0047296979, -- Tribune's Folly
+    [1070] = 0.0019577399, -- Kingsgrave - Entrance
+    [1071] = 0.0019596499, -- Kingsgrave - Under
+    [1072] = 0.0025426582, -- Enclave of the Hourglass
+    [1073] = 0.0025431199, -- Enclave of the Hourglass - Entrance
     [1074] = 0.0017682216, -- Anvil
     [1596] = 0.0017984417, -- Depths of Malatar
     [1597] = 0.002238197, -- Depths of Malatar - Ruins of Garlas Malatar
@@ -1932,6 +1933,12 @@ MapRadarZoneData = { -- Based on MapId
     -- ==============================================================================
     -- Quest
 
+    -- A Mortal's Touch
+    [1920] = 0.0032951362, -- Ne Salas Cache Annex
+    [1931] = 0.0030030112, -- Imperial Sewers
+    [1933] = 0.0020758086, -- The Deadlands: Testing Grounds
+    [2001] = 0.0022754764, -- Imperial Cache Annex
+
     -- Eye of Fate
     [2270] = 0.0033036995, -- Emerald Glyphic Vault
     [2271] = 0.0028620709, -- Shrine of the Golden Eye
@@ -1942,14 +1949,19 @@ MapRadarZoneData = { -- Based on MapId
     [102] = 0.0022952901, -- Mzeneldt
     [103] = 0.0017568646, -- The Earth Forge
     [104] = 0.0051717004, -- Ragnthar
-    [241] = 0.0056900887, -- Stonefang Cavern
+    [193] = 0.0046779039, -- Buraniim
+    [241] = 0.0058186909, -- Stonefang Cavern
+    [555] = 0.0040313119, -- Dourstone Vault
     [563] = 0.0029425613, -- Abagarlas
-    [583] = 0.0085430814, -- The Earth Forge - Pressure Room III
+    [583] = 0.0085248558, -- The Earth Forge - Pressure Room III
 
     -- Grayhome
-    [1864] = 0.0010983753, -- Grayhome
-    [1866] = 0.0036039109, -- Castle Grayhome
-    [1868] = 0.0036449523, -- Castle Grayhome Upper
+    [1861] = 0.0048276761, -- Grayhome Ritual Chamber
+    [1864] = 0.0011286698, -- Grayhome
+    [1865] = 0.0038548234, -- Castle Grayhome - Enter
+    [1866] = 0.0036948053, -- Castle Grayhome
+    [1867] = 0.0037367444, -- Castle Grayhome - Upper
+    [1868] = 0.0037545683, -- Castle Grayhome Upper
 
     -- In Memory Of
     [2583] = 0.0062021469, -- Watchling Grotto
@@ -1974,24 +1986,24 @@ MapRadarZoneData = { -- Based on MapId
     [600] = 0.008192021, -- Chateau Master Bedroom
 
     -- Prisoner of Fate
-    [2443] = 0.0056979065, -- Sanctuary of Whispers
-    [2447] = 0.004009576, -- Moonshadow Shrine
-    [2448] = 0.0093027688, -- Holamayan Monastery
-    [2449] = 0.0037382082, -- The Inner Sea
-    [2450] = 0.0025518105, -- Shrine of Inevitable Secrets
-    [2451] = 0.0033039891, -- The Mythos
-    [2538] = 0.007335436, -- Ithelia's Prison
-    [2539] = 0.0023672797, -- The Mythos
-    [2540] = 0.0080080079, -- Boethra Shrine
+    [2443] = 0.0058321137, -- Sanctuary of Whispers
+    [2447] = 0.0040903317, -- Moonshadow Shrine
+    [2448] = 0.0094979285, -- Holamayan Monastery
+    [2449] = 0.0038494555, -- The Inner Sea
+    [2450] = 0.0026191342, -- Shrine of Inevitable Secrets
+    [2451] = 0.0033350077, -- The Mythos
+    [2538] = 0.0075107164, -- Ithelia's Prison
+    [2539] = 0.0024375264, -- The Mythos
+    [2540] = 0.0082574512, -- Boethra Shrine
 
     -- Psijic
-    [1325] = 0.0018803782, -- Dranil Kir Island
-    [1457] = 0.0081676204, -- Imperial Throne Room
+    [1325] = 0.0019575217, -- Dranil Kir Island
+    [1457] = 0.0085012808, -- Imperial Throne Room
 
     -- Ruthless Competition
-    [1513] = 0.0040592538, -- The Sunless Hollow - Auridon
+    [1513] = 0.0041548696, -- The Sunless Hollow - Auridon
     [1517] = 0.0084918051, -- The Sunless Hollow
-    [1535] = 0.0040548243, -- The Sunless Hollow - Auridon - Upper
+    [1535] = 0.0041561666, -- The Sunless Hollow - Auridon - Upper
     [1536] = 0.0039572545, -- The Sunless Hollow - Upper
     [1537] = 0.0045691884, -- The Sunless Hollow
     [1538] = 0.0041706333, -- The Sunless Hollow - Upper
@@ -2000,8 +2012,8 @@ MapRadarZoneData = { -- Based on MapId
     [459] = 0.0043759847, -- Blood Matron's Crypt
 
     -- Sojourn of the Druid King
-    [2234] = 0.0024969669, -- Eimhir's Cavern
-    [2235] = 0.0030654347, -- Glenmoril Ritual Site
+    [2234] = 0.0025608567, -- Eimhir's Cavern
+    [2235] = 0.0031490068, -- Glenmoril Ritual Site
 
     -- The Dark Brotherhood Dailies
     [828] = 0.0028683705, -- Smuggler's Den - Main
@@ -2029,14 +2041,14 @@ MapRadarZoneData = { -- Based on MapId
     [1602] = 0.0027796344, -- Halls of Colossus - Summit of Rending Flames
 
     -- The Dragonguard's Legacy
-    [1703] = 0.0033406493, -- Wind Scour Temple
-    [1704] = 0.0022920683, -- Storm Talon Temple
-    [1705] = 0.0022958461, -- Dark Water Temple
-    [1706] = 0.001899402, -- Valley of Blades
-    [1707] = 0.0015731373, -- Vahlokzin's Domain
-    [1708] = 0.0013897877, -- Vahlokzin's Lair
-    [1709] = 0.002487503, -- Vahlokzin's Lair
-    [1710] = 0.0046423993, -- Vahlokzin's Lair
+    [1703] = 0.0035081072, -- Wind Scour Temple
+    [1704] = 0.0024031632, -- Storm Talon Temple
+    [1705] = 0.0024047239, -- Dark Water Temple
+    [1706] = 0.0019922303, -- Valley of Blades
+    [1707] = 0.0016522416, -- Vahlokzin's Domain
+    [1708] = 0.0014529022, -- Vahlokzin's Lair
+    [1709] = 0.0025666573, -- Vahlokzin's Lair
+    [1710] = 0.0049038533, -- Vahlokzin's Lair - Cave
 
     -- The Gray Host
     [2161] = 0.0042543335, -- The Undergrove
@@ -2072,7 +2084,7 @@ MapRadarZoneData = { -- Based on MapId
     [516] = 0.0019922303, -- Valley of Blades
     [517] = 0.0046334905, -- Valley of Blades - Ancestral Crypt
     [736] = 0.0073670253, -- The Harborage - Glenumbra
-    [737] = 0.0078729547, -- The Harborage
+    [737] = 0.0082583205, -- The Harborage - Stonefalls
     [760] = 0.007013606, -- The Colored Rooms
     [772] = 0.0087519689, -- The Harborage - Auridon
 

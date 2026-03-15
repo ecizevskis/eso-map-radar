@@ -16,11 +16,6 @@ local function getMeterCoefficient()
         return zData
     end
 
-    local calibratedData = mr.config.scaleData[getCurrentMapId()]
-    if calibratedData ~= nil and calibratedData.unit1 ~= nil then
-        return calibratedData.unit1
-    end
-
     return 0
 end
 
@@ -100,10 +95,6 @@ end
 
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitialized", function()
-        if MapRadar.config.scaleData == nil then
-            MapRadar.config.scaleData = {}
-        end
-
         MapRadar_ToggleSpeedometer()
 
     end)

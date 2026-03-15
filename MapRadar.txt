@@ -16,7 +16,6 @@ Settings.lua
 ZoneData.lua
 
 InvokeAnalyzer.lua
-ScaleCalibrator.lua
 WorldScaleCalibrator.lua
 
 MapRadar.lua

@@ -67,8 +67,6 @@ local function SettingsInit()
 
         -- Debug 
         showCalibrate = false,
-        calibrationDistance1 = 40,
-        calibrationDistance2 = 0,
 
         showAnalyzer = false
      }

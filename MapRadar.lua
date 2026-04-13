@@ -454,7 +454,7 @@ local function slashCommands(args)
     end
 
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
-    CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
+    CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand", args)
 end
 
 SLASH_COMMANDS["/mapradar"] = slashCommands

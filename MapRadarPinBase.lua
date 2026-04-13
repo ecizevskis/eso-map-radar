@@ -22,12 +22,6 @@ local function getMeterCoefficient()
         return zData, true
     end
 
-    local calibratedData = MapRadar.config.scaleData[mapId]
-    if calibratedData ~= nil and calibratedData.unit1 ~= nil then
-        -- MapRadar.debugDebounce("Get calibrated zone unit1: <<1>>", MapRadar.getStrVal(calibratedData.unit1))
-        return calibratedData.unit1, true
-    end
-
     if getMapType() == MAPTYPE_SUBZONE then
         -- Default sub-zone coefficient
         return 0.00145, false

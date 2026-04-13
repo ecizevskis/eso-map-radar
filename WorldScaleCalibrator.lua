@@ -271,7 +271,12 @@ CALLBACK_MANAGER:RegisterCallback(
     end)
 
 CALLBACK_MANAGER:RegisterCallback(
-    "OnMapRadarSlashCommand", function()
+    "OnMapRadarSlashCommand", function(args)
+
+        if (args == "reset") then
+            dataForm.counterList:Clear()
+        end
+
         if MapRadar.config.showCalibrate and dataForm == nil then
             MapRadar_InitScaleCalibrator()
         end

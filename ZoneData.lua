@@ -818,7 +818,7 @@ MapRadarZoneData = { -- Based on MapId
     [2407] = 0.0030657118, -- Infinite Archive - Antechamber
     [2408] = 0.0028709693, -- Infinite Archive - Wings 1
     [2410] = 0.0050248954, -- Infinite Archive - Wings 2
-    [2411] = 0.0103364993, -- Infinite Archive
+    [2411] = 0.0113098222, -- Infinite Archive
     [2414] = 0.0014435782, -- Infinite Archive - Wings 3
     [2415] = 0.0019944764, -- Infinite Archive - Wings 4
     [2416] = 0.0024561662, -- Infinite Archive - Wings 5
@@ -830,9 +830,9 @@ MapRadarZoneData = { -- Based on MapId
     [2422] = 0.0059492285, -- Infinite Archive - Filer's Wing
     [2423] = 0.0064694387, -- Infinite Archive - Echoing Den
     [2424] = 0.0105030216, -- Infinite Archive - Theater of War
-    [2425] = 0.0100154217, -- Infinite Archive - Destozuno's Library
+    [2425] = 0.0103922191, -- Infinite Archive - Destozuno's Library
     [2566] = 0.0019991338, -- Infinite Archive
-    [2567] = 0.001987294, -- Infinite Archive
+    [2567] = 0.0019991016, -- Infinite Archive
 
     -- Artaeum
     [1374] = 0.0020246566, -- Traitor's Vault - External
@@ -1066,6 +1066,31 @@ MapRadarZoneData = { -- Based on MapId
     [1699] = 0.001484948, -- Moongrave Fane Grounds
     [1700] = 0.0045070402, -- The Penumbral Path
     [1721] = 0.0022152441, -- Moon-Sugar Meadow
+
+    -- Soulstice
+    [2603] = 0.0001438611, -- Solstice
+    [2632] = 0.0020929362, -- Carapace Cavern
+    [2642] = 0.002179604, -- Tainted Leel
+    [2644] = 0.0011169588, -- Deetra Grotto
+    [2647] = 0.003342779, -- Shrine of Sithis
+    [2648] = 0.0020039759, -- Senik-Haas's Dream-Wallow
+    [2649] = 0.0024578832, -- Tlali-Haas's Dream-Wallow
+    [2654] = 0.0015351659, -- Sunport
+    [2659] = 0, -- Tarnur Mine
+    [2666] = 0.0079099274, -- Blood'n'Baubles
+    [2667] = 0.0100712807, -- Misfortune Teller's Garden - First
+    [2669] = 0.0047922567, -- Tent of Dark Joy
+    [2671] = 0.0023427224, -- Broken Light Temple
+    [2672] = 0.0023537845, -- Broken Light Temple - Purity Wing
+    [2685] = 0.007518268, -- Misfortunes Telle's Garden - Second
+    [2721] = 0.0016310766, -- Shor's Stand
+    [2722] = 0.0035020152, -- Deetra Grotto - Entrance
+    [2728] = 0.0014584893, -- Calindvale Gardens
+    [2730] = 0.003465362, -- Broken Light Temple - Purity Wing Upper
+    [2731] = 0.0023584522, -- Broken Light Temple - Dawn Wing
+    [2732] = 0.0065468059, -- Broken Light Temple - Temple Cynosure
+    [2733] = 0.0023634858, -- Broken Light Temple - Dawn Wing Ritual Site
+    [2734] = 0.0023456039, -- Shell-Tide Village
 
     -- Summerset
     [1349] = 0.0001809173, -- Summerset
@@ -1389,7 +1414,6 @@ MapRadarZoneData = { -- Based on MapId
     [1774] = 0.002618092, -- Labyrinthian
     [1775] = 0.0018696679, -- Labyrinthian Temple
     [1776] = 0.002607597, -- Kagnthamz
-    [1777] = 0.0027292803, -- The Undergrove
     [1778] = 0.0034718872, -- Solitude Outlaws Refuge
     [1783] = 0.0028880305, -- Dragon Bridge Smuggler Caves
     [1785] = 0.0026835557, -- Stone Garden - Blackreach Cavern
@@ -2051,6 +2075,7 @@ MapRadarZoneData = { -- Based on MapId
     [1710] = 0.0049038533, -- Vahlokzin's Lair - Cave
 
     -- The Gray Host
+    [1777] = 0.0027292803, -- The Undergrove
     [2161] = 0.0042543335, -- The Undergrove
 
     -- The Harborage

@@ -396,9 +396,9 @@ MapRadarZoneData = { -- Based on MapId
     [816] = 0.0039523381, -- Wayrest Outlaws Refuge
     [1149] = 0.0026629377, -- Wayrest Sewers II
     [1432] = 0.002524377, -- Scalecaller Peak - Frostspike Caverns
-    [1433] = 0.0026322094, -- Scalecaller Peak - Scalecaller Rise
-    [1434] = 0.0023861141, -- Scalecaller Peak - Zaan's Temple
-    [1435] = 0.0034366227, -- Scalecaller Peak - Final
+    [1433] = 0.002722733, -- Scalecaller Peak - Scalecaller Rise
+    [1434] = 0.0024833467, -- Scalecaller Peak - Zaan's Temple
+    [1435] = 0.0036150809, -- Scalecaller Peak - Final
 
     -- Stros M'Kai
     [201] = 0.0006663001, -- Stros M'Kai
@@ -760,6 +760,18 @@ MapRadarZoneData = { -- Based on MapId
     [2039] = 0.0036014839, -- Balfiera Ruins
     [2041] = 0.0042058361, -- Balfiera Ruins
 
+    -- Night Market
+    [2771] = 0.0022580945, -- Starlit Plaza
+    [2772] = 0.0015275011, -- The Parch
+    [2773] = 0.0018545404, -- Skittering Precinct
+    [2774] = 0.0018895687, -- Sorrow's Friend
+    [2795] = 0.0049921033, -- Timeless Wallow
+    [2796] = 0.0021679052, -- Opulent Ordeal
+    [2797] = 0.0069614565, -- Mournful Catacombs
+    [2798] = 0.0124868707, -- Gossamer Crypt
+    [2815] = 0.0092951956, -- Night's Den Upper
+    [2816] = 0.0092998174, -- Night's Den
+
     -- ==============================================================================
     -- Chapter
 
@@ -1096,11 +1108,14 @@ MapRadarZoneData = { -- Based on MapId
     [2674] = 0.0030942007, -- The Colored Rooms
     [2684] = 0.0025891884, -- Xul-Katam
     [2685] = 0.007518268, -- Misfortunes Telle's Garden - Second
+    [2686] = 0.0044553133, -- Ossein Cage - Entrance
     [2694] = 0.0015658028, -- Sunport Palace District - Battle
     [2696] = 0.0024527379, -- Naj-Caldeesh
     [2699] = 0.001999307, -- Sea and Sword Lodge - Entrance
     [2704] = 0.0078876505, -- Black Gem Foundry - Entrance
     [2705] = 0.001993678, -- Black Gem Foundry - Area
+    [2706] = 0.0013220704, -- Black Gem Foundry - Refinement Factory
+    [2708] = 0.0065508584, -- Black Gem Foundry - Prospector's Field Forge
     [2709] = 0, -- Tarnur Mine Shrine
     [2710] = 0.0045734247, -- Carapace Cavern Shrine
     [2711] = 0, -- Fissure Ruins
@@ -1138,6 +1153,7 @@ MapRadarZoneData = { -- Based on MapId
     [2755] = 0.0054284188, -- Ashbound Hall - Broken Walkway
     [2758] = 0.005893043, -- Basking-Stone Refuge
     [2759] = 0.0045641677, -- Vaedinhill Cavern
+    [2760] = 0.0110358122, -- Black Gem Foundry - Pulverizing Chamber
     [2762] = 0.0053395124, -- Xul-Haj - Entrance
     [2763] = 0.0020404641, -- Xul-Haj - Lower Halls
     [2764] = 0.0027371289, -- Xul-Haj - Lower Halls 2
@@ -1147,6 +1163,8 @@ MapRadarZoneData = { -- Based on MapId
     [2769] = 0.004762497, -- Gristmug Hold Shackle Walkway
     [2778] = 0.0038147612, -- Seaside Caves 2 - Lower
     [2779] = 0.0041705948, -- Seaside Caves
+    [2780] = 0.0086937722, -- Lair of the Black Work - Chamber
+    [2781] = 0.0130091172, -- Lair of the Black Work - Chamber Path
     [2782] = 0.0045371872, -- Noe Naril Priory 2
     [2783] = 0.0037714222, -- Ashbound Hall - The Brutal Arena
     [2784] = 0.0020032377, -- Sea and Sword Lodge - Upper left 2?
@@ -1627,11 +1645,11 @@ MapRadarZoneData = { -- Based on MapId
     [1072] = 0.0025426582, -- Enclave of the Hourglass
     [1073] = 0.0025431199, -- Enclave of the Hourglass - Entrance
     [1074] = 0.0017682216, -- Anvil
-    [1596] = 0.0017984417, -- Depths of Malatar
-    [1597] = 0.002238197, -- Depths of Malatar - Ruins of Garlas Malatar
-    [1598] = 0.0018805779, -- Depths of Malatar - Halls of Garlas Malatar
-    [1599] = 0.0015994012, -- Depths of Malatar - Cove of the Guiding Light
-    [1600] = 0.0044922454, -- Depths of Malatar - Colored Rooms
+    [1596] = 0.00184497, -- Depths of Malatar
+    [1597] = 0.0022826903, -- Depths of Malatar - Ruins of Garlas Malatar
+    [1598] = 0.0019227312, -- Depths of Malatar - Halls of Garlas Malatar
+    [1599] = 0.0016742083, -- Depths of Malatar - Cove of the Guiding Light
+    [1600] = 0.0048652624, -- Depths of Malatar - Colored Rooms
     [1873] = 0.0023431791, -- Black Drake Villa - Estate Grounds
     [1874] = 0.0028747338, -- Black Drake Villa - Flooded Gardens
     [1875] = 0.0024240346, -- Black Drake Villa - Grand Archive 
@@ -1862,12 +1880,12 @@ MapRadarZoneData = { -- Based on MapId
     [1928] = 0.0024981654, -- Reachwind Depths - The Blinds
     [1929] = 0.0067809752, -- Reachwind Depths - Upper Halls 2
     [2462] = 0.0022284946, -- Oathsworn Pit
-    [2463] = 0.0049156395, -- Oathsworn Pit - Trial of Blood - Scaffolding
+    [2463] = 0.0051495794, -- Oathsworn Pit - Trial of Blood - Scaffolding
     [2464] = 0.0019985108, -- Oathsworn Pit - Lodge of the Axe
-    [2465] = 0.0050582932, -- Oathsworn Pit - Trial of Conquest
+    [2465] = 0.0052138961, -- Oathsworn Pit - Trial of Conquest
     [2466] = 0.0018430848, -- Oathsworn Pit - Lodge of the Forge
-    [2467] = 0.0046471263, -- Oathsworn Pit - Trial of War
-    [2517] = 0.0048449611, -- Oathsworn Pit - Trial of Blood
+    [2467] = 0.0048903931, -- Oathsworn Pit - Trial of War
+    [2517] = 0.0051539648, -- Oathsworn Pit - Trial of Blood
 
     -- Wrothgar
     [667] = 0.0002857143, -- Wrothgar

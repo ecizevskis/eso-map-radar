@@ -10,12 +10,12 @@ local latestMapId = 0
 local ScaleData = {
     px = 0,
     py = 0
- }
+}
 
 local function isSkippedMap(mapId)
-    if mapId == 27 -- Tamriel
-    or mapId == 439 -- The Aurubis
-    then
+    if
+        mapId == 27 or mapId == 439 -- Tamriel
+     then -- The Aurubis
         return true
     end
 
@@ -24,7 +24,9 @@ end
 
 local function checkMapIdUpdated(mapId)
     if latestMapId ~= mapId then
-        local isCalibrated = MapRadarAutoscaled[mapId] ~= nil or MapRadarZoneData[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
+        local isCalibrated =
+            MapRadarAutoscaled[mapId] ~= nil or MapRadarZoneData[mapId] ~= nil or
+            MapRadar.accountData.worldScaleData[mapId] ~= nil
         dataForm:SetColor(1, 1, isCalibrated and 1 or 0, 1)
 
         if dataForm.autoscaleLabel then
@@ -40,12 +42,12 @@ local function checkMapIdUpdated(mapId)
                 name = worldMap.zoneName,
                 positions = {},
                 count = 0
-             }
+            }
             mapCoordinateDataMatrix[mapId] = {}
         end
     end
 
-    latestMapId = mapId;
+    latestMapId = mapId
 end
 
 local function calcAndSaveDistances()
@@ -53,7 +55,7 @@ local function calcAndSaveDistances()
         local distanceData = {
             mapDistance = 0,
             worldDistance = 0
-         }
+        }
 
         -- Iterate and compare all positions and find longest one
         for posIndex, mapPos in pairs(mapData.positions) do
@@ -94,8 +96,8 @@ local function selfData()
         return
     end
 
-    local zoneId, wx, wy, wz = getUnitWorldPosition("player");
-    local zoneId, rwx, rwy, rwz = getUnitRawWorldPosition("player");
+    local zoneId, wx, wy, wz = getUnitWorldPosition("player")
+    local zoneId, rwx, rwy, rwz = getUnitRawWorldPosition("player")
 
     ScaleData.px = playerX
     ScaleData.py = playerY
@@ -110,49 +112,64 @@ local function selfData()
 end
 
 local function CreateCalibrationDataForm()
-
     dataForm = MapRadarCommon.DataForm:New("WorldCalibrateDataForm", MapRadarContainer)
-    dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 150, -250)
+    dataForm:SetAnchor(LEFT, GuiRoot, LEFT, 150, 150)
 
     dataForm:AddLabel(
-        "MapId", function()
+        "MapId",
+        function()
             local mapId = getCurrentMapId()
             checkMapIdUpdated(mapId)
-            return mapId;
-        end)
+            return mapId
+        end
+    )
 
     dataForm:AddLabel(
-        "Active zone", function()
+        "Active zone",
+        function()
             return GetPlayerActiveZoneName()
-        end)
+        end
+    )
 
     dataForm:AddLabel(
-        "Zone", function()
+        "Zone",
+        function()
             return worldMap.zoneName
-        end)
+        end
+    )
     dataForm:AddLabel(
-        "Rel PX", function()
+        "Rel PX",
+        function()
             return ScaleData.px
-        end)
+        end
+    )
     dataForm:AddLabel(
-        "Rel PY", function()
+        "Rel PY",
+        function()
             return ScaleData.py
-        end)
+        end
+    )
 
     dataForm:AddLabel(
-        "World (X/Z/Y)", function()
+        "World (X/Z/Y)",
+        function()
             return zo_strformat("<<1>>  <<2>>  <<3>>", ScaleData.wx, ScaleData.wz, ScaleData.wy)
-        end)
+        end
+    )
 
     dataForm:AddLabel(
-        "Raw World (X/Z/Y)", function()
+        "Raw World (X/Z/Y)",
+        function()
             return zo_strformat("<<1>>  <<2>>  <<3>>", ScaleData.rwx, ScaleData.rwz, ScaleData.rwy)
-        end)
+        end
+    )
 
     dataForm:AddLabel(
-        "AUTOSCALE", function()
+        "AUTOSCALE",
+        function()
             return "AUTOSCALE"
-        end)
+        end
+    )
     local autoscaleIndex = table.maxn(dataForm.labels)
     dataForm.autoscaleLabel = dataForm.labels[autoscaleIndex].control
     dataForm.autoscaleLabel:SetColor(1, 1, 0, 1)
@@ -162,14 +179,15 @@ local function CreateCalibrationDataForm()
     btnSave:SetDimensions(40, 40)
     btnSave:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT, 0, 10)
     btnSave:SetHandler(
-        "OnClicked", function()
-            calcAndSaveDistances();
-        end)
+        "OnClicked",
+        function()
+            calcAndSaveDistances()
+        end
+    )
 
-    -- Counter list 
+    -- Counter list
     dataForm.counterList = MapRadarCommon.CounterList:New("WorldCalibrateCounterList", MapRadarContainer)
     dataForm.counterList:SetAnchor(TOP, GuiRoot, TOP, 550, 0)
-
 end
 
 local function MapRadar_InitScaleCalibrator()
@@ -183,10 +201,13 @@ local function EnableOrDisableCalibrator()
 
     if MapRadar.config.showCalibrate then
         EVENT_MANAGER:RegisterForUpdate(
-            "MapRadar_WorldCalibrationData", 100, function()
+            "MapRadar_WorldCalibrationData",
+            100,
+            function()
                 selfData()
                 dataForm:Update()
-            end)
+            end
+        )
 
         latestMapId = 0
         checkMapIdUpdated(getCurrentMapId())
@@ -196,7 +217,9 @@ local function EnableOrDisableCalibrator()
 
     if MapRadar.config.showCalibrate then
         EVENT_MANAGER:RegisterForUpdate(
-            "MapRadar_SaveMapCoordinates", 1000, function()
+            "MapRadar_SaveMapCoordinates",
+            1000,
+            function()
                 local mapId = getCurrentMapId()
 
                 local mapX, mapY, heading, isShownInCurrentMap = getMapPlayerPosition("player")
@@ -212,10 +235,10 @@ local function EnableOrDisableCalibrator()
                 end
 
                 if MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil then
-                    return; -- do not gather position data for world scaled maps
+                    return -- do not gather position data for world scaled maps
                 end
 
-                local _, wx, _, wz = getUnitRawWorldPosition("player");
+                local _, wx, _, wz = getUnitRawWorldPosition("player")
                 -- local _, rwx, _, rwz = getUnitRawWorldPosition("player");
 
                 -- Ensures that map positions are only saved in matrix by 10meters
@@ -232,13 +255,14 @@ local function EnableOrDisableCalibrator()
                     mapMatrix[xIndex][yIndex] = true
 
                     table.insert(
-                        mapCoordinateData[mapId].positions, {
+                        mapCoordinateData[mapId].positions,
+                        {
                             mapX = mapX,
                             mapY = mapY,
-
                             worldX = wx,
                             worldY = wz -- Z parameter is instead of Y because Y is elevation
-                         })
+                        }
+                    )
 
                     -- Increase record counter for statistics
                     mapCoordinateData[mapId].count = mapCoordinateData[mapId].count + 1
@@ -246,15 +270,16 @@ local function EnableOrDisableCalibrator()
                     local name = zo_strformat("<<1>> (<<2>>)", worldMap.zoneName, mapId)
                     dataForm.counterList:AddOrUpdateCounter(mapId, name, mapCoordinateData[mapId].count)
                 end
-
-            end)
+            end
+        )
     else
         EVENT_MANAGER:UnregisterForUpdate("MapRadar_SaveMapCoordinates")
     end
 end
 
 CALLBACK_MANAGER:RegisterCallback(
-    "OnMapRadarInitialized", function()
+    "OnMapRadarInitialized",
+    function()
         if MapRadar.accountData.worldScaleData == nil then
             MapRadar.accountData.worldScaleData = {}
         end
@@ -268,11 +293,12 @@ CALLBACK_MANAGER:RegisterCallback(
         end
 
         EnableOrDisableCalibrator()
-    end)
+    end
+)
 
 CALLBACK_MANAGER:RegisterCallback(
-    "OnMapRadarSlashCommand", function(args)
-
+    "OnMapRadarSlashCommand",
+    function(args)
         if (args == "reset") then
             dataForm.counterList:Clear()
         end
@@ -282,4 +308,5 @@ CALLBACK_MANAGER:RegisterCallback(
         end
 
         EnableOrDisableCalibrator()
-    end)
+    end
+)

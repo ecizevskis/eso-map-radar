@@ -10,13 +10,13 @@ local function SettingsInit()
             relativePoint = BOTTOMRIGHT,
             offsetX = -300,
             offsetY = -40
-         },
+        },
         speedPosition = {
             point = CENTER,
             relativePoint = CENTER,
             offsetX = 0,
             offsetY = 0
-         },
+        },
         isOverlayMode = false,
         radarSettings = {
             maxDistance = 800,
@@ -33,14 +33,12 @@ local function SettingsInit()
             showLoreBooks = false,
             showHarvestMap = false,
             showMapPinsChests = false,
-
             minAlpha = 40,
             maxAlpha = 100,
             minScale = 60,
             maxScale = 100,
-
             hideRadarTexture = false
-         },
+        },
         overlaySettings = {
             maxDistance = 1200,
             showDistance = false,
@@ -56,35 +54,34 @@ local function SettingsInit()
             showLoreBooks = false,
             showHarvestMap = false,
             showMapPinsChests = false,
-
             minAlpha = 40,
             maxAlpha = 100,
             minScale = 60,
             maxScale = 100
-         },
-
+        },
         showSpeedometer = false,
-
-        -- Debug 
+        -- Debug
+        showDebug = false,
         showCalibrate = false,
-
         showAnalyzer = false
-     }
+    }
 
     MapRadar.config = ZO_SavedVars:NewCharacterIdSettings("MapRadar_Data", 1, nil, defaults)
 
     local radarPos = MapRadar.config.radarPosition
     MapRadarContainer:SetAnchor(radarPos.point, GuiRoot, radarPos.relativePoint, radarPos.offsetX, radarPos.offsetY)
     MapRadarContainer:SetHandler(
-        "OnMoveStop", function()
+        "OnMoveStop",
+        function()
             local _, point, _, relativePoint, offsetX, offsetY = MapRadarContainer:GetAnchor(0)
             MapRadar.config.radarPosition = {
                 point = point,
                 relativePoint = relativePoint,
                 offsetX = offsetX,
                 offsetY = offsetY
-             }
-        end)
+            }
+        end
+    )
 end
 
 local loadedAddons = {}
@@ -110,24 +107,30 @@ local function CreatePinOptionStack(id, parent, config)
         btn:SetNormalTexture(texture)
         btn:SetAlpha(self.config[optionKey] and 1 or 0.3)
         btn:SetHandler(
-            "OnClicked", function(self)
+            "OnClicked",
+            function(self)
                 self.config[optionKey] = not self.config[optionKey]
                 self:SetAlpha(self.config[optionKey] and 1 or 0.3)
                 CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
-            end)
+            end
+        )
 
         btn:SetHandler(
-            "OnMouseEnter", function(self)
+            "OnMouseEnter",
+            function(self)
                 if tooltip then
                     ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
                 end
-            end)
+            end
+        )
         btn:SetHandler(
-            "OnMouseExit", function(self)
+            "OnMouseExit",
+            function(self)
                 if tooltip then
                     ZO_Tooltips_HideTextTooltip()
                 end
-            end)
+            end
+        )
         if (index == 1) then
             btn:SetAnchor(TOPLEFT, self, TOPLEFT)
         else
@@ -147,10 +150,19 @@ local function CreateCommonSection(parent, config)
     local title = MapRadarCommon.CreateLabel("$(parent)_title", control, "Common settings")
     title:SetAnchor(TOPLEFT, control, TOPLEFT)
 
-    local sectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_sectionDivider", control, "ZO_Options_Divider")
+    local sectionDivider =
+        WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_sectionDivider", control, "ZO_Options_Divider")
     sectionDivider:SetAnchor(TOPLEFT, title, BOTTOMLEFT)
 
-    local showSpeedCbx = MapRadarCommon.CreateToggle("$(parent)_speedCbx", control, config, "showSpeedometer", "Show speed", "Show speed widget")
+    local showSpeedCbx =
+        MapRadarCommon.CreateToggle(
+        "$(parent)_speedCbx",
+        control,
+        config,
+        "showSpeedometer",
+        "Show speed",
+        "Show speed widget"
+    )
     showSpeedCbx:SetAnchor(TOPLEFT, sectionDivider, BOTTOMLEFT)
 
     -- CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand")
@@ -165,21 +177,28 @@ local function CreateModeSection(id, parent, title, config, w, h, customToggles)
     local title = MapRadarCommon.CreateLabel("$(parent)_title", control, title)
     title:SetAnchor(TOPLEFT, control, TOPLEFT)
 
-    local sectionDivider = WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_sectionDivider", control, "ZO_Options_Divider")
+    local sectionDivider =
+        WINDOW_MANAGER:CreateControlFromVirtual("$(parent)_sectionDivider", control, "ZO_Options_Divider")
     sectionDivider:SetAnchor(TOPLEFT, title, BOTTOMLEFT)
 
     local optionStack = CreatePinOptionStack("$(parent)_optionStack", control, config)
     optionStack:SetAnchor(TOPLEFT, sectionDivider, BOTTOMLEFT)
     optionStack:SetDimensions(200, 50)
 
-    optionStack:addPinButton("showQuests", "EsoUi/Art/Compass/quest_icon_assisted.dds", "Show quests (from Quest Map too)")
+    optionStack:addPinButton(
+        "showQuests",
+        "EsoUi/Art/Compass/quest_icon_assisted.dds",
+        "Show quests (from Quest Map too)"
+    )
     optionStack:addPinButton("showWayshrines", "/esoui/art/icons/poi/poi_wayshrine_complete.dds", "Show wayshrines")
     optionStack:addPinButton("showGroup", "/esoui/art/compass/groupleader.dds", "Show your group units")
     optionStack:addPinButton("showDelves", "/esoui/art/icons/poi/poi_delve_complete.dds", "Show delves")
     optionStack:addPinButton("showDungeons", "/esoui/art/icons/poi/poi_dungeon_complete.dds", "Show dungeons")
     optionStack:addPinButton(
-        "showPortals", "/esoui/art/icons/poi/poi_portal_complete.dds",
-        "Show porals (originally those are Dolmens but MapPins can add more of portals)")
+        "showPortals",
+        "/esoui/art/icons/poi/poi_portal_complete.dds",
+        "Show porals (originally those are Dolmens but MapPins can add more of portals)"
+    )
     optionStack:addPinButton("showWorldBosses", "/esoui/art/icons/poi/poi_groupboss_complete.dds", "Show world bosses")
 
     if LoreBooks then
@@ -200,13 +219,13 @@ local function CreateModeSection(id, parent, title, config, w, h, customToggles)
             key = "showDistance",
             label = "Show distance",
             tooltip = "Show distance in meters for each radar pin"
-         },
+        },
         {
             key = "showPointers",
             label = "Show pointers",
             tooltip = "Show pointers from player pin towards all quest pins"
-         }
-     }
+        }
+    }
 
     -- Add custom toggles to toggle list
     if customToggles then
@@ -217,7 +236,15 @@ local function CreateModeSection(id, parent, title, config, w, h, customToggles)
 
     local prevToggle = nil
     for key, toggle in pairs(toggles) do
-        local cbx = MapRadarCommon.CreateToggle("$(parent)_" .. key .. "Cbx", control, config, toggle.key, toggle.label, toggle.tooltip)
+        local cbx =
+            MapRadarCommon.CreateToggle(
+            "$(parent)_" .. key .. "Cbx",
+            control,
+            config,
+            toggle.key,
+            toggle.label,
+            toggle.tooltip
+        )
         if prevToggle then
             cbx:SetAnchor(TOPLEFT, prevToggle, TOPRIGHT)
         else
@@ -227,27 +254,39 @@ local function CreateModeSection(id, parent, title, config, w, h, customToggles)
     end
 
     -- Sliders
-    local maxDistanceSlider = MapRadarCommon.CreateSlider(
-        "$(parent)_maxDistanceSlider", control, config, "maxDistance", "Max distance",
-        "Set maximum distance for pin to be displayed in radar (Quest and Group pins ignore this)", 100, 30)
+    local maxDistanceSlider =
+        MapRadarCommon.CreateSlider(
+        "$(parent)_maxDistanceSlider",
+        control,
+        config,
+        "maxDistance",
+        "Max distance",
+        "Set maximum distance for pin to be displayed in radar (Quest and Group pins ignore this)",
+        100,
+        30
+    )
     maxDistanceSlider:SetAnchor(TOPLEFT, optionStack, BOTTOMLEFT, 0, 45)
     maxDistanceSlider:SetMinMaxStep(400, 2500, 50)
 
     -- Pin alpha sliders
-    local minAlphaSlider = MapRadarCommon.CreateSlider("$(parent)_minAlphaSlider", control, config, "minAlpha", "Min Alpha", "", 300, 30)
+    local minAlphaSlider =
+        MapRadarCommon.CreateSlider("$(parent)_minAlphaSlider", control, config, "minAlpha", "Min Alpha", "", 300, 30)
     minAlphaSlider:SetAnchor(TOPLEFT, maxDistanceSlider, BOTTOMLEFT)
     minAlphaSlider:SetMinMaxStep(10, 100, 5)
 
-    local maxAlphaSlider = MapRadarCommon.CreateSlider("$(parent)_maxAlphaSlider", control, config, "maxAlpha", "Max Alpha", "", 100, 30)
+    local maxAlphaSlider =
+        MapRadarCommon.CreateSlider("$(parent)_maxAlphaSlider", control, config, "maxAlpha", "Max Alpha", "", 100, 30)
     maxAlphaSlider:SetAnchor(TOPLEFT, minAlphaSlider, TOPRIGHT)
     maxAlphaSlider:SetMinMaxStep(10, 100, 5)
 
     -- Pin scale sliders
-    local minScaleSlider = MapRadarCommon.CreateSlider("$(parent)_minScaleSlider", control, config, "minScale", "Min Scale", "", 300, 30)
+    local minScaleSlider =
+        MapRadarCommon.CreateSlider("$(parent)_minScaleSlider", control, config, "minScale", "Min Scale", "", 300, 30)
     minScaleSlider:SetAnchor(TOPLEFT, minAlphaSlider, BOTTOMLEFT)
     minScaleSlider:SetMinMaxStep(50, 200, 5)
 
-    local maxScaleSlider = MapRadarCommon.CreateSlider("$(parent)_maxScaleSlider", control, config, "maxScale", "Max Scale", "", 100, 30)
+    local maxScaleSlider =
+        MapRadarCommon.CreateSlider("$(parent)_maxScaleSlider", control, config, "maxScale", "Max Scale", "", 100, 30)
     maxScaleSlider:SetAnchor(TOPLEFT, minScaleSlider, TOPRIGHT)
     maxScaleSlider:SetMinMaxStep(50, 200, 5)
 
@@ -279,25 +318,36 @@ local function addHarvestFilterButton(id, parent, pinTypeId)
     btn.texture:SetColor(tint.r, tint.g, tint.b, 1)
     btn.texture:SetDimensions(30, 30)
     btn:SetHandler(
-        "OnClicked", function(self)
+        "OnClicked",
+        function(self)
             local isVisible = not HarvestMapFilterProfile[pinTypeId]
             HarvestMapFilterProfile[pinTypeId] = isVisible
-            Harvest.callbackManager:FireCallbacks(Harvest.events.FILTER_PROFILE_CHANGED, HarvestMapFilterProfile, pinTypeId, isVisible)
+            Harvest.callbackManager:FireCallbacks(
+                Harvest.events.FILTER_PROFILE_CHANGED,
+                HarvestMapFilterProfile,
+                pinTypeId,
+                isVisible
+            )
             self:Refresh()
-        end)
+        end
+    )
 
     btn:SetHandler(
-        "OnMouseEnter", function(self)
+        "OnMouseEnter",
+        function(self)
             if tooltip then
                 ZO_Tooltips_ShowTextTooltip(self, BOTTOM, tooltip)
             end
-        end)
+        end
+    )
     btn:SetHandler(
-        "OnMouseExit", function(self)
+        "OnMouseExit",
+        function(self)
             if tooltip then
                 ZO_Tooltips_HideTextTooltip()
             end
-        end)
+        end
+    )
 
     btn.Refresh = function(self)
         self:SetAlpha(HarvestMapFilterProfile[pinTypeId] and 1 or 0.3)
@@ -352,9 +402,13 @@ local function CreateForm()
     local closeButton = CreateControlFromVirtual("$(parent)closeButton", MapRadar_Settings, "ZO_DialogButton")
     closeButton:SetAnchor(BOTTOMRIGHT, btnSavePosition2, BOTTOMRIGHT, -20, -20)
     ZO_KeybindButtonTemplate_Setup(
-        closeButton, "TOGGLE_SYSTEM", function()
+        closeButton,
+        "TOGGLE_SYSTEM",
+        function()
             MapRadar_toggleSettings()
-        end, "Close")
+        end,
+        "Close"
+    )
 
     local commonSection = CreateCommonSection(MapRadar_Settings, MapRadar.config)
     commonSection:SetAnchor(TOPLEFT, MapRadar_Settings, TOPLEFT, 30, 30)
@@ -364,15 +418,30 @@ local function CreateForm()
             key = "hideRadarTexture",
             label = "Hide texture",
             tooltip = "Hides radar texture in radar mode"
-         }
-     }
+        }
+    }
 
-    local radarModeSection = CreateModeSection(
-        "$(parent)_radarSection", MapRadar_Settings, "Radar mode settings", MapRadar.config.radarSettings, 500, 230, radarCustomToggles)
+    local radarModeSection =
+        CreateModeSection(
+        "$(parent)_radarSection",
+        MapRadar_Settings,
+        "Radar mode settings",
+        MapRadar.config.radarSettings,
+        500,
+        230,
+        radarCustomToggles
+    )
     radarModeSection:SetAnchor(TOPLEFT, commonSection, BOTTOMLEFT)
 
-    local overlayModeSection = CreateModeSection(
-        "$(parent)_overlaySection", MapRadar_Settings, "Overlay mode settings", MapRadar.config.overlaySettings, 500, 230)
+    local overlayModeSection =
+        CreateModeSection(
+        "$(parent)_overlaySection",
+        MapRadar_Settings,
+        "Overlay mode settings",
+        MapRadar.config.overlaySettings,
+        500,
+        230
+    )
     overlayModeSection:SetAnchor(TOPLEFT, radarModeSection, BOTTOMLEFT)
 
     if Harvest then
@@ -382,7 +451,8 @@ local function CreateForm()
 
     -- Escape key handling
     ZO_PreHook(
-        "ZO_SceneManager_ToggleGameMenuBinding", function()
+        "ZO_SceneManager_ToggleGameMenuBinding",
+        function()
             local isOpen = not MapRadar_Settings:IsHidden()
             if isOpen then
                 MapRadar_toggleSettings()
@@ -390,16 +460,21 @@ local function CreateForm()
             end
 
             return false
-        end)
+        end
+    )
 end
 
 CALLBACK_MANAGER:RegisterCallback(
-    "OnMapRadarInitializing", function()
+    "OnMapRadarInitializing",
+    function()
         SettingsInit()
-    end)
+    end
+)
 
 EVENT_MANAGER:RegisterForEvent(
-    "MapRadar_Settings", EVENT_PLAYER_ACTIVATED, function()
+    "MapRadar_Settings",
+    EVENT_PLAYER_ACTIVATED,
+    function()
         for i = 1, GetAddOnManager():GetNumAddOns() do
             local name, _, _, _, _, state = GetAddOnManager():GetAddOnInfo(i)
             if state == ADDON_STATE_ENABLED then
@@ -410,6 +485,7 @@ EVENT_MANAGER:RegisterForEvent(
 
         -- Prevents from firing this event each zone change
         EVENT_MANAGER:UnregisterForEvent("MapRadar_Settings", EVENT_PLAYER_ACTIVATED)
-    end)
+    end
+)
 
 -- WORLD_MAP_MANAGER:GetFilterValue(pinGroup)

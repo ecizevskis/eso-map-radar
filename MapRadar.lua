@@ -2,7 +2,6 @@ MapRadar = {
     pinPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin"),
     pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer"),
     pinLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance"),
-
     maxRadarDistance = 0, -- limit distance to keep icons on radar outer edge (is set in setOverlayMode())
     pinSize = 0, -- positionLabel = {},
     activePins = {},
@@ -22,21 +21,8 @@ MapRadar = {
     showPinLoc = false,
     showPinNames = false,
     showPinParams = false,
-    debug = function(formatString, ...)
-        d(zo_strformat(formatString, ...))
-    end,
+    calibrationSimulation = false,
     lastdebugMsg = "",
-    debugDebounce = function(formatString, ...)
-        local msg = zo_strformat(formatString, ...)
-
-        if MapRadar.lastdebugMsg == msg then
-            return
-        end
-
-        d(msg)
-
-        MapRadar.lastdebugMsg = msg
-    end,
     getStrVal = function(obj)
         if obj == nil then
             return "nil"
@@ -56,9 +42,33 @@ MapRadar = {
             MapRadar.debug("<<1>>: <<2>>", key, MapRadar.getStrVal(val))
         end
     end
- }
+}
 
 local MR = MapRadar
+
+function MapRadar:debug(formatString, ...)
+    if (not MR.config.showDebug) then
+        return
+    end
+
+    d(zo_strformat(formatString, ...))
+end
+
+function MapRadar:debugDebounce(formatString, ...)
+    if (not MR.config.showDebug) then
+        return
+    end
+    local msg = zo_strformat(formatString, ...)
+
+    if MapRadar.lastdebugMsg == msg then
+        return
+    end
+
+    d(msg)
+
+    MapRadar.lastdebugMsg = msg
+end
+
 local radarTexture = MapRadarContainerRadarTexture
 
 -- Localize global objects for better performance
@@ -76,7 +86,6 @@ local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer,
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
 -- https://esodata.uesp.net/100025/src/ingame/map/worldmap.lua.html
 local function registerMapPins()
-
     if sceneManager:IsShowing("worldMap") then
         return -- Block further execution while map is opened
     end
@@ -195,7 +204,6 @@ local function MapRadar_ClearHarvestPins()
 end
 
 local function MapRadar_LoadHarvestPins()
-
     MapRadar_ClearHarvestPins()
 
     if not MapRadar.modeSettings.showHarvestMap then
@@ -222,7 +230,6 @@ local function MapRadar_LoadHarvestPins()
 
         -- MR.debug("harvestMapPins.mapCache.divisions --------------------------------------------------")
         for pinTypeId, division in pairs(harvestMapPins.mapCache.divisions) do
-
             if Harvest.InRangePins.worldFilterProfile[pinTypeId] then
                 -- MR.debug("-------------------- PinTypeId <<1>>", MR.getStrVal(pinTypeId))
 
@@ -239,12 +246,10 @@ local function MapRadar_LoadHarvestPins()
                         MR.customPinLayer[nodeId] = customPin
                         -- MR.debug("Added customPin with key: <<1>>", nodeId)
                     end
-
                 end
             end
         end
     end
-
 end
 
 -- ==================================================================================================
@@ -264,7 +269,7 @@ local function initialize(eventType, addonName)
     MR.playerPinTexture = playerPinTexture
 
     -- Set mode to radar from start (should be saved to variables later)
-    setOverlayMode(MR.config.isOverlayMode);
+    setOverlayMode(MR.config.isOverlayMode)
 
     local fragment = ZO_SimpleSceneFragment:New(MapRadarContainer)
     SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
@@ -275,12 +280,14 @@ local function initialize(eventType, addonName)
     EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCheck", 300, mapPinIntegrityCheck)
 
     CALLBACK_MANAGER:RegisterCallback(
-        "MapRadar_Reset", function()
+        "MapRadar_Reset",
+        function()
             playerHeading = 0
 
             MapRadar_LoadHarvestPins()
             setVisibilityForRadarTexture()
-        end)
+        end
+    )
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarInitialized")
 end
@@ -289,19 +296,25 @@ local function onPlayerActivated(eventCode, initial)
     -- All addons already loaded at this stage.
     if Harvest then
         Harvest.callbackManager:RegisterCallback(
-            Harvest.events.NEW_NODES_LOADED_TO_CACHE, function(mapCache, pinTypeId, numAddedNodes)
+            Harvest.events.NEW_NODES_LOADED_TO_CACHE,
+            function(mapCache, pinTypeId, numAddedNodes)
                 MapRadar_LoadHarvestPins()
-            end)
+            end
+        )
 
         Harvest.callbackManager:RegisterCallback(
-            Harvest.events.MAP_CHANGE, function()
+            Harvest.events.MAP_CHANGE,
+            function()
                 MapRadar_LoadHarvestPins()
-            end)
+            end
+        )
 
         Harvest.callbackManager:RegisterCallback(
-            Harvest.events.FILTER_PROFILE_CHANGED, function()
+            Harvest.events.FILTER_PROFILE_CHANGED,
+            function()
                 MapRadar_LoadHarvestPins()
-            end)
+            end
+        )
     end
 
     -- Prevents from firing this event each zone change
@@ -313,44 +326,62 @@ end
 
 -- This is good to trigger pin reset (if quest changes 1 marker then pin count check does not see difference)
 EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_QUEST_ADVANCED, function()
+    "MapRadar",
+    EVENT_QUEST_ADVANCED,
+    function()
         zo_callLater(registerMapPins, 200)
-    end)
+    end
+)
 
 EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_QUEST_COMPLETE, function()
+    "MapRadar",
+    EVENT_QUEST_COMPLETE,
+    function()
         zo_callLater(registerMapPins, 200)
-    end)
+    end
+)
 
 EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_QUEST_ADDED, function()
+    "MapRadar",
+    EVENT_QUEST_ADDED,
+    function()
         zo_callLater(registerMapPins, 200)
-    end)
+    end
+)
 
 EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function()
+    "MapRadar",
+    EVENT_QUEST_POSITION_REQUEST_COMPLETE,
+    function()
         zo_callLater(registerMapPins, 200)
-    end)
+    end
+)
 
 EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function()
+    "MapRadar",
+    EVENT_QUEST_CONDITION_COUNTER_CHANGED,
+    function()
         zo_callLater(registerMapPins, 200)
-    end)
+    end
+)
 
 EVENT_MANAGER:RegisterForEvent(
-    "MapRadar", EVENT_ALL_GUI_SCREENS_RESIZED, function()
+    "MapRadar",
+    EVENT_ALL_GUI_SCREENS_RESIZED,
+    function()
         UIWidth, UIHeight = GuiRoot:GetDimensions()
         updateOverlay()
-    end)
+    end
+)
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, onPlayerActivated)
 -- ==================================================================================================
 -- Key binding
 
-local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
+local hotkeyDebouncer =
+    MapRadarCommon.Debouncer:New(
     function(count)
-
         if count == 1 then
             return setOverlayMode(not MR.config.isOverlayMode)
         end
@@ -375,8 +406,8 @@ local hotkeyDebouncer = MapRadarCommon.Debouncer:New(
             local x, y = getMapPlayerPosition("player")
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, x, y)
         end
-
-    end)
+    end
+)
 
 ZO_CreateStringId("SI_BINDING_NAME_MAPRADAR_HOTKEY", "Hotkey")
 
@@ -400,6 +431,18 @@ local function slashCommands(args)
         MR.showAllPins = not MR.showAllPins
         local flagStr = MR.showAllPins and "ON" or "OFF"
         MR.debug("Show all pins: <<1>>", flagStr)
+    end
+
+    if args == "debug" then
+        MR.config.showDebug = not MR.config.showDebug
+        local flagStr = MR.config.showDebug and "ON" or "OFF"
+        d("Show Debug: " .. flagStr)
+    end
+
+    if args == "simulate" then
+        MR.calibrationSimulation = not MR.calibrationSimulation
+        local flagStr = MR.calibrationSimulation and "ON" or "OFF"
+        d("Simulate mode: " .. flagStr)
     end
 
     if args == "names" then
@@ -459,54 +502,3 @@ end
 
 SLASH_COMMANDS["/mapradar"] = slashCommands
 SLASH_COMMANDS["/mr"] = slashCommands
-
--- ==================================================================================================
--- Test stuff 
-
--- GetCurrentMapIndex() 
--- GetPlayerActiveSubzoneName() -> Returns: string subzoneName 
--- GetPlayerActiveZoneName() -> Returns: string zoneName 
-
--- local worldMapMode = WORLD_MAP_MANAGER:GetMode()
---[[
-MAP_MODE_AVA_KEEP_RECALL
-	6
-MAP_MODE_AVA_RESPAWN
-	5
-MAP_MODE_DIG_SITES
-	7
-MAP_MODE_FAST_TRAVEL
-	4
-MAP_MODE_KEEP_TRAVEL
-	3
-MAP_MODE_LARGE_CUSTOM
-	2
-MAP_MODE_SMALL_CUSTOM
---]]
-
--- ZO_WorldMapScroll:IsHidden()
--- WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:IsShowing()
--- SCENE_MANAGER:IsShowing("worldMap")
-
--- local zoneId, pwx1, pwh1, pwy1 = GetUnitRawWorldPosition("player")
--- local _, pwx2, pwh2, pwy2 = GetUnitWorldPosition("player")
-
--- GetMapTileTexture()    whats that??
-
---[[
-local x, y = GetMapPlayerPosition("player")
-local numTiles = GetMapNumTiles()
-local tilePixelWidth = ZO_WorldMapContainer1:GetTextureFileDimensions()
-local totalPixels = numTiles * tilePixelWidth
-local w, h = ZO_WorldMapScroll:GetDimensions()
-]]
-
--- 			needChange, oldMapType, mapId = not DoesCurrentMapMatchMapForPlayerLocation(), GetMapType(), GetMapTileTexture()
--- DoesCurrentMapShowPlayerWorld()
-
--- Search on ESOUI Source Code WorldPositionToGuiRender3DPosition(integer worldX, integer worldY, integer worldZ)
--- Returns: number renderX, number renderY, number renderZ 
-
--- 	local subzone=string.match(string.gsub(GetMapTileTexture(),"_base[_%w]*",""),"([%w%-_]+).dds$")
-
--- GetMapType(), -- Returns: UIMapType mapType: https://wiki.esoui.com/Globals#UIMapType

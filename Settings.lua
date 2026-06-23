@@ -63,7 +63,8 @@ local function SettingsInit()
         -- Debug
         showDebug = false,
         showCalibrate = false,
-        showAnalyzer = false
+        showAnalyzer = false,
+        calibrationSimulation = false
     }
 
     MapRadar.config = ZO_SavedVars:NewCharacterIdSettings("MapRadar_Data", 1, nil, defaults)

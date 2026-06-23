@@ -21,7 +21,6 @@ MapRadar = {
     showPinLoc = false,
     showPinNames = false,
     showPinParams = false,
-    calibrationSimulation = false,
     lastdebugMsg = "",
     getStrVal = function(obj)
         if obj == nil then
@@ -46,7 +45,7 @@ MapRadar = {
 
 local MR = MapRadar
 
-function MapRadar:debug(formatString, ...)
+function MapRadar.debug(formatString, ...)
     if (not MR.config.showDebug) then
         return
     end
@@ -54,7 +53,7 @@ function MapRadar:debug(formatString, ...)
     d(zo_strformat(formatString, ...))
 end
 
-function MapRadar:debugDebounce(formatString, ...)
+function MapRadar.debugDebounce(formatString, ...)
     if (not MR.config.showDebug) then
         return
     end
@@ -275,9 +274,9 @@ local function initialize(eventType, addonName)
     SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
     SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
 
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, mapUpdate)
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinRefresh", 200, registerMapPins)
-    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCheck", 300, mapPinIntegrityCheck)
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, MR.Profile("OnUpdate", mapUpdate))
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinRefresh", 200, MR.Profile("PinRefresh", registerMapPins))
+    EVENT_MANAGER:RegisterForUpdate("MapRadar_PinCheck", 300, MR.Profile("PinCheck", mapPinIntegrityCheck))
 
     CALLBACK_MANAGER:RegisterCallback(
         "MapRadar_Reset",
@@ -440,8 +439,8 @@ local function slashCommands(args)
     end
 
     if args == "simulate" then
-        MR.calibrationSimulation = not MR.calibrationSimulation
-        local flagStr = MR.calibrationSimulation and "ON" or "OFF"
+        MR.config.calibrationSimulation = not MR.config.calibrationSimulation
+        local flagStr = MR.config.calibrationSimulation and "ON" or "OFF"
         d("Simulate mode: " .. flagStr)
     end
 

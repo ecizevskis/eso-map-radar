@@ -401,6 +401,110 @@ function CounterList:New(id, parent)
 end
 
 -- ==================================================================================================
+-- Scrollable report list
+-- columns: array of { title = "MapId", width = 60 }
+local ReportList = {}
+function ReportList:New(id, parent, title, columns, visibleRows)
+    visibleRows = visibleRows or 18
+
+    local ROW_HEIGHT = 22
+    local PADDING = 12
+    local TITLE_HEIGHT = 26
+    local HEADER_HEIGHT = 24
+
+    local contentWidth = 0
+    for _, col in ipairs(columns) do
+        contentWidth = contentWidth + col.width
+    end
+
+    -- Top-level window so it can be registered with SCENE_MANAGER (mouse mode + ESC handling)
+    local control = WINDOW_MANAGER:CreateTopLevelWindow("MapRadarReportList" .. id)
+    control:SetDimensions(contentWidth + PADDING * 2, TITLE_HEIGHT + HEADER_HEIGHT + ROW_HEIGHT * visibleRows + PADDING * 2)
+    control:SetMouseEnabled(true)
+    control:SetMovable(true)
+    control:SetClampedToScreen(true)
+    control:SetHidden(true)
+
+    local bg = CreateControlFromVirtual("$(parent)BG", control, "ZO_DefaultBackdrop")
+    bg:SetAnchorFill(control)
+
+    control.columns = columns
+    control.visibleRows = visibleRows
+    control.offset = 0
+    control.data = {}
+
+    -- Title
+    local titleLabel = CreateLabel("$(parent)Title", control, title)
+    titleLabel:SetAnchor(TOPLEFT, control, TOPLEFT, PADDING, PADDING)
+
+    -- Builds a horizontal row of fixed-width cell labels
+    local function createCells(name, anchorTo, anchorOffsetY)
+        local cells = {}
+        local x = PADDING
+        for i, col in ipairs(columns) do
+            local cell = CreateLabel(name .. "Cell" .. i, control)
+            cell:SetDimensions(col.width, ROW_HEIGHT)
+            cell:SetAnchor(TOPLEFT, anchorTo, BOTTOMLEFT, x - PADDING, anchorOffsetY or 0)
+            cells[i] = cell
+            x = x + col.width
+        end
+        return cells
+    end
+
+    -- Header
+    local headerCells = createCells("$(parent)Header", titleLabel, 6)
+    for i, col in ipairs(columns) do
+        headerCells[i]:SetText(col.title)
+        headerCells[i]:SetColor(1, 0.85, 0.4, 1)
+    end
+
+    -- Data rows
+    control.rows = {}
+    local anchorTo = headerCells[1]
+    for r = 1, visibleRows do
+        control.rows[r] = createCells("$(parent)Row" .. r, anchorTo, 2)
+        anchorTo = control.rows[r][1]
+    end
+
+    control.Render = function(self)
+        local maxOffset = math.max(0, #self.data - self.visibleRows)
+        self.offset = zo_clamp(self.offset, 0, maxOffset)
+
+        for r = 1, self.visibleRows do
+            local rowCells = self.rows[r]
+            local item = self.data[self.offset + r]
+
+            for i = 1, #self.columns do
+                if item then
+                    local color = item.color or {1, 1, 1}
+                    rowCells[i]:SetText(item.values[i] or "")
+                    rowCells[i]:SetColor(color[1], color[2], color[3], 1)
+                else
+                    rowCells[i]:SetText("")
+                end
+            end
+        end
+    end
+
+    control.SetData = function(self, data)
+        self.data = data or {}
+        self.offset = 0
+        self:Render()
+    end
+
+    control.Clear = function(self)
+        self:SetData({})
+    end
+
+    control:SetHandler("OnMouseWheel", function(self, delta)
+        self.offset = self.offset - delta -- wheel up scrolls towards the top
+        self:Render()
+    end)
+
+    return control
+end
+
+-- ==================================================================================================
 -- namespace to export class to public
 MapRadarCommon = {
     -- simple constructor methods
@@ -413,7 +517,8 @@ MapRadarCommon = {
     LabelStack = LabelStack,
     DataForm = DataForm,
     Debouncer = Debouncer,
-    CounterList = CounterList
+    CounterList = CounterList,
+    ReportList = ReportList
  }
 
 -- Just event to load some test demo

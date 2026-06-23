@@ -13,6 +13,10 @@ local ScaleData = {
     py = 0
 }
 
+-- Auto-save triggers once both explored diagonals reach this fraction of the full map diagonal
+local FULL_MAP_DIAGONAL = zoDistance(0, 0, 1, 1)
+local MIN_DIAGONAL_COVERAGE = 0.5
+
 local function isSkippedMap(mapId)
     if mapId == 27 or mapId == 439 then -- Tamriel -- The Aurubis
         return true
@@ -173,10 +177,13 @@ local function EvaluateClusters(clusters)
         for _, v in ipairs(cluster) do
             sum = sum + v.meterCoefficient
         end
-        table.insert(clusterData, {
-            average = sum / #cluster,
-            size = #cluster
-        })
+        table.insert(
+            clusterData,
+            {
+                average = sum / #cluster,
+                size = #cluster
+            }
+        )
         totalPoints = totalPoints + #cluster
     end
 
@@ -186,7 +193,12 @@ local function EvaluateClusters(clusters)
     end
 
     -- Sort by size descending to find dominant cluster
-    table.sort(clusterData, function(a, b) return a.size > b.size end)
+    table.sort(
+        clusterData,
+        function(a, b)
+            return a.size > b.size
+        end
+    )
 
     local dominant = clusterData[1]
 
@@ -199,7 +211,10 @@ local function EvaluateClusters(clusters)
             local relDev = math.abs(clusterData[i].average - dominant.average) / dominant.average
             if relDev > 0.15 then
                 outlierCount = outlierCount + 1
-                MapRadar.debug("[EvaluateClusters] Dropping outlier cluster (dev: <<1>>%)", string.format("%.1f", relDev * 100))
+                MapRadar.debug(
+                    "[EvaluateClusters] Dropping outlier cluster (dev: <<1>>%)",
+                    string.format("%.1f", relDev * 100)
+                )
             else
                 table.insert(inliers, clusterData[i])
             end
@@ -229,12 +244,19 @@ local function EvaluateClusters(clusters)
 
     -- All clusters deviate too much - skip zone entirely
     if maxDev > 0.25 then
-        MapRadar.debug("[EvaluateClusters] Zone skipped: clusters deviate too much (max <<1>>%)", string.format("%.1f", maxDev * 100))
+        MapRadar.debug(
+            "[EvaluateClusters] Zone skipped: clusters deviate too much (max <<1>>%)",
+            string.format("%.1f", maxDev * 100)
+        )
         return nil
     end
 
     -- Moderate deviation - complicated zone with scaling, average all weighted by size
-    MapRadar.debug("[EvaluateClusters] Complicated zone (<<1>> clusters, max dev <<2>>%), using weighted average", #clusterData, string.format("%.1f", maxDev * 100))
+    MapRadar.debug(
+        "[EvaluateClusters] Complicated zone (<<1>> clusters, max dev <<2>>%), using weighted average",
+        #clusterData,
+        string.format("%.1f", maxDev * 100)
+    )
     local weightedSum = 0
     for _, c in ipairs(clusterData) do
         weightedSum = weightedSum + c.average * c.size
@@ -242,33 +264,67 @@ local function EvaluateClusters(clusters)
     return weightedSum / totalPoints
 end
 
+local function CalculateMapCoefficient(mapData)
+    if #mapData.positions < 3 then
+        return nil
+    end
+
+    -- Calculate distance coefficient from single map point to all positions
+    local positionsWithSinglePointCoefficient = GetPositionsWithSinglePointCoefficientCalculation(mapData.positions)
+
+    -- Group positions by coefficients with some error delta
+    local mapCoefficientGroups = GroupByCoefficient(positionsWithSinglePointCoefficient, 0.01)
+
+    -- Average coefficients per group using pairwise baselines
+    local groupCoefficients = CalculateGroupCoefficients(mapCoefficientGroups)
+
+    if #groupCoefficients == 0 then
+        return nil
+    end
+
+    -- Cluster group coefficients and evaluate
+    local coefficientClusters = GroupByCoefficient(groupCoefficients, 0.01)
+    return EvaluateClusters(coefficientClusters)
+end
+
+local function SaveMapScaleCoefficient(mapId, finalCoefficient)
+    local map1meterCoefficient = 100 / finalCoefficient
+
+    if MapRadar.config.calibrationSimulation then
+        MapRadar.accountData.worldScaleDataSimulated[mapId] = map1meterCoefficient
+        MapRadar.debug("[Calibrator] Saved simulated coefficient for map <<1>>", mapId)
+    else
+        MapRadar.accountData.worldScaleData[mapId] = map1meterCoefficient
+        MapRadar.debug("[Calibrator] Saved coefficient for map <<1>>", mapId)
+    end
+end
+
+local function autoSave(mapId)
+    local mapData = mapCoordinateData[mapId]
+    if mapData == nil or mapData.saved then
+        return
+    end
+
+    local finalCoefficient = CalculateMapCoefficient(mapData)
+    if finalCoefficient == nil then
+        MapRadar.debug("[autoSave] Skipped map <<1>> due to insufficient/inconsistent data", mapId)
+        return
+    end
+
+    SaveMapScaleCoefficient(mapId, finalCoefficient)
+
+    -- Flag prevents re-saving while the player keeps roaming the same map
+    mapData.saved = true
+end
+
 local function calcAndSaveDistances()
     for index, mapData in pairs(mapCoordinateData) do
-        if #mapData.positions >= 3 then
-            -- Calculate distance coefficient from single map point to all positions
-            local positionsWithSinglePointCoefficient = GetPositionsWithSinglePointCoefficientCalculation(mapData.positions)
+        local finalCoefficient = CalculateMapCoefficient(mapData)
 
-            -- Group positions by coefficients with some error delta
-            local mapCoefficientGroups = GroupByCoefficient(positionsWithSinglePointCoefficient, 0.01)
-
-            -- Average coefficients per group using pairwise baselines
-            local groupCoefficients = CalculateGroupCoefficients(mapCoefficientGroups)
-
-            if #groupCoefficients > 0 then
-                -- Cluster group coefficients and evaluate
-                local coefficientClusters = GroupByCoefficient(groupCoefficients, 0.01)
-                local finalCoefficient = EvaluateClusters(coefficientClusters)
-
-                if finalCoefficient ~= nil and not MapRadar.calibrationSimulation then
-                    local map1meterCoefficient = 100 / finalCoefficient
-                    MapRadar.accountData.worldScaleData[index] = map1meterCoefficient
-                    MapRadar.debug("[calcAndSaveDistances] Saved coefficient <<1>> for map <<2>>", map1meterCoefficient, index)
-                elseif finalCoefficient == nil then
-                    MapRadar.debug("[calcAndSaveDistances] Skipped map <<1>> due to inconsistent data", index)
-                end
-            end
+        if finalCoefficient ~= nil then
+            SaveMapScaleCoefficient(index, finalCoefficient)
         else
-            MapRadar.debug("[calcAndSaveDistances] Not enough positions for map <<1>>", index)
+            MapRadar.debug("[calcAndSaveDistances] Skipped map <<1>> due to insufficient/inconsistent data", index)
         end
 
         -- Cleaning position table data
@@ -394,7 +450,8 @@ local function RegisterMapCoordinateCollection()
             local mapId = getCurrentMapId()
 
             local hasScaleData = MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
-            if hasScaleData and not MapRadar.calibrationSimulation then
+            local hasSimulatedScaleData = MapRadar.accountData.worldScaleDataSimulated[mapId] ~= nil
+            if hasScaleData and (not MapRadar.config.calibrationSimulation or hasSimulatedScaleData) then
                 return -- do not gather position data for world scaled maps
             end
 
@@ -426,8 +483,10 @@ local function RegisterMapCoordinateCollection()
             if (mapMatrix[xIndex][yIndex] == nil) then
                 mapMatrix[xIndex][yIndex] = true
 
+                local mapData = mapCoordinateData[mapId]
+
                 table.insert(
-                    mapCoordinateData[mapId].positions,
+                    mapData.positions,
                     {
                         mapX = mapX,
                         mapY = mapY,
@@ -437,10 +496,39 @@ local function RegisterMapCoordinateCollection()
                 )
 
                 -- Increase record counter for statistics
-                mapCoordinateData[mapId].count = mapCoordinateData[mapId].count + 1
+                mapData.count = mapData.count + 1
+
+                -- Track the explored bounding box (normalized map coords; top = min Y, bottom = max Y)
+                if mapData.left == nil or mapX < mapData.left then
+                    mapData.left = mapX
+                end
+                if mapData.right == nil or mapX > mapData.right then
+                    mapData.right = mapX
+                end
+                if mapData.top == nil or mapY < mapData.top then
+                    mapData.top = mapY
+                end
+                if mapData.bottom == nil or mapY > mapData.bottom then
+                    mapData.bottom = mapY
+                end
 
                 local name = zo_strformat("<<1>> (<<2>>)", worldMap.zoneName, mapId)
-                dataForm.counterList:AddOrUpdateCounter(mapId, name, mapCoordinateData[mapId].count)
+                dataForm.counterList:AddOrUpdateCounter(mapId, name, mapData.count)
+
+                -- Auto-save once both explored diagonals cover enough of the map
+                if not mapData.saved and mapData.count >= 3 then
+                    local diagTopLeftToBottomRight =
+                        zoDistance(mapData.left, mapData.top, mapData.right, mapData.bottom)
+                    local diagBottomLeftToTopRight =
+                        zoDistance(mapData.left, mapData.bottom, mapData.right, mapData.top)
+
+                    if
+                        diagTopLeftToBottomRight / FULL_MAP_DIAGONAL >= MIN_DIAGONAL_COVERAGE and
+                            diagBottomLeftToTopRight / FULL_MAP_DIAGONAL >= MIN_DIAGONAL_COVERAGE
+                     then
+                        autoSave(mapId)
+                    end
+                end
             end
         end
     )
@@ -476,11 +564,108 @@ local function EnableOrDisableCalibrator()
     end
 end
 
+-- ==================================================================================================
+-- Simulation vs. original scale data deviation report
+local reportList = nil
+
+local REPORT_COLUMNS = {
+    {title = "MapId", width = 60},
+    {title = "Name", width = 200},
+    {title = "Orig", width = 120},
+    {title = "Auto", width = 120},
+    {title = "Diff %", width = 80}
+}
+
+local function formatCoefficient(value)
+    if value == nil then
+        return "n/a"
+    end
+    return string.format("%.8f", value)
+end
+
+local function BuildScaleReportData()
+    local rows = {}
+
+    for mapId, simulatedValue in pairs(MapRadar.accountData.worldScaleDataSimulated) do
+        -- Original value: user calibration takes precedence over built-in zone data
+        local origValue = MapRadar.accountData.worldScaleData[mapId] or MapRadarZoneData[mapId]
+        local name = zo_strformat("<<1>>", GetMapNameById(mapId))
+
+        local diffStr = "n/a"
+        local absDiff = -1 -- entries without a baseline sink to the bottom when sorted
+        local color = {1, 1, 1}
+
+        if origValue ~= nil and origValue ~= 0 then
+            local diff = (simulatedValue - origValue) / origValue * 100
+            diffStr = string.format("%+.1f%%", diff)
+            absDiff = math.abs(diff)
+
+            if absDiff < 5 then
+                color = {0.4, 1, 0.4} -- green: close match
+            elseif absDiff < 15 then
+                color = {1, 0.85, 0.4} -- yellow: moderate deviation
+            else
+                color = {1, 0.45, 0.45} -- red: large deviation
+            end
+        end
+
+        table.insert(
+            rows,
+            {
+                absDiff = absDiff,
+                color = color,
+                values = {
+                    tostring(mapId),
+                    name,
+                    formatCoefficient(origValue),
+                    formatCoefficient(simulatedValue),
+                    diffStr
+                }
+            }
+        )
+    end
+
+    -- Worst deviations first
+    table.sort(
+        rows,
+        function(a, b)
+            return a.absDiff > b.absDiff
+        end
+    )
+
+    return rows
+end
+
+local function ToggleScaleReport()
+    if reportList == nil then
+        reportList =
+            MapRadarCommon.ReportList:New("ScaleReport", nil, "World Scale Simulation Report", REPORT_COLUMNS, 20)
+        reportList:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
+        -- Registering as a top level gives us cursor/mouse mode and ESC-to-close
+        SCENE_MANAGER:RegisterTopLevel(reportList, false)
+    end
+
+    if not reportList:IsHidden() then
+        SCENE_MANAGER:HideTopLevel(reportList)
+        return
+    end
+
+    local rows = BuildScaleReportData()
+    reportList:SetData(rows)
+    SCENE_MANAGER:ShowTopLevel(reportList)
+
+    MapRadar.debug("[ScaleReport] <<1>> simulated map(s) listed", tostring(#rows))
+end
+
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitialized",
     function()
         if MapRadar.accountData.worldScaleData == nil then
             MapRadar.accountData.worldScaleData = {}
+        end
+
+        if MapRadar.accountData.worldScaleDataSimulated == nil then
+            MapRadar.accountData.worldScaleDataSimulated = {}
         end
 
         if MapRadar.accountData.mapNameData == nil then
@@ -500,6 +685,10 @@ CALLBACK_MANAGER:RegisterCallback(
     function(args)
         if (args == "reset") then
             dataForm.counterList:Clear()
+        end
+
+        if (args == "report") then
+            ToggleScaleReport()
         end
 
         if MapRadar.config.showCalibrate and dataForm == nil then

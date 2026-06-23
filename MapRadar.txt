@@ -20,6 +20,8 @@ WorldScaleCalibrator.lua
 
 MapRadar.lua
 
+Profiler.lua
+
 MapRadarPinBase.lua
 MapRadarPin.lua
 MapRadarHarvestPin.lua

@@ -39,6 +39,20 @@ local function CreateInvokeAnalyzerDataForm()
         "Pin Corrupted", function()
             return AnalyzerData.pinCorruptedCount
         end)
+
+    -- Profiling: CPU-ms per second (reset each 1000ms in the reader below)
+    dataForm:AddStack(
+        "OnUpdate ms/s", function()
+            return MapRadar.FormatProfile("OnUpdate")
+        end)
+    dataForm:AddStack(
+        "PinRefresh ms/s", function()
+            return MapRadar.FormatProfile("PinRefresh")
+        end)
+    dataForm:AddStack(
+        "PinCheck ms/s", function()
+            return MapRadar.FormatProfile("PinCheck")
+        end)
 end
 
 local function MapRadar_InitInvokeAnalyzer()
@@ -85,6 +99,11 @@ local function EnableOrDisableAnalyzer()
                 AnalyzerData.pinRemoveCount = 0
                 AnalyzerData.pinUpdateCount = 0
                 AnalyzerData.pinCorruptedCount = 0
+
+                -- Reset profiling so totalMs reads as CPU-ms per second
+                MapRadar.ResetProfile("OnUpdate")
+                MapRadar.ResetProfile("PinRefresh")
+                MapRadar.ResetProfile("PinCheck")
 
                 --[[
             local mapScrollHidden = MapRadar.getStrVal(ZO_WorldMapScroll:IsHidden())

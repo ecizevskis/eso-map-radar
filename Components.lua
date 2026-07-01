@@ -357,10 +357,7 @@ function CounterList:New(id, parent)
 
         if (self.records[key] == nil) then
             local label, labelKey = self.labelPool:AcquireObject()
-            label.objkey = labelKey
-
             local countLabel, countLabelKey = self.labelCountPool:AcquireObject()
-            label.objkey = countLabelKey
 
             -- TODO: add option to expand upwards!
 
@@ -374,7 +371,9 @@ function CounterList:New(id, parent)
 
             self.records[key] = {
                 label = label,
-                count = countLabel
+                labelKey = labelKey,
+                count = countLabel,
+                countKey = countLabelKey
              }
 
             self.lastTextLabel = label
@@ -383,6 +382,37 @@ function CounterList:New(id, parent)
 
         self.records[key].label:SetText(text)
         self.records[key].count:SetText(count)
+    end
+
+    control.RemoveCounter = function(self, key)
+        local record = self.records[key]
+        if (record == nil) then
+            return
+        end
+
+        self.labelPool:ReleaseObject(record.labelKey)
+        self.labelCountPool:ReleaseObject(record.countKey)
+        self.records[key] = nil
+
+        -- Rebuild the anchor chain so the removed row does not leave a gap
+        -- and any rows that were anchored to it re-attach correctly.
+        self.lastTextLabel = {}
+        self.lastCountLabel = {}
+        local first = true
+        for _, v in pairs(self.records) do
+            v.label:ClearAnchors()
+            v.count:ClearAnchors()
+            if (first) then
+                v.label:SetAnchor(TOPRIGHT, self, TOPLEFT, -10)
+                v.count:SetAnchor(TOPLEFT, self, TOPRIGHT, 10)
+                first = false
+            else
+                v.label:SetAnchor(TOPRIGHT, self.lastTextLabel, BOTTOMRIGHT)
+                v.count:SetAnchor(TOPLEFT, self.lastCountLabel, BOTTOMLEFT)
+            end
+            self.lastTextLabel = v.label
+            self.lastCountLabel = v.count
+        end
     end
 
     control.Clear = function(self)
@@ -404,22 +434,37 @@ end
 -- Scrollable report list
 -- columns: array of { title = "MapId", width = 60 }
 local ReportList = {}
-function ReportList:New(id, parent, title, columns, visibleRows)
+-- rowAction (optional): { label = "X", width = 60, onClick = function(item) end }
+-- adds a clickable button at the end of each populated row
+function ReportList:New(id, parent, title, columns, visibleRows, rowAction)
     visibleRows = visibleRows or 18
 
-    local ROW_HEIGHT = 22
+    local ROW_HEIGHT = 28
+    local ROW_GAP = 3          -- vertical gap between stacked rows (must match createCells offset)
     local PADDING = 12
     local TITLE_HEIGHT = 26
-    local HEADER_HEIGHT = 24
+    local HEADER_GAP = 6       -- gap between the title and the header row
+    local ACTION_GAP = 6
+    local SCROLLBAR_WIDTH = 8
+    local SCROLLBAR_GAP = 6
 
     local contentWidth = 0
     for _, col in ipairs(columns) do
         contentWidth = contentWidth + col.width
     end
 
+    local actionWidth = rowAction and (ACTION_GAP + rowAction.width) or 0
+
+    -- Vertical geometry of the scrolling area, derived from the real anchor chain so the
+    -- window is tall enough to hold every visible row plus its inter-row gap.
+    local rowsTop = PADDING + TITLE_HEIGHT + HEADER_GAP + ROW_HEIGHT + ROW_GAP
+    local rowsSpan = visibleRows * ROW_HEIGHT + (visibleRows - 1) * ROW_GAP
+    local windowHeight = rowsTop + rowsSpan + PADDING
+    local windowWidth = PADDING * 2 + contentWidth + actionWidth + SCROLLBAR_GAP + SCROLLBAR_WIDTH
+
     -- Top-level window so it can be registered with SCENE_MANAGER (mouse mode + ESC handling)
     local control = WINDOW_MANAGER:CreateTopLevelWindow("MapRadarReportList" .. id)
-    control:SetDimensions(contentWidth + PADDING * 2, TITLE_HEIGHT + HEADER_HEIGHT + ROW_HEIGHT * visibleRows + PADDING * 2)
+    control:SetDimensions(windowWidth, windowHeight)
     control:SetMouseEnabled(true)
     control:SetMovable(true)
     control:SetClampedToScreen(true)
@@ -435,7 +480,13 @@ function ReportList:New(id, parent, title, columns, visibleRows)
 
     -- Title
     local titleLabel = CreateLabel("$(parent)Title", control, title)
+    titleLabel:SetHeight(TITLE_HEIGHT)
     titleLabel:SetAnchor(TOPLEFT, control, TOPLEFT, PADDING, PADDING)
+    control.titleLabel = titleLabel
+
+    control.SetTitle = function(self, text)
+        self.titleLabel:SetText(text)
+    end
 
     -- Builds a horizontal row of fixed-width cell labels
     local function createCells(name, anchorTo, anchorOffsetY)
@@ -452,7 +503,7 @@ function ReportList:New(id, parent, title, columns, visibleRows)
     end
 
     -- Header
-    local headerCells = createCells("$(parent)Header", titleLabel, 6)
+    local headerCells = createCells("$(parent)Header", titleLabel, HEADER_GAP)
     for i, col in ipairs(columns) do
         headerCells[i]:SetText(col.title)
         headerCells[i]:SetColor(1, 0.85, 0.4, 1)
@@ -460,10 +511,53 @@ function ReportList:New(id, parent, title, columns, visibleRows)
 
     -- Data rows
     control.rows = {}
+    control.rowButtons = {}
     local anchorTo = headerCells[1]
     for r = 1, visibleRows do
-        control.rows[r] = createCells("$(parent)Row" .. r, anchorTo, 2)
+        control.rows[r] = createCells("$(parent)Row" .. r, anchorTo, ROW_GAP)
         anchorTo = control.rows[r][1]
+
+        if rowAction then
+            local btn = CreateControlFromVirtual("$(parent)Row" .. r .. "Action", control, "ZO_DefaultButton")
+            btn:SetDimensions(rowAction.width, ROW_HEIGHT)
+            btn:SetAnchor(TOPLEFT, control.rows[r][#columns], TOPRIGHT, ACTION_GAP, 0)
+            btn:SetText(rowAction.label or "X")
+            btn:SetHidden(true)
+            control.rowButtons[r] = btn
+        end
+    end
+
+    -- Scrollbar (track + draggable-looking thumb) pinned to the right edge, spanning the rows
+    local scrollTrack = CreateControl("MapRadarReportList" .. id .. "ScrollTrack", control, CT_TEXTURE)
+    scrollTrack:SetColor(0, 0, 0, 0.4)
+    scrollTrack:SetDimensions(SCROLLBAR_WIDTH, rowsSpan)
+    scrollTrack:SetAnchor(TOPRIGHT, control, TOPRIGHT, -PADDING, rowsTop)
+    control.scrollTrack = scrollTrack
+
+    local scrollThumb = CreateControl("MapRadarReportList" .. id .. "ScrollThumb", control, CT_TEXTURE)
+    scrollThumb:SetColor(0.85, 0.85, 0.85, 0.85)
+    scrollThumb:SetWidth(SCROLLBAR_WIDTH)
+    scrollThumb:SetAnchor(TOPRIGHT, scrollTrack, TOPRIGHT, 0, 0)
+    control.scrollThumb = scrollThumb
+
+    control.UpdateScrollbar = function(self)
+        local total = #self.data
+        if total <= self.visibleRows then
+            self.scrollTrack:SetHidden(true)
+            self.scrollThumb:SetHidden(true)
+            return
+        end
+
+        self.scrollTrack:SetHidden(false)
+        self.scrollThumb:SetHidden(false)
+
+        local thumbHeight = math.max(20, rowsSpan * self.visibleRows / total)
+        local maxOffset = total - self.visibleRows
+        local frac = maxOffset > 0 and (self.offset / maxOffset) or 0
+
+        self.scrollThumb:SetHeight(thumbHeight)
+        self.scrollThumb:ClearAnchors()
+        self.scrollThumb:SetAnchor(TOPRIGHT, self.scrollTrack, TOPRIGHT, 0, (rowsSpan - thumbHeight) * frac)
     end
 
     control.Render = function(self)
@@ -483,7 +577,25 @@ function ReportList:New(id, parent, title, columns, visibleRows)
                     rowCells[i]:SetText("")
                 end
             end
+
+            local btn = self.rowButtons[r]
+            if btn then
+                if item then
+                    btn:SetHidden(false)
+                    btn:SetHandler(
+                        "OnClicked",
+                        function()
+                            rowAction.onClick(item)
+                        end
+                    )
+                else
+                    btn:SetHidden(true)
+                    btn:SetHandler("OnClicked", nil)
+                end
+            end
         end
+
+        self:UpdateScrollbar()
     end
 
     control.SetData = function(self, data)

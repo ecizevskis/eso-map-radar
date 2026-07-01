@@ -17,12 +17,14 @@ local ScaleData = {
 local FULL_MAP_DIAGONAL = zoDistance(0, 0, 1, 1)
 local MIN_DIAGONAL_COVERAGE = 0.5
 
-local function isSkippedMap(mapId)
-    if mapId == 27 or mapId == 439 then -- Tamriel -- The Aurubis
-        return true
-    end
+-- Maps excluded from calibration and simulation (mapId -> name, name is just for reference)
+local SKIPPED_MAPS = {
+    [27] = "Tamriel",
+    [439] = "The Aurubis"
+}
 
-    return false
+local function isSkippedMap(mapId)
+    return SKIPPED_MAPS[mapId] ~= nil
 end
 
 local function checkMapIdUpdated(mapId)
@@ -160,7 +162,6 @@ local function CalculateGroupCoefficients(mapCoefficientGroups)
 
         if coefficient ~= nil then
             table.insert(groupCoefficients, {meterCoefficient = coefficient})
-            MapRadar.debug("[CalculateGroupCoefficients] <<1>>", coefficient)
         end
     end
 
@@ -287,6 +288,42 @@ local function CalculateMapCoefficient(mapData)
     return EvaluateClusters(coefficientClusters)
 end
 
+-- Diagnostic: runs the same clustering pipeline as CalculateMapCoefficient but,
+-- instead of collapsing to a single coefficient, returns every cluster with its
+-- average coefficient and member count. Returns nil when there is not enough data.
+local function ComputeMapClusters(mapData)
+    if mapData.positions == nil or #mapData.positions < 3 then
+        return nil
+    end
+
+    local positionsWithSinglePointCoefficient = GetPositionsWithSinglePointCoefficientCalculation(mapData.positions)
+    local mapCoefficientGroups = GroupByCoefficient(positionsWithSinglePointCoefficient, 0.01)
+    local groupCoefficients = CalculateGroupCoefficients(mapCoefficientGroups)
+
+    if #groupCoefficients == 0 then
+        return nil
+    end
+
+    local coefficientClusters = GroupByCoefficient(groupCoefficients, 0.01)
+
+    local clusterData = {}
+    for _, cluster in ipairs(coefficientClusters) do
+        local sum = 0
+        for _, v in ipairs(cluster) do
+            sum = sum + v.meterCoefficient
+        end
+        table.insert(
+            clusterData,
+            {
+                average = sum / #cluster,
+                size = #cluster
+            }
+        )
+    end
+
+    return clusterData
+end
+
 local function SaveMapScaleCoefficient(mapId, finalCoefficient)
     local map1meterCoefficient = 100 / finalCoefficient
 
@@ -296,6 +333,11 @@ local function SaveMapScaleCoefficient(mapId, finalCoefficient)
     else
         MapRadar.accountData.worldScaleData[mapId] = map1meterCoefficient
         MapRadar.debug("[Calibrator] Saved coefficient for map <<1>>", mapId)
+    end
+
+    -- Coefficient resolved, so any stored raw data kept for recalc attempts is no longer needed
+    if MapRadar.accountData.worldScaleDataUnresolved[mapId] ~= nil then
+        MapRadar.accountData.worldScaleDataUnresolved[mapId] = nil
     end
 end
 
@@ -307,7 +349,6 @@ local function autoSave(mapId)
 
     local finalCoefficient = CalculateMapCoefficient(mapData)
     if finalCoefficient == nil then
-        MapRadar.debug("[autoSave] Skipped map <<1>> due to insufficient/inconsistent data", mapId)
         return
     end
 
@@ -315,6 +356,9 @@ local function autoSave(mapId)
 
     -- Flag prevents re-saving while the player keeps roaming the same map
     mapData.saved = true
+
+    -- Map is resolved, so drop its live row from the on-screen counter
+    dataForm.counterList:RemoveCounter(mapId)
 end
 
 local function calcAndSaveDistances()
@@ -324,7 +368,56 @@ local function calcAndSaveDistances()
         if finalCoefficient ~= nil then
             SaveMapScaleCoefficient(index, finalCoefficient)
         else
-            MapRadar.debug("[calcAndSaveDistances] Skipped map <<1>> due to insufficient/inconsistent data", index)
+            MapRadar.debug(
+                "[calcAndSaveDistances] Skipped map <<1>> (<<2>>) due to insufficient/inconsistent data",
+                index,
+                zo_strformat("<<1>>", GetMapNameById(index))
+            )
+
+            -- Persist the raw position data so the map can be re-analyzed / recalculated later.
+            -- Merge into any existing record so points from earlier failed gathers accumulate.
+            local stored = MapRadar.accountData.worldScaleDataUnresolved[index]
+            if stored == nil then
+                stored = {
+                    name = mapData.name,
+                    count = 0,
+                    positions = {}
+                }
+                MapRadar.accountData.worldScaleDataUnresolved[index] = stored
+            end
+
+            -- Keep the most recent known name
+            if mapData.name ~= nil and mapData.name ~= "" then
+                stored.name = mapData.name
+            end
+
+            -- Append the freshly gathered positions
+            for _, pos in pairs(mapData.positions) do
+                table.insert(
+                    stored.positions,
+                    {
+                        mapX = pos.mapX,
+                        mapY = pos.mapY,
+                        worldX = pos.worldX,
+                        worldY = pos.worldY
+                    }
+                )
+            end
+            stored.count = #stored.positions
+
+            -- Expand the explored bounding box to cover both old and new points
+            if mapData.left ~= nil and (stored.left == nil or mapData.left < stored.left) then
+                stored.left = mapData.left
+            end
+            if mapData.right ~= nil and (stored.right == nil or mapData.right > stored.right) then
+                stored.right = mapData.right
+            end
+            if mapData.top ~= nil and (stored.top == nil or mapData.top < stored.top) then
+                stored.top = mapData.top
+            end
+            if mapData.bottom ~= nil and (stored.bottom == nil or mapData.bottom > stored.bottom) then
+                stored.bottom = mapData.bottom
+            end
         end
 
         -- Cleaning position table data
@@ -570,7 +663,7 @@ local reportList = nil
 
 local REPORT_COLUMNS = {
     {title = "MapId", width = 60},
-    {title = "Name", width = 200},
+    {title = "Name", width = 320},
     {title = "Orig", width = 120},
     {title = "Auto", width = 120},
     {title = "Diff %", width = 80}
@@ -612,6 +705,7 @@ local function BuildScaleReportData()
         table.insert(
             rows,
             {
+                mapId = mapId,
                 absDiff = absDiff,
                 color = color,
                 values = {
@@ -636,10 +730,66 @@ local function BuildScaleReportData()
     return rows
 end
 
+-- Removes a single simulated calibration record and re-enables data gathering for that map
+local function DeleteSimulatedRecord(mapId)
+    MapRadar.accountData.worldScaleDataSimulated[mapId] = nil
+
+    -- Drop any in-progress gathering data so collection starts clean for this map.
+    -- Resetting latestMapId forces checkMapIdUpdated to re-initialize the table on the next tick.
+    mapCoordinateData[mapId] = nil
+    mapCoordinateDataMatrix[mapId] = nil
+    latestMapId = 0
+
+    MapRadar.debug("[ScaleReport] Deleted simulated calibration for map <<1>>; gathering re-enabled", mapId)
+
+    -- Refresh the report so the deleted row disappears
+    if reportList ~= nil and not reportList:IsHidden() then
+        reportList:SetData(BuildScaleReportData())
+    end
+end
+
+local SCALE_REPORT_DELETE_DIALOG = "MAPRADAR_DELETE_SIMULATED_SCALE"
+ZO_Dialogs_RegisterCustomDialog(
+    SCALE_REPORT_DELETE_DIALOG,
+    {
+        title = {text = "Delete Simulated Calibration"},
+        mainText = {
+            text = "Delete the simulated calibration record for <<1>> (<<2>>)?\n\nData collection will resume for this map."
+        },
+        buttons = {
+            {
+                text = SI_DIALOG_CONFIRM,
+                callback = function(dialog)
+                    DeleteSimulatedRecord(dialog.data.mapId)
+                end
+            },
+            {
+                text = SI_DIALOG_CANCEL
+            }
+        }
+    }
+)
+
+local SCALE_REPORT_ROW_ACTION = {
+    label = "Delete",
+    width = 70,
+    onClick = function(item)
+        local name = zo_strformat("<<1>>", GetMapNameById(item.mapId))
+        ZO_Dialogs_ShowDialog(SCALE_REPORT_DELETE_DIALOG, {mapId = item.mapId}, {mainTextParams = {name, item.mapId}})
+    end
+}
+
 local function ToggleScaleReport()
     if reportList == nil then
         reportList =
-            MapRadarCommon.ReportList:New("ScaleReport", nil, "World Scale Simulation Report", REPORT_COLUMNS, 20)
+            MapRadarCommon.ReportList:New(
+            "ScaleReport",
+            nil,
+            "World Scale Simulation Report",
+            REPORT_COLUMNS,
+            20,
+            SCALE_REPORT_ROW_ACTION
+        )
         reportList:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
         -- Registering as a top level gives us cursor/mouse mode and ESC-to-close
         SCENE_MANAGER:RegisterTopLevel(reportList, false)
@@ -653,8 +803,160 @@ local function ToggleScaleReport()
     local rows = BuildScaleReportData()
     reportList:SetData(rows)
     SCENE_MANAGER:ShowTopLevel(reportList)
+end
 
-    MapRadar.debug("[ScaleReport] <<1>> simulated map(s) listed", tostring(#rows))
+-- ==================================================================================================
+-- Measurement clustering check: pick a map, inspect all of its coefficient clusters
+local checkList = nil
+local clusterList = nil
+
+local CHECK_COLUMNS = {
+    {title = "MapId", width = 60},
+    {title = "Name", width = 340},
+    {title = "Points", width = 70}
+}
+
+local CLUSTER_COLUMNS = {
+    {title = "Cluster", width = 70},
+    {title = "Avg Coeff", width = 140},
+    {title = "1m Coeff", width = 140},
+    {title = "Size", width = 60}
+}
+
+-- Gathers every map that still has raw position data to cluster: live in-memory
+-- gathering data first, then persisted unresolved data for maps not currently loaded.
+local function CollectCheckableMaps()
+    local maps = {}
+
+    for mapId, mapData in pairs(mapCoordinateData) do
+        if mapData.positions ~= nil and #mapData.positions > 0 then
+            maps[mapId] = mapData
+        end
+    end
+
+    for mapId, mapData in pairs(MapRadar.accountData.worldScaleDataUnresolved) do
+        if maps[mapId] == nil and mapData.positions ~= nil and #mapData.positions > 0 then
+            maps[mapId] = mapData
+        end
+    end
+
+    return maps
+end
+
+local function BuildCheckListData()
+    local rows = {}
+
+    for mapId, mapData in pairs(CollectCheckableMaps()) do
+        local name = mapData.name
+        if name == nil or name == "" then
+            name = zo_strformat("<<1>>", GetMapNameById(mapId))
+        end
+
+        table.insert(
+            rows,
+            {
+                mapId = mapId,
+                values = {
+                    tostring(mapId),
+                    name,
+                    tostring(#mapData.positions)
+                }
+            }
+        )
+    end
+
+    table.sort(
+        rows,
+        function(a, b)
+            return a.mapId < b.mapId
+        end
+    )
+
+    return rows
+end
+
+local function BuildClusterReportData(mapId)
+    local rows = {}
+
+    local mapData = CollectCheckableMaps()[mapId]
+    if mapData == nil then
+        return rows
+    end
+
+    local clusters = ComputeMapClusters(mapData)
+    if clusters == nil then
+        return rows
+    end
+
+    -- Largest clusters first
+    table.sort(
+        clusters,
+        function(a, b)
+            return a.size > b.size
+        end
+    )
+
+    for i, c in ipairs(clusters) do
+        table.insert(
+            rows,
+            {
+                values = {
+                    tostring(i),
+                    string.format("%.8f", c.average),
+                    string.format("%.8f", 100 / c.average),
+                    tostring(c.size)
+                }
+            }
+        )
+    end
+
+    return rows
+end
+
+local function ShowClusterReport(mapId)
+    if clusterList == nil then
+        clusterList = MapRadarCommon.ReportList:New("CheckClusters", nil, "Measurement Clusters", CLUSTER_COLUMNS, 20)
+        clusterList:SetAnchor(CENTER, GuiRoot, CENTER, 250, 0)
+        SCENE_MANAGER:RegisterTopLevel(clusterList, false)
+    end
+
+    local name = zo_strformat("<<1>>", GetMapNameById(mapId))
+    clusterList:SetTitle(zo_strformat("Clusters: <<1>> (<<2>>)", name, mapId))
+
+    local rows = BuildClusterReportData(mapId)
+    clusterList:SetData(rows)
+    SCENE_MANAGER:ShowTopLevel(clusterList)
+
+    MapRadar.debug("[Check] Map <<1>>: <<2>> cluster(s)", mapId, tostring(#rows))
+end
+
+local CHECK_ROW_ACTION = {
+    label = "Check",
+    width = 70,
+    onClick = function(item)
+        ShowClusterReport(item.mapId)
+    end
+}
+
+local function ToggleCheckReport()
+    if checkList == nil then
+        checkList =
+            MapRadarCommon.ReportList:New("Check", nil, "Measurement Check", CHECK_COLUMNS, 20, CHECK_ROW_ACTION)
+        checkList:SetAnchor(CENTER, GuiRoot, CENTER, -250, 0)
+        SCENE_MANAGER:RegisterTopLevel(checkList, false)
+    end
+
+    if not checkList:IsHidden() then
+        SCENE_MANAGER:HideTopLevel(checkList)
+        if clusterList ~= nil and not clusterList:IsHidden() then
+            SCENE_MANAGER:HideTopLevel(clusterList)
+        end
+        return
+    end
+
+    local rows = BuildCheckListData()
+    checkList:SetData(rows)
+    SCENE_MANAGER:ShowTopLevel(checkList)
 end
 
 CALLBACK_MANAGER:RegisterCallback(
@@ -666,6 +968,12 @@ CALLBACK_MANAGER:RegisterCallback(
 
         if MapRadar.accountData.worldScaleDataSimulated == nil then
             MapRadar.accountData.worldScaleDataSimulated = {}
+        end
+
+        -- Raw position data for maps whose coefficient could not be resolved,
+        -- kept for further analysis and recalc attempts
+        if MapRadar.accountData.worldScaleDataUnresolved == nil then
+            MapRadar.accountData.worldScaleDataUnresolved = {}
         end
 
         if MapRadar.accountData.mapNameData == nil then
@@ -689,6 +997,10 @@ CALLBACK_MANAGER:RegisterCallback(
 
         if (args == "report") then
             ToggleScaleReport()
+        end
+
+        if (args == "check") then
+            ToggleCheckReport()
         end
 
         if MapRadar.config.showCalibrate and dataForm == nil then

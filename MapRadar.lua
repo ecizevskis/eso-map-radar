@@ -294,23 +294,29 @@ end
 local function onPlayerActivated(eventCode, initial)
     -- All addons already loaded at this stage.
     if Harvest then
-        Harvest.callbackManager:RegisterCallback(
-            Harvest.events.NEW_NODES_LOADED_TO_CACHE,
-            function(mapCache, pinTypeId, numAddedNodes)
+        -- Guard against HarvestMap renaming/removing events (e.g. NEW_NODES_LOADED_TO_CACHE
+        -- was replaced by NEW_ZONE_ENTERED), so a missing event degrades gracefully
+        -- instead of crashing on login inside CallbackManager:RegisterCallback.
+        local function safeRegister(eventId, callback)
+            if eventId then
+                Harvest.callbackManager:RegisterCallback(eventId, callback)
+            end
+        end
+
+        safeRegister(
+            Harvest.events.NEW_ZONE_ENTERED, function()
                 MapRadar_LoadHarvestPins()
             end
         )
 
-        Harvest.callbackManager:RegisterCallback(
-            Harvest.events.MAP_CHANGE,
-            function()
+        safeRegister(
+            Harvest.events.MAP_CHANGE, function()
                 MapRadar_LoadHarvestPins()
             end
         )
 
-        Harvest.callbackManager:RegisterCallback(
-            Harvest.events.FILTER_PROFILE_CHANGED,
-            function()
+        safeRegister(
+            Harvest.events.FILTER_PROFILE_CHANGED, function()
                 MapRadar_LoadHarvestPins()
             end
         )

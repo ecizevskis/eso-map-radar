@@ -329,7 +329,16 @@ local function SaveMapScaleCoefficient(mapId, finalCoefficient)
 
     if MapRadar.config.calibrationSimulation then
         MapRadar.accountData.worldScaleDataSimulated[mapId] = map1meterCoefficient
-        MapRadar.debug("[Calibrator] Saved simulated coefficient for map <<1>>", mapId)
+
+        -- Deviation vs the current baseline (user calibration takes precedence over zone data)
+        local origValue = MapRadar.accountData.worldScaleData[mapId] or MapRadarZoneData[mapId]
+        local diffStr = "n/a"
+        if origValue ~= nil and origValue ~= 0 then
+            diffStr = string.format("%+.1f%%", (map1meterCoefficient - origValue) / origValue * 100)
+        end
+
+        local mapName = zo_strformat("<<1>>", GetMapNameById(mapId))
+        MapRadar.debug("[Calibrator] Saved simulated coefficient for <<1>> (<<2>>) diff <<3>>", mapName, mapId, diffStr)
     else
         MapRadar.accountData.worldScaleData[mapId] = map1meterCoefficient
         MapRadar.debug("[Calibrator] Saved coefficient for map <<1>>", mapId)

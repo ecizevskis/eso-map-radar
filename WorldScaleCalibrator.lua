@@ -435,6 +435,10 @@ local function calcAndSaveDistances()
 end
 
 local function readPlayerData()
+    if SCENE_MANAGER:IsShowing("worldMap") then
+        return -- don't read while browsing the map; player can't move anyway
+    end
+
     local playerX, playerY, heading, isShownInCurrentMap = getMapPlayerPosition("player")
     if not isShownInCurrentMap then
         return
@@ -540,6 +544,10 @@ local function RegisterMapCoordinateCollection()
         "MapRadar_SaveMapCoordinates",
         1000,
         function()
+            if SCENE_MANAGER:IsShowing("worldMap") then
+                return -- don't gather while browsing the map; player can't move anyway
+            end
+
             local mapId = getCurrentMapId()
 
             local hasScaleData = MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
@@ -669,6 +677,9 @@ local REPORT_COLUMNS = {
     {title = "Diff %", width = 80}
 }
 
+-- Percent deviation at/above which a row is "too big" and floats to the top of the report
+local LARGE_DIFF_THRESHOLD = 15
+
 local function formatCoefficient(value)
     if value == nil then
         return "n/a"
@@ -685,7 +696,7 @@ local function BuildScaleReportData()
         local name = zo_strformat("<<1>>", GetMapNameById(mapId))
 
         local diffStr = "n/a"
-        local absDiff = -1 -- entries without a baseline sink to the bottom when sorted
+        local absDiff = -1 -- entries without a baseline never count as "too big"
         local color = {1, 1, 1}
 
         if origValue ~= nil and origValue ~= 0 then
@@ -695,7 +706,7 @@ local function BuildScaleReportData()
 
             if absDiff < 5 then
                 color = {0.4, 1, 0.4} -- green: close match
-            elseif absDiff < 15 then
+            elseif absDiff < LARGE_DIFF_THRESHOLD then
                 color = {1, 0.85, 0.4} -- yellow: moderate deviation
             else
                 color = {1, 0.45, 0.45} -- red: large deviation
@@ -719,11 +730,16 @@ local function BuildScaleReportData()
         )
     end
 
-    -- Worst deviations first
+    -- Ordered by mapId, but "too big" deviations float to the top of the list
     table.sort(
         rows,
         function(a, b)
-            return a.absDiff > b.absDiff
+            local aBig = a.absDiff >= LARGE_DIFF_THRESHOLD
+            local bBig = b.absDiff >= LARGE_DIFF_THRESHOLD
+            if aBig ~= bBig then
+                return aBig
+            end
+            return a.mapId < b.mapId
         end
     )
 

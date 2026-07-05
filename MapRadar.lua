@@ -78,9 +78,6 @@ local pinManager = ZO_WorldMap_GetPinManager()
 
 local UIWidth, UIHeight = GuiRoot:GetDimensions()
 local playerPin = pinManager:GetPlayerPin()
-local pinsPool = ZO_ControlPool:New("PinTemplate", MapRadarContainer, "Pin")
-local pointerPool = ZO_ControlPool:New("PointerTemplate", MapRadarContainer, "Pointer")
-local distanceLabelPool = ZO_ControlPool:New("LabelTemplate", MapRadarContainer, "Distance")
 
 -- https://esoapi.uesp.net/100031/src/ingame/map/mappin.lua.html
 -- https://esodata.uesp.net/100025/src/ingame/map/worldmap.lua.html
@@ -146,6 +143,9 @@ local function setOverlayMode(flag)
     CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
 end
 
+-- Exposed for SlashCommands.lua (the hotkey block below keeps using the local)
+MR.setOverlayMode = setOverlayMode
+
 local function updateOverlay()
     if MR.config.isOverlayMode then
         setOverlayMode(true)
@@ -192,66 +192,6 @@ local function mapPinIntegrityCheck()
 end
 
 -- ==================================================================================================
--- Custom pin layer methods
-
-local function MapRadar_ClearHarvestPins()
-    -- Dispose pins
-    for k, _ in pairs(MR.customPinLayer) do
-        MR.customPinLayer[k]:Dispose()
-        MR.customPinLayer[k] = nil
-    end
-end
-
-local function MapRadar_LoadHarvestPins()
-    MapRadar_ClearHarvestPins()
-
-    if not MapRadar.modeSettings.showHarvestMap then
-        return
-    end
-
-    local harvestMapPins = Harvest["mapPins"]
-
-    -- -- List Harvest mapPins module elements
-    -- MR.debug("harvestMapPins module -------------------------------------------------")
-    -- for key, v in pairs(harvestMapPins) do
-    --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(v))
-    -- end
-
-    -- This can be null if Harvest has disabled "Show on minimap"
-    if (harvestMapPins.mapCache) then
-        -- MR.debug("harvestMapPins.mapCache --------------------------------------------------")
-        -- for key, v in pairs(harvestMapPins.mapCache) do
-        --     MR.debug("<<1>>: <<2>>", key, MR.getStrVal(v))
-        -- end
-
-        local playerX, playerY = getMapPlayerPosition("player")
-        local heading = getPlayerCameraHeading()
-
-        -- MR.debug("harvestMapPins.mapCache.divisions --------------------------------------------------")
-        for pinTypeId, division in pairs(harvestMapPins.mapCache.divisions) do
-            if Harvest.InRangePins.worldFilterProfile[pinTypeId] then
-                -- MR.debug("-------------------- PinTypeId <<1>>", MR.getStrVal(pinTypeId))
-
-                for diviKey, divI in pairs(division) do
-                    -- MR.debug("<<1>>: <<2>> --------------", diviKey, MR.getStrVal(divI))
-
-                    for nodeKey, nodeId in pairs(divI) do
-                        local x, y = harvestMapPins.mapCache:GetLocal(nodeId)
-                        local texturePath = Harvest.settings.savedVars.settings.pinLayouts[pinTypeId].texture
-                        -- MR.debug("<<1>>: <<2>>  (<<3>> <<4>>) <<5>>", nodeKey, MR.getStrVal(nodeId), MR.getStrVal(x), MR.getStrVal(y), texturePath)
-
-                        local customPin = MapRadarHarvestPin:New(nodeId, x, y, pinTypeId, texturePath)
-                        customPin:UpdatePin(playerX, playerY, heading, true)
-                        MR.customPinLayer[nodeId] = customPin
-                        -- MR.debug("Added customPin with key: <<1>>", nodeId)
-                    end
-                end
-            end
-        end
-    end
-end
-
--- ==================================================================================================
 -- Init / Load
 
 local function initialize(eventType, addonName)
@@ -289,41 +229,6 @@ local function initialize(eventType, addonName)
     )
 
     CALLBACK_MANAGER:FireCallbacks("OnMapRadarInitialized")
-end
-
-local function onPlayerActivated(eventCode, initial)
-    -- All addons already loaded at this stage.
-    if Harvest then
-        -- Guard against HarvestMap renaming/removing events (e.g. NEW_NODES_LOADED_TO_CACHE
-        -- was replaced by NEW_ZONE_ENTERED), so a missing event degrades gracefully
-        -- instead of crashing on login inside CallbackManager:RegisterCallback.
-        local function safeRegister(eventId, callback)
-            if eventId then
-                Harvest.callbackManager:RegisterCallback(eventId, callback)
-            end
-        end
-
-        safeRegister(
-            Harvest.events.NEW_ZONE_ENTERED, function()
-                MapRadar_LoadHarvestPins()
-            end
-        )
-
-        safeRegister(
-            Harvest.events.MAP_CHANGE, function()
-                MapRadar_LoadHarvestPins()
-            end
-        )
-
-        safeRegister(
-            Harvest.events.FILTER_PROFILE_CHANGED, function()
-                MapRadar_LoadHarvestPins()
-            end
-        )
-    end
-
-    -- Prevents from firing this event each zone change
-    EVENT_MANAGER:UnregisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED)
 end
 
 -- ==================================================================================================
@@ -380,7 +285,6 @@ EVENT_MANAGER:RegisterForEvent(
 )
 
 EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_ADD_ON_LOADED, initialize)
-EVENT_MANAGER:RegisterForEvent("MapRadar", EVENT_PLAYER_ACTIVATED, onPlayerActivated)
 -- ==================================================================================================
 -- Key binding
 
@@ -421,89 +325,3 @@ function MapRadar_Hotkey()
     hotkeyDebouncer:Invoke()
 end
 
--- ==================================================================================================
--- Slash commands
-local function slashCommands(args)
-    if args == "config" then
-        MapRadar_toggleSettings()
-    end
-
-    if args == "mode" then
-        setOverlayMode(not MR.config.isOverlayMode)
-    end
-
-    if args == "all" then
-        MR.showAllPins = not MR.showAllPins
-        local flagStr = MR.showAllPins and "ON" or "OFF"
-        MR.debug("Show all pins: <<1>>", flagStr)
-    end
-
-    if args == "debug" then
-        MR.config.showDebug = not MR.config.showDebug
-        local flagStr = MR.config.showDebug and "ON" or "OFF"
-        d("Show Debug: " .. flagStr)
-    end
-
-    if args == "simulate" then
-        MR.config.calibrationSimulation = not MR.config.calibrationSimulation
-        local flagStr = MR.config.calibrationSimulation and "ON" or "OFF"
-        d("Simulate mode: " .. flagStr)
-    end
-
-    if args == "names" then
-        MR.showPinNames = not MR.showPinNames
-        local flagStr = MR.showPinNames and "ON" or "OFF"
-        MR.debug("Show names: <<1>>", flagStr)
-    end
-
-    if args == "para" then
-        MR.showPinParams = not MR.showPinParams
-        local flagStr = MR.showPinParams and "ON" or "OFF"
-        MR.debug("Show params: <<1>>", flagStr)
-    end
-
-    if args == "calibrate" then
-        MR.config.showCalibrate = not MR.config.showCalibrate
-        local flagStr = MR.config.showCalibrate and "ON" or "OFF"
-        MR.debug("Show calibrate: <<1>>", flagStr)
-    end
-
-    if args == "analyzer" then
-        MR.config.showAnalyzer = not MR.config.showAnalyzer
-        local flagStr = MR.config.showAnalyzer and "ON" or "OFF"
-        MR.debug("Show analyzer: <<1>>", flagStr)
-    end
-
-    if args == "speed" then
-        MR.config.showSpeedometer = not MR.config.showSpeedometer
-        local flagStr = MR.config.showSpeedometer and "ON" or "OFF"
-        MR.debug("Show Speedometer: <<1>>", flagStr)
-    end
-
-    if args == "wipe asc" then
-        MapRadar.accountData.worldScaleData = {}
-        MR.debug("Wiped Account world scale data")
-    end
-
-    local wipeMapMatch = string.match(args, "wipe asc (%d+)")
-    if wipeMapMatch then
-        local mapId = tonumber(wipeMapMatch)
-        if MapRadar.accountData.worldScaleData[mapId] then
-            MapRadar.accountData.worldScaleData[mapId] = nil
-            MR.debug("Wiped Account world scale data for mapId: <<1>>", mapId)
-        end
-    end
-
-    if args == "recalibrate" then
-        local mapId = GetCurrentMapId()
-        MapRadarAutoscaled[mapId] = nil
-        MapRadar.accountData.worldScaleData[mapId] = nil
-        MR.debug("Recalibrating mapId: <<1>>", mapId)
-    end
-
-    CALLBACK_MANAGER:FireCallbacks("MapRadar_Reset")
-    CALLBACK_MANAGER:FireCallbacks("OnMapRadarSlashCommand", args)
-end
-
-SLASH_COMMANDS["/mapradar"] = slashCommands
-SLASH_COMMANDS["/mr"] = slashCommands

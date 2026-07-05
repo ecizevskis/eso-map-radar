@@ -19,12 +19,14 @@ InvokeAnalyzer.lua
 WorldScaleCalibrator.lua
 
 MapRadar.lua
+SlashCommands.lua
 
 Profiler.lua
 
 MapRadarPinBase.lua
 MapRadarPin.lua
 MapRadarHarvestPin.lua
+HarvestIntegration.lua
 
 Speedometer.lua
 Autoscaled.lua

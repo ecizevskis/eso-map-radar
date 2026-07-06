@@ -337,6 +337,16 @@ local function SaveMapScaleCoefficient(mapId, finalCoefficient)
             diffStr = string.format("%+.1f%%", (map1meterCoefficient - origValue) / origValue * 100)
         end
 
+        -- Also store as a real calibration when there is no user calibration yet and the
+        -- baseline is absent or autoscaled (machine-generated, not authoritative), so the
+        -- radar can use the value without toggling simulation off
+        if
+            MapRadar.accountData.worldScaleData[mapId] == nil and
+                (origValue == nil or MapRadarAutoscaled[mapId] ~= nil)
+         then
+            MapRadar.accountData.worldScaleData[mapId] = map1meterCoefficient
+        end
+
         local mapName = zo_strformat("<<1>>", GetMapNameById(mapId))
         MapRadar.debug("[Calibrator] Saved simulated coefficient for <<1>> (<<2>>) diff <<3>>", mapName, mapId, diffStr)
     else

@@ -337,13 +337,10 @@ local function SaveMapScaleCoefficient(mapId, finalCoefficient)
             diffStr = string.format("%+.1f%%", (map1meterCoefficient - origValue) / origValue * 100)
         end
 
-        -- Also store as a real calibration when there is no user calibration yet and the
-        -- baseline is absent or autoscaled (machine-generated, not authoritative), so the
-        -- radar can use the value without toggling simulation off
-        if
-            MapRadar.accountData.worldScaleData[mapId] == nil and
-                (origValue == nil or MapRadarAutoscaled[mapId] ~= nil)
-         then
+        -- Also store as a real calibration when there is no user calibration yet, so the
+        -- radar can use the value without toggling simulation off. Zone data (autoscaled
+        -- or not) only serves as the diff baseline above; it does not block the save.
+        if MapRadar.accountData.worldScaleData[mapId] == nil then
             MapRadar.accountData.worldScaleData[mapId] = map1meterCoefficient
         end
 
@@ -1028,6 +1025,15 @@ CALLBACK_MANAGER:RegisterCallback(
     function(args)
         if (args == "reset") then
             dataForm.counterList:Clear()
+        end
+
+        if (args == "recalibrate") then
+            -- Saved coefficient was just cleared, so let autoSave fire again for this map;
+            -- positions gathered this session are still valid and are kept
+            local mapData = mapCoordinateData[getCurrentMapId()]
+            if mapData ~= nil then
+                mapData.saved = false
+            end
         end
 
         if (args == "report") then

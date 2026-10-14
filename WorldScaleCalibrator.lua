@@ -32,6 +32,18 @@ local BASELINE_TOLERANCE = 0.02
 local TEMPORARY_STAGES = {10, 100, 200}
 local temporaryScaleData = {}
 
+-- Stored maps that never reach the 50% coverage auto-save (towns, partly explored zones) are calibrated
+-- at game load once their points, collected over earlier visits, reach this count
+local MIN_STORED_POINTS_FOR_CALIBRATION = 100
+
+-- Confined maps (e.g. kept inside one building) stop growing once every reachable 10 m cell has a point,
+-- so they are also calibrated at load after this many visits in a row added no new point
+local MIN_IDLE_VISITS_FOR_CALIBRATION = 3
+local MIN_IDLE_POINTS_FOR_CALIBRATION = 8
+
+-- Maps whose visit was already counted this session (one count per session)
+local visitedThisSession = {}
+
 -- Local references for GetMeterCoefficient, which runs per pin on every radar draw tick.
 -- worldScaleData points at the saved table once initialized (empty placeholder until then).
 local zoneData = MapRadarZoneData
@@ -113,21 +125,18 @@ end
 -- Stored points of maps without a resolved coefficient (worldScaleDataUnresolved). They persist across
 -- reloads so collection continues where it left off, and are dropped once the map gets a coefficient.
 -- Points are stored compactly as {mapX, mapY, worldX, worldY} to keep the SavedVariables file small.
+-- Map names are not stored; GetMapNameById(mapId) provides them when needed.
 
-local function GetOrCreateStoredMapData(mapId, name)
+local function GetOrCreateStoredMapData(mapId)
     local store = MapRadar.accountData.worldScaleDataUnresolved
     local stored = store[mapId]
 
     if stored == nil then
         stored = {
-            name = name,
             count = 0,
             positions = {}
         }
         store[mapId] = stored
-    elseif name ~= nil and name ~= "" then
-        -- Keep the most recent known name
-        stored.name = name
     end
 
     return stored
@@ -145,7 +154,7 @@ local function StoreAllPositions(mapId)
         positions[i] = {pos.mapX, pos.mapY, pos.worldX, pos.worldY}
     end
 
-    local stored = GetOrCreateStoredMapData(mapId, mapData.name)
+    local stored = GetOrCreateStoredMapData(mapId)
     stored.positions = positions
     stored.count = #positions
 end
@@ -196,7 +205,6 @@ local function checkMapIdUpdated(mapId)
 
         if (mapCoordinateData[mapId] == nil) then
             mapCoordinateData[mapId] = {
-                name = worldMap.zoneName,
                 positions = {},
                 count = 0
             }
@@ -576,17 +584,17 @@ local function SaveMapScaleCoefficient(mapId, finalCoefficient)
     if MapRadar.config.calibrationSimulation then
         MapRadar.accountData.worldScaleDataSimulated[mapId] = map1meterCoefficient
 
-        -- Deviation vs the current baseline (user calibration takes precedence over zone data)
-        local origValue = MapRadar.accountData.worldScaleData[mapId] or MapRadarZoneData[mapId]
+        -- Deviation vs the current baseline (zone data takes precedence, same order as the radar)
+        local origValue = zoneData[mapId] or MapRadar.accountData.worldScaleData[mapId]
         local diffStr = "n/a"
         if origValue ~= nil and origValue ~= 0 then
             diffStr = string.format("%+.1f%%", (map1meterCoefficient - origValue) / origValue * 100)
         end
 
-        -- Also store as a real calibration when there is no user calibration yet, so the
-        -- radar can use the value without toggling simulation off. Zone data (autoscaled
-        -- or not) only serves as the diff baseline above; it does not block the save.
-        if MapRadar.accountData.worldScaleData[mapId] == nil then
+        -- Also store as a real calibration when the map has neither zone data nor a calibration yet,
+        -- so the radar can use the value without toggling simulation off. On zone data maps it would
+        -- never be used, would be removed at the next load, and would hide the zone data baseline.
+        if zoneData[mapId] == nil and MapRadar.accountData.worldScaleData[mapId] == nil then
             MapRadar.accountData.worldScaleData[mapId] = map1meterCoefficient
         end
 
@@ -675,40 +683,6 @@ local function autoSave(mapId)
     if dataForm ~= nil then
         dataForm.counterList:RemoveCounter(mapId)
     end
-end
-
-local function calcAndSaveDistances()
-    for index, mapData in pairs(mapCoordinateData) do
-        local finalCoefficient = CalculateMapCoefficient(mapData)
-
-        if finalCoefficient ~= nil then
-            SaveMapScaleCoefficient(index, finalCoefficient)
-        else
-            MapRadar.debug(
-                "[calcAndSaveDistances] Skipped map <<1>> (<<2>>) due to insufficient/inconsistent data",
-                index,
-                zo_strformat("<<1>>", GetMapNameById(index))
-            )
-
-            -- Keep the raw points stored so the map can be re-analyzed, and collection
-            -- picks them up again (restored on the next visit) instead of starting over
-            StoreAllPositions(index)
-        end
-
-        -- Cleaning position table data
-        for i, pos in pairs(mapData.positions) do
-            mapData.positions[i] = nil
-        end
-        mapCoordinateData[index] = nil
-    end
-
-    -- Clear counter data from UI
-    if dataForm ~= nil then
-        dataForm.counterList:Clear()
-    end
-
-    latestMapId = 0
-    checkMapIdUpdated(getCurrentMapId())
 end
 
 local function readPlayerData()
@@ -800,16 +774,6 @@ local function CreateCalibrationDataForm()
     dataForm.autoscaleLabel:SetColor(1, 1, 0, 1)
     dataForm.autoscaleLabel:SetHidden(true)
 
-    local btnSave = CreateControlFromVirtual("$(parent)btnSave", dataForm, "SavingEditBoxSaveButton")
-    btnSave:SetDimensions(40, 40)
-    btnSave:SetAnchor(TOPLEFT, dataForm, BOTTOMLEFT, 0, 10)
-    btnSave:SetHandler(
-        "OnClicked",
-        function()
-            calcAndSaveDistances()
-        end
-    )
-
     -- Counter list
     dataForm.counterList = MapRadarCommon.CounterList:New("WorldCalibrateCounterList", MapRadarContainer)
     dataForm.counterList:SetAnchor(TOP, GuiRoot, TOP, 550, 0)
@@ -828,7 +792,10 @@ local function RegisterMapCoordinateCollection()
 
             local mapId = getCurrentMapId()
 
-            local hasScaleData = MapRadarAutoscaled[mapId] ~= nil or MapRadar.accountData.worldScaleData[mapId] ~= nil
+            -- Zone data is the decided value, so only simulation mode collects on those maps
+            local hasScaleData =
+                zoneData[mapId] ~= nil or MapRadarAutoscaled[mapId] ~= nil or
+                MapRadar.accountData.worldScaleData[mapId] ~= nil
             local hasSimulatedScaleData = MapRadar.accountData.worldScaleDataSimulated[mapId] ~= nil
             if hasScaleData and (not MapRadar.config.calibrationSimulation or hasSimulatedScaleData) then
                 return -- do not gather position data for world scaled maps
@@ -841,9 +808,14 @@ local function RegisterMapCoordinateCollection()
 
             checkMapIdUpdated(mapId)
 
-            if MapRadarZoneData[mapId] == nil and MapRadar.accountData.mapNameData[mapId] == nil then
-                -- Need to save map name
-                MapRadar.accountData.mapNameData[mapId] = worldMap.zoneName
+            -- Count one visit per session on stored maps; a new point below resets the count
+            if not visitedThisSession[mapId] then
+                visitedThisSession[mapId] = true
+
+                local stored = MapRadar.accountData.worldScaleDataUnresolved[mapId]
+                if stored ~= nil then
+                    stored.idleVisits = (stored.idleVisits or 0) + 1
+                end
             end
 
             local _, wx, _, wz = getUnitRawWorldPosition("player")
@@ -854,12 +826,13 @@ local function RegisterMapCoordinateCollection()
                 local mapData = mapCoordinateData[mapId]
 
                 -- Store the point too, so collection continues after a reload
-                local stored = GetOrCreateStoredMapData(mapId, mapData.name)
+                local stored = GetOrCreateStoredMapData(mapId)
                 table.insert(stored.positions, {mapX, mapY, wx, wz})
                 stored.count = #stored.positions
+                stored.idleVisits = 0
 
                 if dataForm ~= nil then
-                    local name = zo_strformat("<<1>> (<<2>>)", worldMap.zoneName, mapId)
+                    local name = zo_strformat("<<1>> (<<2>>)", GetMapNameById(mapId), mapId)
                     dataForm.counterList:AddOrUpdateCounter(mapId, name, mapData.count)
                 end
 
@@ -950,8 +923,8 @@ local function BuildScaleReportData()
     local rows = {}
 
     for mapId, simulatedValue in pairs(MapRadar.accountData.worldScaleDataSimulated) do
-        -- Original value: user calibration takes precedence over built-in zone data
-        local origValue = MapRadar.accountData.worldScaleData[mapId] or MapRadarZoneData[mapId]
+        -- Original value: built-in zone data takes precedence over user calibration (same order as the radar)
+        local origValue = zoneData[mapId] or MapRadar.accountData.worldScaleData[mapId]
         local name = zo_strformat("<<1>>", GetMapNameById(mapId))
 
         local diffStr = "n/a"
@@ -1113,7 +1086,6 @@ local function CollectCheckableMaps()
     for mapId, stored in pairs(MapRadar.accountData.worldScaleDataUnresolved) do
         if maps[mapId] == nil and stored.positions ~= nil and #stored.positions > 0 then
             maps[mapId] = {
-                name = stored.name,
                 positions = ExpandStoredPositions(stored.positions)
             }
         end
@@ -1126,18 +1098,13 @@ local function BuildCheckListData()
     local rows = {}
 
     for mapId, mapData in pairs(CollectCheckableMaps()) do
-        local name = mapData.name
-        if name == nil or name == "" then
-            name = zo_strformat("<<1>>", GetMapNameById(mapId))
-        end
-
         table.insert(
             rows,
             {
                 mapId = mapId,
                 values = {
                     tostring(mapId),
-                    name,
+                    zo_strformat("<<1>>", GetMapNameById(mapId)),
                     tostring(#mapData.positions)
                 }
             }
@@ -1238,6 +1205,66 @@ local function ToggleCheckReport()
     SCENE_MANAGER:ShowTopLevel(checkList)
 end
 
+-- A new addon version may ship zone data for maps calibrated or collected so far. Zone data is the decided
+-- value and takes precedence, so those maps are dropped from the calibrated and stored collections.
+local function RemoveMapsCoveredByZoneData()
+    local calibratedMaps = MapRadar.accountData.worldScaleData
+    local storedMaps = MapRadar.accountData.worldScaleDataUnresolved
+    local removedCalibrated, removedStored = 0, 0
+
+    for mapId in pairs(calibratedMaps) do
+        if zoneData[mapId] ~= nil then
+            calibratedMaps[mapId] = nil
+            removedCalibrated = removedCalibrated + 1
+        end
+    end
+
+    -- Simulation mode keeps collecting on zone data maps to compare against them, so their points stay
+    if not MapRadar.config.calibrationSimulation then
+        for mapId in pairs(storedMaps) do
+            if zoneData[mapId] ~= nil then
+                storedMaps[mapId] = nil
+                removedStored = removedStored + 1
+            end
+        end
+    end
+
+    if removedCalibrated > 0 or removedStored > 0 then
+        MapRadar.debug(
+            "[Calibrator] Removed <<1>> calibrated and <<2>> stored maps now covered by zone data",
+            removedCalibrated,
+            removedStored
+        )
+    end
+end
+
+-- Calibrates stored maps that collected enough points over earlier visits without reaching the coverage
+-- auto-save; resolved maps get their coefficient saved and their stored points dropped
+local function CalibrateStoredMaps()
+    for mapId, stored in pairs(MapRadar.accountData.worldScaleDataUnresolved) do
+        local count = stored.positions ~= nil and #stored.positions or 0
+        local idleVisits = stored.idleVisits or 0
+
+        local hasEnoughPoints = count >= MIN_STORED_POINTS_FOR_CALIBRATION
+        local isFullyExplored =
+            count >= MIN_IDLE_POINTS_FOR_CALIBRATION and idleVisits >= MIN_IDLE_VISITS_FOR_CALIBRATION
+
+        if hasEnoughPoints or isFullyExplored then
+            local coefficient = CalculateMapCoefficient({positions = ExpandStoredPositions(stored.positions)})
+
+            if coefficient ~= nil then
+                MapRadar.debug(
+                    "[Calibrator] Calibrating stored map <<1>> from <<2>> points (<<3>> idle visits)",
+                    mapId,
+                    count,
+                    idleVisits
+                )
+                SaveMapScaleCoefficient(mapId, coefficient)
+            end
+        end
+    end
+end
+
 -- ==================================================================================================
 -- Coefficient (map units per meter) for a map: hardcoded zone data first, then calibrated values, then the
 -- best temporary approximation (200 m, 100 m, 10 m). Second return is false for approximations; nil if none.
@@ -1289,7 +1316,8 @@ CALLBACK_MANAGER:RegisterCallback(
             MapRadar.accountData.worldScaleDataUnresolved = {}
         end
 
-        -- Older records stored keyed points ({mapX = ...}) and a bounding box; convert to the compact form
+        -- Older records stored keyed points ({mapX = ...}), a bounding box and the map name;
+        -- convert to the compact form (names come from GetMapNameById now)
         for _, stored in pairs(MapRadar.accountData.worldScaleDataUnresolved) do
             if stored.positions ~= nil then
                 for i, p in ipairs(stored.positions) do
@@ -1299,11 +1327,15 @@ CALLBACK_MANAGER:RegisterCallback(
                 end
             end
             stored.left, stored.right, stored.top, stored.bottom = nil, nil, nil, nil
+            stored.name = nil
         end
 
-        if MapRadar.accountData.mapNameData == nil then
-            MapRadar.accountData.mapNameData = {}
-        end
+        -- Map names collected by older versions; GetMapNameById(mapId) provides them, so drop the table
+        MapRadar.accountData.mapNameData = nil
+
+        -- Before collection starts, so a cleaned or calibrated map is not restored into live collection
+        RemoveMapsCoveredByZoneData()
+        CalibrateStoredMaps()
 
         if MapRadar.config.showCalibrate then
             CreateCalibrationDataForm()

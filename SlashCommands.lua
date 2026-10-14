@@ -37,8 +37,9 @@ local function slashCommands(args)
     end
 
     if args == "recalibrate" then
+        -- Discards a bad auto-calibration so collection and auto-save run again for this map
+        -- (zone data still takes precedence on maps that have it)
         local mapId = GetCurrentMapId()
-        MapRadarAutoscaled[mapId] = nil
         MapRadar.accountData.worldScaleData[mapId] = nil
         d("Recalibrating mapId: " .. mapId)
     end

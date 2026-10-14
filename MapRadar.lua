@@ -75,6 +75,7 @@ local sceneManager = SCENE_MANAGER
 local getPlayerCameraHeading = GetPlayerCameraHeading
 local getMapPlayerPosition = GetMapPlayerPosition
 local pinManager = ZO_WorldMap_GetPinManager()
+local refreshMeterCoefficient -- set in initialize (MapRadarPinBase.lua loads after this file)
 
 local UIWidth, UIHeight = GuiRoot:GetDimensions()
 local playerPin = pinManager:GetPlayerPin()
@@ -100,6 +101,7 @@ local function registerMapPins()
 
     local playerX, playerY = getMapPlayerPosition("player")
     local heading = getPlayerCameraHeading()
+    refreshMeterCoefficient()
 
     -- Add new pins that did not exist
     for key, pin in pairs(pins) do
@@ -170,6 +172,9 @@ local function mapUpdate()
 
     radarTexture:SetTextureRotation(-heading, 0.5, 0.5)
 
+    -- One coefficient lookup per tick, shared by all pins
+    refreshMeterCoefficient()
+
     -- reposition pins
     for key, radarPin in pairs(MR.activePins) do
         radarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
@@ -213,6 +218,8 @@ local function initialize(eventType, addonName)
     local fragment = ZO_SimpleSceneFragment:New(MapRadarContainer)
     SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
     SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
+
+    refreshMeterCoefficient = MapRadarPinBase.RefreshMeterCoefficient
 
     EVENT_MANAGER:RegisterForUpdate("MapRadar_OnUpdate", 30, MR.Profile("OnUpdate", mapUpdate))
     EVENT_MANAGER:RegisterForUpdate("MapRadar_PinRefresh", 200, MR.Profile("PinRefresh", registerMapPins))

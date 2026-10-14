@@ -1,25 +1,28 @@
 local getCurrentMapId = GetCurrentMapId
-local zoneData = MapRadarZoneData
 local getMapType = GetMapType
+local getMapMeterCoefficient = MapRadarWorldScale.GetMeterCoefficient -- WorldScaleCalibrator.lua loads first
+
+-- Localize global objects for better performance (UpdatePin runs per pin on every draw tick)
+local MR = MapRadar -- MapRadar.lua loads first, so this is the final table
+local callbackManager = CALLBACK_MANAGER
+local zoStrformat = zo_strformat
+local sqrt, min, max, atan2, sin, cos = math.sqrt, math.min, math.max, math.atan2, math.sin, math.cos
+local CENTER = CENTER
 
 MapRadarPinBase = {}
+
+-- Meter coefficient of the current map, refreshed once per batch of pin updates instead of per pin
+local meterCoefficient, isMeterCalibrated = 0.005, false
 
 -- ========================================================================================
 -- helper methods
 
 local function getMeterCoefficient()
 
-    local mapId = getCurrentMapId()
-
-    local worldCalibratedData = MapRadar.accountData.worldScaleData[mapId]
-    if worldCalibratedData ~= nil then
-        return worldCalibratedData, true
-    end
-
-    local zData = zoneData[mapId]
-    if zData ~= nil then
-        -- MapRadar.debugDebounce("Get zone unit1: <<1>>", MapRadar.getStrVal(zData))
-        return zData, true
+    -- Zone data, then calibrated value, then temporary approximation (see WorldScaleCalibrator)
+    local coefficient, isCalibrated = getMapMeterCoefficient(getCurrentMapId())
+    if coefficient ~= nil then
+        return coefficient, isCalibrated
     end
 
     if getMapType() == MAPTYPE_SUBZONE then
@@ -36,6 +39,11 @@ local function getMeterCoefficient()
     return 0.005, false
 end
 
+-- Call once before each batch of UpdatePin calls (draw tick, newly created pins)
+function MapRadarPinBase.RefreshMeterCoefficient()
+    meterCoefficient, isMeterCalibrated = getMeterCoefficient()
+end
+
 -- ========================================================================================
 -- MapRadarPinBase handling methods
 function MapRadarPinBase:SetHidden(flag)
@@ -49,8 +57,12 @@ function MapRadarPinBase:SetHidden(flag)
 end
 
 function MapRadarPinBase:SetVisibility(isCalibrated)
+    -- modeSettings is replaced on mode switch, so read it per call
+    local modeSettings = MR.modeSettings
+    local distance = self.distance
+
     -- Most pin types they should be visible only in certain range
-    if not self.showAlways and self.distance > MapRadar.modeSettings.maxDistance then
+    if not self.showAlways and distance > modeSettings.maxDistance then
         -- d(zo_strformat("Pin is not visible: <<1>>  <<2>> > <<3>>", self.key, self.distance, MapRadar.modeSettings.maxDistance))
         self:SetHidden(true)
         return false
@@ -58,12 +70,13 @@ function MapRadarPinBase:SetVisibility(isCalibrated)
 
     self:SetHidden(false)
 
-    local minAlpha = MapRadar.modeSettings.minAlpha / 100
-    local maxAlpha = MapRadar.modeSettings.maxAlpha / 100
+    local minAlpha = modeSettings.minAlpha / 100
+    local maxAlpha = modeSettings.maxAlpha / 100
+    local maxRadarDistance = MR.maxRadarDistance
 
     local alpha = maxAlpha
-    if self.distance > MapRadar.maxRadarDistance then
-        alpha = math.max(minAlpha, maxAlpha - (self.distance - MapRadar.maxRadarDistance) / MapRadar.maxRadarDistance)
+    if distance > maxRadarDistance then
+        alpha = max(minAlpha, maxAlpha - (distance - maxRadarDistance) / maxRadarDistance)
     end
 
     self.texture:SetAlpha(alpha)
@@ -81,11 +94,12 @@ end
 function MapRadarPinBase:SetPinDimensions(pinSize)
     -- MapRadar.pinSize changes on switching between modes, so need to reassign it while other different approach is found.
     -- Maybe this is not needed at all if every mode apply own scaling?
-    self.size = pinSize or MapRadar.pinSize
-    local minScale = MapRadar.modeSettings.minScale / 100
-    local maxScale = MapRadar.modeSettings.maxScale / 100
+    self.size = pinSize or MR.pinSize
+    local modeSettings = MR.modeSettings
+    local minScale = modeSettings.minScale / 100
+    local maxScale = modeSettings.maxScale / 100
 
-    local distanceScale = math.max(minScale, maxScale - self.distance / MapRadar.maxRadarDistance / 2)
+    local distanceScale = max(minScale, maxScale - self.distance / MR.maxRadarDistance / 2)
 
     self.scaledSize = self.size * distanceScale
     self.texture:SetDimensions(self.scaledSize, self.scaledSize)
@@ -116,34 +130,33 @@ function MapRadarPinBase:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
     local dx = self.x - playerX
     local dy = self.y - playerY
 
-    local coefficient, isCalibrated = getMeterCoefficient()
+    self.distance = sqrt(dx * dx + dy * dy) / meterCoefficient
 
-    self.distance = math.sqrt(dx ^ 2 + dy ^ 2) / coefficient
-
-    -- Set visibility (hidden or transparency) and if not visible then stop processing further 
-    if not self:SetVisibility(isCalibrated) then
+    -- Set visibility (hidden or transparency) and if not visible then stop processing further
+    if not self:SetVisibility(isMeterCalibrated) then
         return
     end
 
-    local radarDistance = math.min(MapRadar.maxRadarDistance, self.distance)
+    local radarDistance = min(MR.maxRadarDistance, self.distance)
 
     -- recalculate coordinates to apply rotation
-    local angle = math.atan2(-dx, -dy) - heading
-    dx = radarDistance * -math.sin(angle)
-    dy = radarDistance * -math.cos(angle)
+    local angle = atan2(-dx, -dy) - heading
+    dx = radarDistance * -sin(angle)
+    dy = radarDistance * -cos(angle)
 
-    -- Resize pin 
+    -- Resize pin
     self:SetPinDimensions()
 
     -- Reposition pin
     self.texture:ClearAnchors()
-    self.texture:SetAnchor(CENTER, MapRadar.playerPinTexture, CENTER, dx, dy)
+    self.texture:SetAnchor(CENTER, MR.playerPinTexture, CENTER, dx, dy)
 
     -- Pointer points only for quests (not affected by range)
     if self.pointer ~= nil then
-        self.pointer:SetHidden(not MapRadar.modeSettings.showPointers)
+        local showPointers = MR.modeSettings.showPointers
+        self.pointer:SetHidden(not showPointers)
 
-        if MapRadar.modeSettings.showPointers then
+        if showPointers then
             self.pointer:SetTextureRotation(angle, 0.5, 1)
             if radarDistance < 64 then
                 self.pointer:SetDimensions(8, radarDistance)
@@ -151,12 +164,16 @@ function MapRadarPinBase:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
         end
     end
 
-    -- Show distance near pin
-    if self.label ~= nil and MapRadar.modeSettings.showDistance then
-        self.label:SetText(zo_strformat("<<1>>", self.distance))
-    end
+    self:UpdateLabel()
 
-    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_UpdatePin", self)
+    callbackManager:FireCallbacks("OnMapRadar_UpdatePin", self)
+end
+
+-- Show distance near pin (only while the pin is visible); subclasses override for extra label data
+function MapRadarPinBase:UpdateLabel()
+    if self.label ~= nil and MR.modeSettings.showDistance then
+        self.label:SetText(zoStrformat("<<1>>", self.distance))
+    end
 end
 
 -- ========================================================================================
@@ -166,7 +183,7 @@ function MapRadarPinBase:New(key, x, y, showPointer)
     setmetatable(radarPin, self)
     self.__index = self
 
-    local texture, textureKey = MapRadar.pinPool:AcquireObject()
+    local texture, textureKey = MR.pinPool:AcquireObject()
 
     radarPin.texture = texture
     radarPin.textureKey = textureKey
@@ -179,15 +196,15 @@ function MapRadarPinBase:New(key, x, y, showPointer)
     radarPin:ApplyTexture()
     radarPin:ApplyTint()
 
-    local label, labelKey = MapRadar.pinLabelPool:AcquireObject()
+    local label, labelKey = MR.pinLabelPool:AcquireObject()
     label:SetAnchor(BOTTOMLEFT, radarPin.texture, BOTTOMRIGHT)
     radarPin.label = label
     radarPin.labelKey = labelKey
 
     if showPointer then
-        local pointerTexture, pointerKey = MapRadar.pointerPool:AcquireObject()
+        local pointerTexture, pointerKey = MR.pointerPool:AcquireObject()
         pointerTexture:SetTexture("MapRadar/textures/pointer.dds")
-        pointerTexture:SetAnchor(BOTTOM, MapRadar.playerPinTexture, CENTER)
+        pointerTexture:SetAnchor(BOTTOM, MR.playerPinTexture, CENTER)
         pointerTexture:SetAlpha(0.5)
         pointerTexture:SetDimensions(8, 64)
         pointerTexture:SetHidden(true)
@@ -195,7 +212,7 @@ function MapRadarPinBase:New(key, x, y, showPointer)
         radarPin.pointerKey = pointerKey
     end
 
-    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_NewPin", radarPin)
+    callbackManager:FireCallbacks("OnMapRadar_NewPin", radarPin)
 
     return radarPin
 end
@@ -204,7 +221,7 @@ end
 -- deconstruct
 function MapRadarPinBase:Dispose()
 
-    CALLBACK_MANAGER:FireCallbacks("OnMapRadar_RemovePin", self)
+    callbackManager:FireCallbacks("OnMapRadar_RemovePin", self)
 
     if self.animationTimeline then
         self.animationTimeline:Stop()
@@ -213,20 +230,20 @@ function MapRadarPinBase:Dispose()
     end
 
     self.texture:ClearAnchors()
-    MapRadar.pinPool:ReleaseObject(self.textureKey)
+    MR.pinPool:ReleaseObject(self.textureKey)
     self.textureKey = nil
     self.texture = nil
 
     if self.pointer ~= nil then
         self.pointer:ClearAnchors()
-        MapRadar.pointerPool:ReleaseObject(self.pointerKey)
+        MR.pointerPool:ReleaseObject(self.pointerKey)
         self.pointerKey = nil
         self.pointer = nil
     end
 
     if self.label ~= nil then
         self.label:SetText("")
-        MapRadar.pinLabelPool:ReleaseObject(self.labelKey)
+        MR.pinLabelPool:ReleaseObject(self.labelKey)
         self.labelKey = nil
         self.label = nil
     end

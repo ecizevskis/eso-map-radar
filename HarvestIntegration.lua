@@ -8,6 +8,7 @@ local MR = MapRadar
 -- Localize global objects for better performance
 local getPlayerCameraHeading = GetPlayerCameraHeading
 local getMapPlayerPosition = GetMapPlayerPosition
+local refreshMeterCoefficient = MapRadarPinBase.RefreshMeterCoefficient -- MapRadarPinBase.lua loads first
 
 -- ==================================================================================================
 -- Custom pin layer methods
@@ -45,6 +46,7 @@ function MapRadar_LoadHarvestPins()
 
         local playerX, playerY = getMapPlayerPosition("player")
         local heading = getPlayerCameraHeading()
+        refreshMeterCoefficient()
 
         -- MR.debug("harvestMapPins.mapCache.divisions --------------------------------------------------")
         for pinTypeId, division in pairs(harvestMapPins.mapCache.divisions) do

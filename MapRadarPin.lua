@@ -1,6 +1,10 @@
 local zoMapPin = ZO_MapPin
 local pinManager = ZO_WorldMap_GetPinManager()
 
+-- Localize global objects for better performance (UpdatePin runs per pin on every draw tick)
+local MR = MapRadar -- MapRadar.lua loads first, so this is the final table
+local zoStrformat = zo_strformat
+
 MapRadarPin = setmetatable(
     {}, {
         __index = MapRadarPinBase
@@ -19,12 +23,12 @@ local function customPinName(pinType)
 end
 
 local function IsCustomPin(pinType)
-    if MapRadar.modeSettings.showQuests and (customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory") -- Quest map
+    if MR.modeSettings.showQuests and (customPinName(pinType) == "QuestMap_uncompleted" or customPinName(pinType) == "QuestMap_zonestory") -- Quest map
     or customPinName(pinType) == "pinType_Treasure_Maps" -- from "Map Pins" by Hoft
-    or MapRadar.modeSettings.showMapPinsChests and customPinName(pinType) == "pinType_Treasure_Chests" -- from "Map Pins" by Hoft
+    or MR.modeSettings.showMapPinsChests and customPinName(pinType) == "pinType_Treasure_Chests" -- from "Map Pins" by Hoft
     or customPinName(pinType) == "LostTreasure_SurveyReportPin" -- Survey from LostTreasure
     or customPinName(pinType) == "LostTreasure_TreasureMapPin" -- Treasure from LostTreasure
-    or MapRadar.modeSettings.showSkyshards and (customPinName(pinType) == "pinType_Skyshards" -- Map Pins addon
+    or MR.modeSettings.showSkyshards and (customPinName(pinType) == "pinType_Skyshards" -- Map Pins addon
     or customPinName(pinType) == "SkySMapPin_unknown" -- SkyShards addon
     ) then
         return true
@@ -36,16 +40,16 @@ end
 local function IsValidPOI(pin)
     local pinType = pin:GetPinType()
     local pinData = zoMapPin.PIN_DATA[pinType]
-    local texturePath = MapRadar.value(pinData.texture, pin)
+    local texturePath = MR.value(pinData.texture, pin)
 
     if texturePath ~= nil then
-        if texturePath:find("poi_wayshrine") and MapRadar.modeSettings.showWayshrines -- Wayshrine
-        or texturePath:find("poi_dungeon") and MapRadar.modeSettings.showDungeons --
-        or texturePath:find("poi_groupinstance") and MapRadar.modeSettings.showDungeons --
-        or (texturePath:find("poi_delve") or texturePath:find("poi_groupdelve")) and MapRadar.modeSettings.showDelves --
-        or texturePath:find("poi_portal") and MapRadar.modeSettings.showPortals -- dolmen but also other portals :/
-        or texturePath:find("poi_groupboss") and MapRadar.modeSettings.showWorldBosses -- 
-        or texturePath:find("LoreBooks") and MapRadar.modeSettings.showLoreBooks -- Show pins from LoreBooks addon
+        if texturePath:find("poi_wayshrine") and MR.modeSettings.showWayshrines -- Wayshrine
+        or texturePath:find("poi_dungeon") and MR.modeSettings.showDungeons --
+        or texturePath:find("poi_groupinstance") and MR.modeSettings.showDungeons --
+        or (texturePath:find("poi_delve") or texturePath:find("poi_groupdelve")) and MR.modeSettings.showDelves --
+        or texturePath:find("poi_portal") and MR.modeSettings.showPortals -- dolmen but also other portals :/
+        or texturePath:find("poi_groupboss") and MR.modeSettings.showWorldBosses -- 
+        or texturePath:find("LoreBooks") and MR.modeSettings.showLoreBooks -- Show pins from LoreBooks addon
         then
             return true
         end
@@ -72,7 +76,7 @@ function MapRadarPin:SetPinDimensions()
     if (pinData ~= nil and pinData.size ~= nil) then
         self.size = pinData.size
     else
-        self.size = MapRadar.pinSize
+        self.size = MR.pinSize
     end
 
     MapRadarPinBase.SetPinDimensions(self, self.size)
@@ -89,9 +93,9 @@ function MapRadarPin:ApplyTexture()
     local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
 
     if (pinData ~= nil and pinData.texture ~= nil) then
-        texture = MapRadar.value(pinData.texture, self.pin)
+        texture = MR.value(pinData.texture, self.pin)
 
-        if MapRadar.value(pinData.isAnimated, self.pin) then
+        if MR.value(pinData.isAnimated, self.pin) then
             self.animation, self.animationTimeline = CreateSimpleAnimation(ANIMATION_TEXTURE, self.texture)
             self.animation:SetImageData(pinData.framesWide, pinData.framesHigh)
             self.animation:SetFramerate(pinData.framesPerSecond)
@@ -116,7 +120,7 @@ function MapRadarPin:ApplyTint()
     local pinData = zoMapPin.PIN_DATA[pinType]
 
     if (pinData ~= nil and pinData.tint ~= nil) then
-        self.texture:SetColor(MapRadar.value(pinData.tint, self.pin):UnpackRGBA())
+        self.texture:SetColor(MR.value(pinData.tint, self.pin):UnpackRGBA())
         return
     end
 
@@ -145,7 +149,7 @@ function MapRadarPin:CheckIntegrity()
     end
 
     -- Check if texture changed
-    local texture = MapRadar.value(pinData.texture, self.pin)
+    local texture = MR.value(pinData.texture, self.pin)
     if texture ~= self.texturePath then
         return false
     end
@@ -174,38 +178,41 @@ function MapRadarPin:UpdatePin(playerX, playerY, heading, hasPlayerMoved)
 
     -- Set hasPlayerMoved to true so that base method update moving targets when you are not moving
     MapRadarPinBase.UpdatePin(self, playerX, playerY, heading, true)
+end
 
-    -- TODO: extract to separate method
-    -- Show distance (or other test data) near pin on radar
-    if self.label ~= nil then
-        local text = ""
-
-        if MapRadar.modeSettings.showDistance then
-            text = zo_strformat("<<1>>", self.distance)
-        end
-
-        if MapRadar.showPinLoc then
-            text = zo_strformat("<<1>>   <<2>>", ZO_LocalizeDecimalNumber(self.pin.normalizedX), ZO_LocalizeDecimalNumber(self.pin.normalizedY))
-        end
-
-        if MapRadar.showPinNames then
-            local name = MR_PinTypeNames[pinType] or customPinName(pinType)
-            text = zo_strformat("<<1>> <<2>>", pinType, name)
-        end
-
-        if MapRadar.showPinParams then
-            local pinData = zoMapPin.PIN_DATA[pinType]
-            if pinData ~= nil then
-                local animatedStr = MapRadar.value(pinData.isAnimated, self.pin) and "[A]" or "[N]"
-                local texturePath = MapRadar.value(pinData.texture, self.pin)
-                -- later add more
-                text = zo_strformat("<<1>> <<2>>", animatedStr, texturePath)
-            end
-        end
-
-        self.label:SetText(text)
+-- Show distance (or other test data) near pin on radar; called by the base UpdatePin while the pin is visible
+function MapRadarPin:UpdateLabel()
+    if self.label == nil then
+        return
     end
 
+    local text = ""
+
+    if MR.modeSettings.showDistance then
+        text = zoStrformat("<<1>>", self.distance)
+    end
+
+    if MR.showPinLoc then
+        text = zoStrformat("<<1>>   <<2>>", ZO_LocalizeDecimalNumber(self.pin.normalizedX), ZO_LocalizeDecimalNumber(self.pin.normalizedY))
+    end
+
+    if MR.showPinNames then
+        local pinType = self.pin:GetPinType()
+        local name = MR_PinTypeNames[pinType] or customPinName(pinType)
+        text = zoStrformat("<<1>> <<2>>", pinType, name)
+    end
+
+    if MR.showPinParams then
+        local pinData = zoMapPin.PIN_DATA[self.pin:GetPinType()]
+        if pinData ~= nil then
+            local animatedStr = MR.value(pinData.isAnimated, self.pin) and "[A]" or "[N]"
+            local texturePath = MR.value(pinData.texture, self.pin)
+            -- later add more
+            text = zoStrformat("<<1>> <<2>>", animatedStr, texturePath)
+        end
+    end
+
+    self.label:SetText(text)
 end
 
 function MapRadarPin:IsValidPin(pin)
@@ -227,10 +234,10 @@ function MapRadarPin:IsValidPin(pin)
     -- repeatableQuest_icon_door
     -- zoneStoryQuest_icon_door_assisted
 
-    if (pin:IsQuest() or pinType == MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY) and MapRadar.modeSettings.showQuests -- or pin:IsObjective() -- or pin:IsAvAObjective()
+    if (pin:IsQuest() or pinType == MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY) and MR.modeSettings.showQuests -- or pin:IsObjective() -- or pin:IsAvAObjective()
     or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE -- Antiquity
     or pinType == MAP_PIN_TYPE_PLAYER_WAYPOINT -- Player map waypoint
-    or pin:IsUnit() and MapRadar.modeSettings.showGroup -- Player/Group/Companion units
+    or pin:IsUnit() and MR.modeSettings.showGroup -- Player/Group/Companion units
     or pin:IsWorldEventPOIPin() -- Active Dolmens
     -- or pin:IsAssisted() -- or pin:IsMapPing()
     -- or pin:IsKillLocation()
@@ -243,7 +250,7 @@ function MapRadarPin:IsValidPin(pin)
         return true
     end
 
-    return MapRadar.showAllPins
+    return MR.showAllPins
 end
 
 -- ========================================================================================

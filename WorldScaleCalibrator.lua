@@ -7,6 +7,7 @@ local getUnitWorldPosition = GetUnitWorldPosition
 local getUnitRawWorldPosition = GetUnitRawWorldPosition
 local getCurrentMapId = GetCurrentMapId
 local zoDistance = zo_distance
+local zoFloor = zo_floor
 local latestMapId = 0
 local ScaleData = {
     px = 0,
@@ -25,6 +26,20 @@ local EDGE_CANDIDATES_PER_DIRECTION = 10
 -- Max relative deviation (2%) of a single baseline's coefficient from the median of all chosen baselines
 local BASELINE_TOLERANCE = 0.02
 
+-- Walked distances (meters from the first point) at which a temporary coefficient is calculated, so the
+-- radar shows a close approximation before the map is fully calibrated. Kept in memory only:
+-- mapId -> {[10] = coefficient, [100] = coefficient, [200] = coefficient}
+local TEMPORARY_STAGES = {10, 100, 200}
+local temporaryScaleData = {}
+
+-- Local references for GetMeterCoefficient, which runs per pin on every radar draw tick.
+-- worldScaleData points at the saved table once initialized (empty placeholder until then).
+local zoneData = MapRadarZoneData
+local worldScaleData = {}
+
+-- Defined after the coefficient calculation, used earlier when restoring stored points
+local UpdateTemporaryCoefficient
+
 -- Maps excluded from calibration and simulation (mapId -> name, name is just for reference)
 local SKIPPED_MAPS = {
     [27] = "Tamriel",
@@ -40,8 +55,8 @@ local function AddPosition(mapId, mapX, mapY, worldX, worldY)
     local mapMatrix = mapCoordinateDataMatrix[mapId]
 
     -- Ensures that map positions are only saved in matrix by 10meters
-    local xIndex = zo_floor(worldX / 1000)
-    local yIndex = zo_floor(worldY / 1000)
+    local xIndex = zoFloor(worldX / 1000)
+    local yIndex = zoFloor(worldY / 1000)
 
     if (mapMatrix[xIndex] == nil) then
         mapMatrix[xIndex] = {}
@@ -66,6 +81,13 @@ local function AddPosition(mapId, mapX, mapY, worldX, worldY)
 
     -- Increase record counter for statistics
     mapData.count = mapData.count + 1
+
+    -- Farthest walked distance from the first point (meters), drives the temporary coefficient stages
+    local first = mapData.positions[1]
+    local distance = zoDistance(worldX, worldY, first.worldX, first.worldY) / 100
+    if mapData.maxDistanceFromStart == nil or distance > mapData.maxDistanceFromStart then
+        mapData.maxDistanceFromStart = distance
+    end
 
     -- Track the explored extent along each map diagonal (projection onto the diagonal):
     -- x + y grows top-left -> bottom-right, x - y grows bottom-left -> top-right
@@ -180,8 +202,9 @@ local function checkMapIdUpdated(mapId)
             }
             mapCoordinateDataMatrix[mapId] = {}
 
-            -- Continue from points collected in earlier sessions
+            -- Continue from points collected in earlier sessions, with an approximation right away
             RestoreStoredPositions(mapId)
+            UpdateTemporaryCoefficient(mapId)
         end
     end
 
@@ -578,6 +601,58 @@ local function SaveMapScaleCoefficient(mapId, finalCoefficient)
     if MapRadar.accountData.worldScaleDataUnresolved[mapId] ~= nil then
         MapRadar.accountData.worldScaleDataUnresolved[mapId] = nil
     end
+
+    -- Report how close the temporary approximations came, then drop them (the final value takes over)
+    local stages = temporaryScaleData[mapId]
+    if stages ~= nil then
+        local parts = {}
+        for _, meters in ipairs(TEMPORARY_STAGES) do
+            if stages[meters] ~= nil then
+                local deviation = (stages[meters] - map1meterCoefficient) / map1meterCoefficient * 100
+                table.insert(parts, string.format("%dm %+.2f%%", meters, deviation))
+            end
+        end
+
+        if #parts > 0 then
+            MapRadar.debug("[Calibrator] Temporary vs final for map <<1>>: <<2>>", mapId, table.concat(parts, ", "))
+        end
+        temporaryScaleData[mapId] = nil
+    end
+end
+
+-- Calculates a temporary coefficient once the walked distance reaches a new stage (10 m, 100 m, 200 m)
+UpdateTemporaryCoefficient = function(mapId)
+    local mapData = mapCoordinateData[mapId]
+    if mapData == nil or mapData.saved or mapData.maxDistanceFromStart == nil then
+        return
+    end
+
+    -- Highest stage the walked distance has reached; skipped stages (e.g. after a port) stay empty
+    local stage = nil
+    for _, meters in ipairs(TEMPORARY_STAGES) do
+        if mapData.maxDistanceFromStart >= meters then
+            stage = meters
+        end
+    end
+    if stage == nil then
+        return
+    end
+
+    local stages = temporaryScaleData[mapId]
+    if stages == nil then
+        stages = {}
+        temporaryScaleData[mapId] = stages
+    end
+    if stages[stage] ~= nil then
+        return
+    end
+
+    -- Not enough usable points yet leaves the stage empty, so it is retried on the next new point
+    local coefficient = CalculateMapCoefficient(mapData)
+    if coefficient ~= nil then
+        stages[stage] = 100 / coefficient
+        MapRadar.debug("[Calibrator] Temporary coefficient for map <<1>> at <<2>> m", mapId, stage)
+    end
 end
 
 local function autoSave(mapId)
@@ -802,6 +877,9 @@ local function RegisterMapCoordinateCollection()
                         autoSave(mapId)
                     end
                 end
+
+                -- Until then, refine the radar's approximation at 10 m, 100 m and 200 m walked
+                UpdateTemporaryCoefficient(mapId)
             end
         end
     )
@@ -935,6 +1013,7 @@ local function DeleteSimulatedRecord(mapId)
     -- Resetting latestMapId forces checkMapIdUpdated to re-initialize the table on the next tick.
     mapCoordinateData[mapId] = nil
     mapCoordinateDataMatrix[mapId] = nil
+    temporaryScaleData[mapId] = nil
     latestMapId = 0
 
     MapRadar.debug("[ScaleReport] Deleted simulated calibration for map <<1>>; gathering re-enabled", mapId)
@@ -1159,12 +1238,46 @@ local function ToggleCheckReport()
     SCENE_MANAGER:ShowTopLevel(checkList)
 end
 
+-- ==================================================================================================
+-- Coefficient (map units per meter) for a map: hardcoded zone data first, then calibrated values, then the
+-- best temporary approximation (200 m, 100 m, 10 m). Second return is false for approximations; nil if none.
+local function GetMeterCoefficient(mapId)
+    local zoneValue = zoneData[mapId]
+    if zoneValue ~= nil then
+        return zoneValue, true
+    end
+
+    local calibrated = worldScaleData[mapId]
+    if calibrated ~= nil then
+        return calibrated, true
+    end
+
+    local stages = temporaryScaleData[mapId]
+    if stages ~= nil then
+        for i = #TEMPORARY_STAGES, 1, -1 do
+            local value = stages[TEMPORARY_STAGES[i]]
+            if value ~= nil then
+                return value, false
+            end
+        end
+    end
+
+    return nil
+end
+
+-- Own global table (MapRadar.lua recreates the MapRadar table after this file loads), so consumers
+-- loaded later can keep the function in a local instead of looking it up on every call
+MapRadarWorldScale = {
+    GetMeterCoefficient = GetMeterCoefficient
+}
+
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarInitialized",
     function()
         if MapRadar.accountData.worldScaleData == nil then
             MapRadar.accountData.worldScaleData = {}
         end
+        worldScaleData = MapRadar.accountData.worldScaleData
 
         if MapRadar.accountData.worldScaleDataSimulated == nil then
             MapRadar.accountData.worldScaleDataSimulated = {}

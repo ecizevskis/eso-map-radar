@@ -13,9 +13,17 @@ local ScaleData = {
     py = 0
 }
 
--- Auto-save triggers once both explored diagonals reach this fraction of the full map diagonal
-local FULL_MAP_DIAGONAL = zoDistance(0, 0, 1, 1)
+-- Auto-save triggers once the explored path spans this fraction of either full map diagonal
 local MIN_DIAGONAL_COVERAGE = 0.5
+
+-- Relative gap (2%) between sorted coefficients that starts a new group / cluster
+local CLUSTER_TOLERANCE = 0.02
+
+-- Points kept per direction (8 directions) as baseline candidates, so pairing stays cheap on big maps
+local EDGE_CANDIDATES_PER_DIRECTION = 10
+
+-- Max relative deviation (2%) of a single baseline's coefficient from the median of all chosen baselines
+local BASELINE_TOLERANCE = 0.02
 
 -- Maps excluded from calibration and simulation (mapId -> name, name is just for reference)
 local SKIPPED_MAPS = {
@@ -27,19 +35,141 @@ local function isSkippedMap(mapId)
     return SKIPPED_MAPS[mapId] ~= nil
 end
 
+-- Adds a point to the live map data unless its 10 m cell already has one; returns true when added
+local function AddPosition(mapId, mapX, mapY, worldX, worldY)
+    local mapMatrix = mapCoordinateDataMatrix[mapId]
+
+    -- Ensures that map positions are only saved in matrix by 10meters
+    local xIndex = zo_floor(worldX / 1000)
+    local yIndex = zo_floor(worldY / 1000)
+
+    if (mapMatrix[xIndex] == nil) then
+        mapMatrix[xIndex] = {}
+    end
+
+    if (mapMatrix[xIndex][yIndex] ~= nil) then
+        return false
+    end
+    mapMatrix[xIndex][yIndex] = true
+
+    local mapData = mapCoordinateData[mapId]
+
+    table.insert(
+        mapData.positions,
+        {
+            mapX = mapX,
+            mapY = mapY,
+            worldX = worldX,
+            worldY = worldY
+        }
+    )
+
+    -- Increase record counter for statistics
+    mapData.count = mapData.count + 1
+
+    -- Track the explored extent along each map diagonal (projection onto the diagonal):
+    -- x + y grows top-left -> bottom-right, x - y grows bottom-left -> top-right
+    local diagSum = mapX + mapY
+    local diagDiff = mapX - mapY
+    if mapData.minDiagSum == nil or diagSum < mapData.minDiagSum then
+        mapData.minDiagSum = diagSum
+    end
+    if mapData.maxDiagSum == nil or diagSum > mapData.maxDiagSum then
+        mapData.maxDiagSum = diagSum
+    end
+    if mapData.minDiagDiff == nil or diagDiff < mapData.minDiagDiff then
+        mapData.minDiagDiff = diagDiff
+    end
+    if mapData.maxDiagDiff == nil or diagDiff > mapData.maxDiagDiff then
+        mapData.maxDiagDiff = diagDiff
+    end
+
+    return true
+end
+
+-- ==================================================================================================
+-- Stored points of maps without a resolved coefficient (worldScaleDataUnresolved). They persist across
+-- reloads so collection continues where it left off, and are dropped once the map gets a coefficient.
+-- Points are stored compactly as {mapX, mapY, worldX, worldY} to keep the SavedVariables file small.
+
+local function GetOrCreateStoredMapData(mapId, name)
+    local store = MapRadar.accountData.worldScaleDataUnresolved
+    local stored = store[mapId]
+
+    if stored == nil then
+        stored = {
+            name = name,
+            count = 0,
+            positions = {}
+        }
+        store[mapId] = stored
+    elseif name ~= nil and name ~= "" then
+        -- Keep the most recent known name
+        stored.name = name
+    end
+
+    return stored
+end
+
+-- Replaces the stored points of a map with its live points (live data includes everything restored)
+local function StoreAllPositions(mapId)
+    local mapData = mapCoordinateData[mapId]
+    if mapData == nil then
+        return
+    end
+
+    local positions = {}
+    for i, pos in ipairs(mapData.positions) do
+        positions[i] = {pos.mapX, pos.mapY, pos.worldX, pos.worldY}
+    end
+
+    local stored = GetOrCreateStoredMapData(mapId, mapData.name)
+    stored.positions = positions
+    stored.count = #positions
+end
+
+-- Converts stored compact points into the keyed form the coefficient calculation works on
+local function ExpandStoredPositions(storedPositions)
+    local positions = {}
+    for i, p in ipairs(storedPositions) do
+        positions[i] = {
+            mapX = p[1],
+            mapY = p[2],
+            worldX = p[3],
+            worldY = p[4]
+        }
+    end
+    return positions
+end
+
+-- Loads stored points into freshly created live map data, rebuilding the 10 m grid and coverage
+local function RestoreStoredPositions(mapId)
+    local stored = MapRadar.accountData.worldScaleDataUnresolved[mapId]
+    if stored == nil or stored.positions == nil then
+        return
+    end
+
+    for _, p in ipairs(stored.positions) do
+        AddPosition(mapId, p[1], p[2], p[3], p[4])
+    end
+end
+
 local function checkMapIdUpdated(mapId)
     if latestMapId ~= mapId then
-        local isCalibrated =
-            MapRadarAutoscaled[mapId] ~= nil or MapRadarZoneData[mapId] ~= nil or
-            MapRadar.accountData.worldScaleData[mapId] ~= nil
-        dataForm:SetColor(1, 1, isCalibrated and 1 or 0, 1)
+        -- Calibrator window is optional; position gathering also runs without it
+        if dataForm ~= nil then
+            local isCalibrated =
+                MapRadarAutoscaled[mapId] ~= nil or MapRadarZoneData[mapId] ~= nil or
+                MapRadar.accountData.worldScaleData[mapId] ~= nil
+            dataForm:SetColor(1, 1, isCalibrated and 1 or 0, 1)
 
-        if dataForm.autoscaleLabel then
-            local isAutoscaled = MapRadarAutoscaled[mapId] ~= nil
-            local isInSavedVars = MapRadar.accountData.worldScaleData[mapId] ~= nil
-            local showLabel = isAutoscaled or not isInSavedVars
-            dataForm.autoscaleLabel:SetHidden(not showLabel)
-            dataForm.autoscaleLabel:SetColor(1, 1, isAutoscaled and 1 or 0, 1)
+            if dataForm.autoscaleLabel then
+                local isAutoscaled = MapRadarAutoscaled[mapId] ~= nil
+                local isInSavedVars = MapRadar.accountData.worldScaleData[mapId] ~= nil
+                local showLabel = isAutoscaled or not isInSavedVars
+                dataForm.autoscaleLabel:SetHidden(not showLabel)
+                dataForm.autoscaleLabel:SetColor(1, 1, isAutoscaled and 1 or 0, 1)
+            end
         end
 
         if (mapCoordinateData[mapId] == nil) then
@@ -49,6 +179,9 @@ local function checkMapIdUpdated(mapId)
                 count = 0
             }
             mapCoordinateDataMatrix[mapId] = {}
+
+            -- Continue from points collected in earlier sessions
+            RestoreStoredPositions(mapId)
         end
     end
 
@@ -72,7 +205,7 @@ local function GetPositionsWithSinglePointCoefficientCalculation(positions)
     return result
 end
 
-local function GroupByCoefficient(positions, delta)
+local function GroupByCoefficient(positions, tolerance)
     -- Sort by coefficient for fast linear grouping
     table.sort(
         positions,
@@ -87,8 +220,9 @@ local function GroupByCoefficient(positions, delta)
     for i = 2, #positions do
         local p = positions[i]
 
-        -- Compare to last element in current group
-        if math.abs(p.meterCoefficient - current[#current].meterCoefficient) <= delta then
+        -- Compare to last element in current group; relative, so it works for any coefficient unit
+        local last = current[#current].meterCoefficient
+        if math.abs(p.meterCoefficient - last) <= tolerance * last then
             table.insert(current, p)
         else
             table.insert(groups, current)
@@ -100,52 +234,146 @@ local function GroupByCoefficient(positions, delta)
     return groups
 end
 
+-- Inserts an item into a list kept sorted by value (highest first) and capped at maxSize entries
+local function InsertTopN(values, items, maxSize, value, item)
+    local count = #values
+    if count >= maxSize and value <= values[count] then
+        return
+    end
+
+    if count < maxSize then
+        count = count + 1
+    end
+
+    -- Shift lower entries down; when the list is full the lowest one falls off
+    local k = count
+    while k > 1 and values[k - 1] < value do
+        values[k], items[k] = values[k - 1], items[k - 1]
+        k = k - 1
+    end
+    values[k], items[k] = value, item
+end
+
+-- Picks the points furthest out in 8 directions (left/right, up/down and both diagonals).
+-- The longest baselines run between such edge points, so pairing only these keeps the
+-- pairwise step cheap no matter how many points the group has.
+local function GetEdgeCandidates(points, perDirection)
+    if #points <= perDirection * 8 then
+        return points
+    end
+
+    local values, items = {}, {}
+    for d = 1, 8 do
+        values[d], items[d] = {}, {}
+    end
+
+    for _, p in ipairs(points) do
+        local x, y = p.mapX, p.mapY
+        local sum, diff = x + y, x - y
+        InsertTopN(values[1], items[1], perDirection, x, p)
+        InsertTopN(values[2], items[2], perDirection, -x, p)
+        InsertTopN(values[3], items[3], perDirection, y, p)
+        InsertTopN(values[4], items[4], perDirection, -y, p)
+        InsertTopN(values[5], items[5], perDirection, sum, p)
+        InsertTopN(values[6], items[6], perDirection, -sum, p)
+        InsertTopN(values[7], items[7], perDirection, diff, p)
+        InsertTopN(values[8], items[8], perDirection, -diff, p)
+    end
+
+    -- Merge, keeping points that are extreme in several directions only once
+    local candidates, seen = {}, {}
+    for d = 1, 8 do
+        for _, p in ipairs(items[d]) do
+            if not seen[p] then
+                seen[p] = true
+                table.insert(candidates, p)
+            end
+        end
+    end
+
+    return candidates
+end
+
 local function CalculateGroupCoefficient(points, minMapDist, useTopN)
     minMapDist = minMapDist or 0.001
     useTopN = useTopN or 10 -- longest 10 baselines
 
-    local baselines = {}
+    local candidates = GetEdgeCandidates(points, EDGE_CANDIDATES_PER_DIRECTION)
 
-    -- Compute all pairwise distances
-    for i = 1, #points do
-        for j = i + 1, #points do
-            local a, b = points[i], points[j]
+    -- Compute pairwise distances between edge candidates
+    local candidatePairs = {}
+    for i = 1, #candidates do
+        for j = i + 1, #candidates do
+            local a, b = candidates[i], candidates[j]
 
             local mapDist = zoDistance(a.mapX, a.mapY, b.mapX, b.mapY)
             if mapDist >= minMapDist then
-                local worldDist = zoDistance(a.worldX, a.worldY, b.worldX, b.worldY)
-
-                table.insert(
-                    baselines,
-                    {
-                        map = mapDist,
-                        world = worldDist
-                    }
-                )
+                table.insert(candidatePairs, {map = mapDist, a = a, b = b})
             end
         end
     end
 
     -- Sort by map distance (longest first)
     table.sort(
-        baselines,
+        candidatePairs,
         function(a, b)
             return a.map > b.map
         end
     )
 
-    -- Keep only the longest N
-    if useTopN and #baselines > useTopN then
-        while #baselines > useTopN do
-            table.remove(baselines)
+    -- Take the longest N, using each point in at most one baseline so a single far-out point can't dominate
+    local baselines = {}
+    local used = {}
+    for _, pair in ipairs(candidatePairs) do
+        if #baselines >= useTopN then
+            break
+        end
+
+        if not used[pair.a] and not used[pair.b] then
+            used[pair.a] = true
+            used[pair.b] = true
+            table.insert(
+                baselines,
+                {
+                    map = pair.map,
+                    world = zoDistance(pair.a.worldX, pair.a.worldY, pair.b.worldX, pair.b.worldY)
+                }
+            )
         end
     end
 
-    -- Weighted coefficient
-    local sumMap, sumWorld = 0, 0
+    if #baselines == 0 then
+        return nil
+    end
+
+    -- Median of the per-baseline coefficients
+    local ratios = {}
+    for i, b in ipairs(baselines) do
+        ratios[i] = b.world / b.map
+    end
+    table.sort(ratios)
+
+    local mid = math.floor(#ratios / 2)
+    local median
+    if #ratios % 2 == 1 then
+        median = ratios[mid + 1]
+    else
+        median = (ratios[mid] + ratios[mid + 1]) / 2
+    end
+
+    -- Weighted coefficient, dropping baselines that disagree with the median (e.g. from one bad point)
+    local sumMap, sumWorld, dropped = 0, 0, 0
     for _, b in ipairs(baselines) do
-        sumMap = sumMap + b.map
-        sumWorld = sumWorld + b.world
+        if math.abs(b.world / b.map - median) <= BASELINE_TOLERANCE * median then
+            sumMap = sumMap + b.map
+            sumWorld = sumWorld + b.world
+        else
+            dropped = dropped + 1
+        end
+    end
+
+    if dropped > 0 then
+        MapRadar.debug("[Calibrator] Dropped <<1>> of <<2>> baselines deviating from median", dropped, #baselines)
     end
 
     if sumMap == 0 then
@@ -161,31 +389,41 @@ local function CalculateGroupCoefficients(mapCoefficientGroups)
         local coefficient = CalculateGroupCoefficient(coefficientGroup)
 
         if coefficient ~= nil then
-            table.insert(groupCoefficients, {meterCoefficient = coefficient})
+            -- Size carries the group's point count so bigger groups get more decision weight
+            table.insert(groupCoefficients, {meterCoefficient = coefficient, size = #coefficientGroup})
         end
     end
 
     return groupCoefficients
 end
 
-local function EvaluateClusters(clusters)
-    -- Calculate weighted average coefficient per cluster
+-- Collapses each cluster of group coefficients into its point-weighted average and total point count
+local function SummarizeClusters(clusters)
     local clusterData = {}
-    local totalPoints = 0
 
     for _, cluster in ipairs(clusters) do
-        local sum = 0
-        for _, v in ipairs(cluster) do
-            sum = sum + v.meterCoefficient
+        local weightedSum, size = 0, 0
+        for _, group in ipairs(cluster) do
+            weightedSum = weightedSum + group.meterCoefficient * group.size
+            size = size + group.size
         end
         table.insert(
             clusterData,
             {
-                average = sum / #cluster,
-                size = #cluster
+                average = weightedSum / size,
+                size = size
             }
         )
-        totalPoints = totalPoints + #cluster
+    end
+
+    return clusterData
+end
+
+local function EvaluateClusters(clusters)
+    local clusterData = SummarizeClusters(clusters)
+    local totalPoints = 0
+    for _, c in ipairs(clusterData) do
+        totalPoints = totalPoints + c.size
     end
 
     -- Single cluster - straightforward
@@ -265,63 +503,48 @@ local function EvaluateClusters(clusters)
     return weightedSum / totalPoints
 end
 
-local function CalculateMapCoefficient(mapData)
-    if #mapData.positions < 3 then
+-- Shared clustering pipeline; returns clusters of group coefficients, or nil when there is not enough data
+local function BuildCoefficientClusters(mapData)
+    if mapData.positions == nil or #mapData.positions < 3 then
         return nil
     end
 
     -- Calculate distance coefficient from single map point to all positions
     local positionsWithSinglePointCoefficient = GetPositionsWithSinglePointCoefficientCalculation(mapData.positions)
 
-    -- Group positions by coefficients with some error delta
-    local mapCoefficientGroups = GroupByCoefficient(positionsWithSinglePointCoefficient, 0.01)
+    -- Group positions by coefficients, so virtually inserted places with other raw coordinates split off
+    local mapCoefficientGroups = GroupByCoefficient(positionsWithSinglePointCoefficient, CLUSTER_TOLERANCE)
 
-    -- Average coefficients per group using pairwise baselines
+    -- Internal coefficient per group using pairwise baselines
     local groupCoefficients = CalculateGroupCoefficients(mapCoefficientGroups)
 
     if #groupCoefficients == 0 then
         return nil
     end
 
-    -- Cluster group coefficients and evaluate
-    local coefficientClusters = GroupByCoefficient(groupCoefficients, 0.01)
+    -- Cluster group coefficients so matching groups are evaluated together
+    return GroupByCoefficient(groupCoefficients, CLUSTER_TOLERANCE)
+end
+
+local function CalculateMapCoefficient(mapData)
+    local coefficientClusters = BuildCoefficientClusters(mapData)
+    if coefficientClusters == nil then
+        return nil
+    end
+
     return EvaluateClusters(coefficientClusters)
 end
 
 -- Diagnostic: runs the same clustering pipeline as CalculateMapCoefficient but,
 -- instead of collapsing to a single coefficient, returns every cluster with its
--- average coefficient and member count. Returns nil when there is not enough data.
+-- point-weighted average coefficient and point count. Returns nil when there is not enough data.
 local function ComputeMapClusters(mapData)
-    if mapData.positions == nil or #mapData.positions < 3 then
+    local coefficientClusters = BuildCoefficientClusters(mapData)
+    if coefficientClusters == nil then
         return nil
     end
 
-    local positionsWithSinglePointCoefficient = GetPositionsWithSinglePointCoefficientCalculation(mapData.positions)
-    local mapCoefficientGroups = GroupByCoefficient(positionsWithSinglePointCoefficient, 0.01)
-    local groupCoefficients = CalculateGroupCoefficients(mapCoefficientGroups)
-
-    if #groupCoefficients == 0 then
-        return nil
-    end
-
-    local coefficientClusters = GroupByCoefficient(groupCoefficients, 0.01)
-
-    local clusterData = {}
-    for _, cluster in ipairs(coefficientClusters) do
-        local sum = 0
-        for _, v in ipairs(cluster) do
-            sum = sum + v.meterCoefficient
-        end
-        table.insert(
-            clusterData,
-            {
-                average = sum / #cluster,
-                size = #cluster
-            }
-        )
-    end
-
-    return clusterData
+    return SummarizeClusters(coefficientClusters)
 end
 
 local function SaveMapScaleCoefficient(mapId, finalCoefficient)
@@ -374,7 +597,9 @@ local function autoSave(mapId)
     mapData.saved = true
 
     -- Map is resolved, so drop its live row from the on-screen counter
-    dataForm.counterList:RemoveCounter(mapId)
+    if dataForm ~= nil then
+        dataForm.counterList:RemoveCounter(mapId)
+    end
 end
 
 local function calcAndSaveDistances()
@@ -390,50 +615,9 @@ local function calcAndSaveDistances()
                 zo_strformat("<<1>>", GetMapNameById(index))
             )
 
-            -- Persist the raw position data so the map can be re-analyzed / recalculated later.
-            -- Merge into any existing record so points from earlier failed gathers accumulate.
-            local stored = MapRadar.accountData.worldScaleDataUnresolved[index]
-            if stored == nil then
-                stored = {
-                    name = mapData.name,
-                    count = 0,
-                    positions = {}
-                }
-                MapRadar.accountData.worldScaleDataUnresolved[index] = stored
-            end
-
-            -- Keep the most recent known name
-            if mapData.name ~= nil and mapData.name ~= "" then
-                stored.name = mapData.name
-            end
-
-            -- Append the freshly gathered positions
-            for _, pos in pairs(mapData.positions) do
-                table.insert(
-                    stored.positions,
-                    {
-                        mapX = pos.mapX,
-                        mapY = pos.mapY,
-                        worldX = pos.worldX,
-                        worldY = pos.worldY
-                    }
-                )
-            end
-            stored.count = #stored.positions
-
-            -- Expand the explored bounding box to cover both old and new points
-            if mapData.left ~= nil and (stored.left == nil or mapData.left < stored.left) then
-                stored.left = mapData.left
-            end
-            if mapData.right ~= nil and (stored.right == nil or mapData.right > stored.right) then
-                stored.right = mapData.right
-            end
-            if mapData.top ~= nil and (stored.top == nil or mapData.top < stored.top) then
-                stored.top = mapData.top
-            end
-            if mapData.bottom ~= nil and (stored.bottom == nil or mapData.bottom > stored.bottom) then
-                stored.bottom = mapData.bottom
-            end
+            -- Keep the raw points stored so the map can be re-analyzed, and collection
+            -- picks them up again (restored on the next visit) instead of starting over
+            StoreAllPositions(index)
         end
 
         -- Cleaning position table data
@@ -444,7 +628,9 @@ local function calcAndSaveDistances()
     end
 
     -- Clear counter data from UI
-    dataForm.counterList:Clear()
+    if dataForm ~= nil then
+        dataForm.counterList:Clear()
+    end
 
     latestMapId = 0
     checkMapIdUpdated(getCurrentMapId())
@@ -555,7 +741,8 @@ local function CreateCalibrationDataForm()
 end
 
 local function RegisterMapCoordinateCollection()
-    -- EVENT_MANAGER:UnregisterForUpdate("MapRadar_SaveMapCoordinates") -- TODO: Should unregister somewhere??
+    -- Unregister first so repeated calls never stack a second loop
+    EVENT_MANAGER:UnregisterForUpdate("MapRadar_SaveMapCoordinates")
     EVENT_MANAGER:RegisterForUpdate(
         "MapRadar_SaveMapCoordinates",
         1000,
@@ -587,61 +774,30 @@ local function RegisterMapCoordinateCollection()
             local _, wx, _, wz = getUnitRawWorldPosition("player")
             -- local _, rwx, _, rwz = getUnitRawWorldPosition("player");
 
-            -- Ensures that map positions are only saved in matrix by 10meters
-            local xIndex = zo_floor(wx / 1000)
-            local yIndex = zo_floor(wz / 1000)
-
-            local mapMatrix = mapCoordinateDataMatrix[mapId]
-
-            if (mapMatrix[xIndex] == nil) then
-                mapMatrix[xIndex] = {}
-            end
-
-            if (mapMatrix[xIndex][yIndex] == nil) then
-                mapMatrix[xIndex][yIndex] = true
-
+            -- Z parameter is used instead of Y because Y is elevation
+            if AddPosition(mapId, mapX, mapY, wx, wz) then
                 local mapData = mapCoordinateData[mapId]
 
-                table.insert(
-                    mapData.positions,
-                    {
-                        mapX = mapX,
-                        mapY = mapY,
-                        worldX = wx,
-                        worldY = wz -- Z parameter is instead of Y because Y is elevation
-                    }
-                )
+                -- Store the point too, so collection continues after a reload
+                local stored = GetOrCreateStoredMapData(mapId, mapData.name)
+                table.insert(stored.positions, {mapX, mapY, wx, wz})
+                stored.count = #stored.positions
 
-                -- Increase record counter for statistics
-                mapData.count = mapData.count + 1
-
-                -- Track the explored bounding box (normalized map coords; top = min Y, bottom = max Y)
-                if mapData.left == nil or mapX < mapData.left then
-                    mapData.left = mapX
-                end
-                if mapData.right == nil or mapX > mapData.right then
-                    mapData.right = mapX
-                end
-                if mapData.top == nil or mapY < mapData.top then
-                    mapData.top = mapY
-                end
-                if mapData.bottom == nil or mapY > mapData.bottom then
-                    mapData.bottom = mapY
+                if dataForm ~= nil then
+                    local name = zo_strformat("<<1>> (<<2>>)", worldMap.zoneName, mapId)
+                    dataForm.counterList:AddOrUpdateCounter(mapId, name, mapData.count)
                 end
 
-                local name = zo_strformat("<<1>> (<<2>>)", worldMap.zoneName, mapId)
-                dataForm.counterList:AddOrUpdateCounter(mapId, name, mapData.count)
-
-                -- Auto-save once both explored diagonals cover enough of the map
+                -- Auto-save once the explored path spans enough of either diagonal, so moving
+                -- through any 3 map corners triggers on whichever diagonal they cover.
+                -- Both value ranges span 2 across the full map, so half the range is the coverage.
                 if not mapData.saved and mapData.count >= 3 then
-                    local diagTopLeftToBottomRight =
-                        zoDistance(mapData.left, mapData.top, mapData.right, mapData.bottom)
-                    local diagBottomLeftToTopRight =
-                        zoDistance(mapData.left, mapData.bottom, mapData.right, mapData.top)
+                    local coverageTopLeftToBottomRight = (mapData.maxDiagSum - mapData.minDiagSum) / 2
+                    local coverageBottomLeftToTopRight = (mapData.maxDiagDiff - mapData.minDiagDiff) / 2
 
                     if
-                        diagTopLeftToBottomRight / FULL_MAP_DIAGONAL >= MIN_DIAGONAL_COVERAGE and
-                            diagBottomLeftToTopRight / FULL_MAP_DIAGONAL >= MIN_DIAGONAL_COVERAGE
+                        coverageTopLeftToBottomRight >= MIN_DIAGONAL_COVERAGE or
+                            coverageBottomLeftToTopRight >= MIN_DIAGONAL_COVERAGE
                      then
                         autoSave(mapId)
                     end
@@ -651,9 +807,18 @@ local function RegisterMapCoordinateCollection()
     )
 end
 
-local function MapRadar_InitScaleCalibrator()
-    CreateCalibrationDataForm()
-    RegisterMapCoordinateCollection()
+-- Position gathering runs independently of the calibrator window. While calibration is being
+-- tested it follows the window toggle; return true here to gather on unscaled maps all the time.
+local function IsCollectionEnabled()
+    return MapRadar.config.showCalibrate
+end
+
+local function EnableOrDisableCollection()
+    if IsCollectionEnabled() then
+        RegisterMapCoordinateCollection()
+    else
+        EVENT_MANAGER:UnregisterForUpdate("MapRadar_SaveMapCoordinates")
+    end
 end
 
 local function EnableOrDisableCalibrator()
@@ -677,7 +842,7 @@ local function EnableOrDisableCalibrator()
         latestMapId = 0
         checkMapIdUpdated(getCurrentMapId())
     else
-        EVENT_MANAGER:UnregisterForUpdate("MapRadar_CalibrationData")
+        EVENT_MANAGER:UnregisterForUpdate("MapRadar_WorldCalibrationData")
     end
 end
 
@@ -866,9 +1031,12 @@ local function CollectCheckableMaps()
         end
     end
 
-    for mapId, mapData in pairs(MapRadar.accountData.worldScaleDataUnresolved) do
-        if maps[mapId] == nil and mapData.positions ~= nil and #mapData.positions > 0 then
-            maps[mapId] = mapData
+    for mapId, stored in pairs(MapRadar.accountData.worldScaleDataUnresolved) do
+        if maps[mapId] == nil and stored.positions ~= nil and #stored.positions > 0 then
+            maps[mapId] = {
+                name = stored.name,
+                positions = ExpandStoredPositions(stored.positions)
+            }
         end
     end
 
@@ -1008,31 +1176,48 @@ CALLBACK_MANAGER:RegisterCallback(
             MapRadar.accountData.worldScaleDataUnresolved = {}
         end
 
+        -- Older records stored keyed points ({mapX = ...}) and a bounding box; convert to the compact form
+        for _, stored in pairs(MapRadar.accountData.worldScaleDataUnresolved) do
+            if stored.positions ~= nil then
+                for i, p in ipairs(stored.positions) do
+                    if p.mapX ~= nil then
+                        stored.positions[i] = {p.mapX, p.mapY, p.worldX, p.worldY}
+                    end
+                end
+            end
+            stored.left, stored.right, stored.top, stored.bottom = nil, nil, nil, nil
+        end
+
         if MapRadar.accountData.mapNameData == nil then
             MapRadar.accountData.mapNameData = {}
         end
 
         if MapRadar.config.showCalibrate then
-            MapRadar_InitScaleCalibrator()
+            CreateCalibrationDataForm()
         end
 
         EnableOrDisableCalibrator()
+        EnableOrDisableCollection()
     end
 )
 
 CALLBACK_MANAGER:RegisterCallback(
     "OnMapRadarSlashCommand",
     function(args)
-        if (args == "reset") then
+        if (args == "reset") and dataForm ~= nil then
             dataForm.counterList:Clear()
         end
 
         if (args == "recalibrate") then
             -- Saved coefficient was just cleared, so let autoSave fire again for this map;
             -- positions gathered this session are still valid and are kept
-            local mapData = mapCoordinateData[getCurrentMapId()]
+            local mapId = getCurrentMapId()
+            local mapData = mapCoordinateData[mapId]
             if mapData ~= nil then
                 mapData.saved = false
+
+                -- The earlier save dropped the stored points; store them again so they survive a reload
+                StoreAllPositions(mapId)
             end
         end
 
@@ -1045,9 +1230,10 @@ CALLBACK_MANAGER:RegisterCallback(
         end
 
         if MapRadar.config.showCalibrate and dataForm == nil then
-            MapRadar_InitScaleCalibrator()
+            CreateCalibrationDataForm()
         end
 
         EnableOrDisableCalibrator()
+        EnableOrDisableCollection()
     end
 )
